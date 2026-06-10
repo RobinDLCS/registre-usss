@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USSS — Registre des effectifs</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+  button { cursor: pointer; font-family: inherit; border: none; }
+  input, select { font-family: inherit; }
+  table { border-collapse: collapse; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+// ════════════════════════════════════════════
+//  ⚠ CONFIGURATION — à remplir avant publication
+// ════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec"; // se termine par /exec
+const TOKEN   = "USSS-Falcon-7392";               // même valeur que dans Code.gs
+
+// ─── Palette institutionnelle ───
+const C = {
+  navy: "#0E2240", navyDeep: "#091830", blue: "#1D4E89", blueSoft: "#E8EEF6",
+  gold: "#C9A24B", line: "#D6DEE8", ink: "#1A2433", grey: "#6B7686",
+  green: "#2E7D4F", amber: "#B5882A", red: "#B23B3B", paper: "#F3F5F8",
+};
+
+const GRADES = [
+  "Chief Operating", "Assistant Chief", "Deputy Chief", "Chief Supervisor",
+  "Senior Supervisor", "Deputy Supervisor", "Senior Special Agent",
+  "Special Agent", "Senior Field Agent", "Field Agent",
+];
+
+const STATUTS = ["Présent", "Absent", "Mis à pied"];
+const STATUT_COLOR = { "Présent": C.green, "Absent": C.amber, "Mis à pied": C.red };
+
+const BOOL_FIELDS = {
+  ppa: [["ppa1","PPA I"],["ppa2","PPA II"],["ppa3","PPA III"],["ppa4","PPA IV"],["ppa5","PPA V"]],
+  qualif: [["sams","SAMS"],["rq","RQ"]],
+  permis: [["permisVoiture","Permis voiture"],["permisHeli","Permis héli"]],
+  formations: [["formaInitiale","Forma. initiale"],["cpo","C.P.O"],["convoi","Convoi"]],
+  leading: [["motorcadeLeading","Motorcade leading"],["cpoLeading","C.P.O leading"],["operationLeading","Operation leading"]],
+};
+
+const PERSO_FIELDS = [
+  ["nom","Nom"],["prenom","Prénom"],["dateEntree","Date d'entrée"],["iban","IBAN"],["telephone","Téléphone"],
+];
+
+const ALL_BOOL = [...BOOL_FIELDS.ppa, ...BOOL_FIELDS.qualif, ...BOOL_FIELDS.permis,
+  ...BOOL_FIELDS.formations, ...BOOL_FIELDS.leading];
+const FIELD_LABELS = Object.fromEntries([...ALL_BOOL, ...PERSO_FIELDS]);
+const MAX_LOGS = 50;
+
+function makeMember(matricule, grade, bools) {
+  const m = { matricule, grade, statut: "Présent",
+    nom: "", prenom: "", dateEntree: "", iban: "", telephone: "" };
+  ALL_BOOL.forEach((f, i) => { m[f[0]] = bools[i] || false; });
+  return m;
+}
+
+const T = true, F = false;
+const SEED = [
+  makeMember("E-12","Chief Operating",      [T,T,T,T,T, T,F, T,T, T,T,T, T,T,T]),
+  makeMember("E-62","Assistant Chief",      [T,T,T,T,T, T,F, T,T, T,T,T, T,T,T]),
+  makeMember("E-16","Senior Supervisor",    [T,T,T,T,F, T,F, T,T, T,T,T, T,T,F]),
+  makeMember("E-20","Deputy Supervisor",    [T,T,T,T,F, T,F, T,F, T,F,F, T,T,F]),
+  makeMember("E-40","Senior Special Agent", [F,F,F,F,F, F,F, T,F, T,T,T, F,T,F]),
+  makeMember("E-90","Senior Special Agent", [T,F,F,F,F, F,F, T,F, F,F,F, F,F,F]),
+  makeMember("E-03","Senior Special Agent", [T,T,T,T,T, T,F, T,T, T,T,T, F,T,F]),
+  makeMember("E-98","Special Agent",        [T,F,F,F,F, T,F, T,F, T,T,T, F,F,F]),
+  makeMember("E-07","Special Agent",        [T,F,F,F,F, T,F, T,T, T,T,T, F,T,F]),
+  makeMember("E-43","Special Agent",        [T,F,F,F,F, F,F, T,F, T,F,F, F,T,F]),
+  makeMember("E-95","Senior Field Agent",   [F,F,F,F,F, T,F, F,F, F,F,F, F,F,F]),
+  makeMember("E-64","Senior Field Agent",   [T,F,F,F,F, T,F, T,F, T,T,T, F,F,F]),
+  makeMember("E-08","Senior Field Agent",   [T,F,F,F,F, F,F, T,F, T,T,T, F,F,F]),
+  makeMember("E-48","Senior Field Agent",   [T,F,F,F,F, T,F, T,F, T,F,F, F,F,F]),
+  makeMember("E-25","Field Agent",          [T,F,F,F,F, F,F, T,F, F,F,F, F,F,F]),
+  makeMember("E-21","Field Agent",          [T,F,F,F,F, T,F, T,F, T,T,T, F,F,F]),
+];
+
+const sortMembers = (list) =>
+  [...list].sort((a, b) => {
+    const g = GRADES.indexOf(a.grade) - GRADES.indexOf(b.grade);
+    return g !== 0 ? g : a.matricule.localeCompare(b.matricule);
+  });
+
+// ─── API Google Sheets (Apps Script) ───
+async function apiLoad() {
+  const res = await fetch(`${API_URL}?token=${encodeURIComponent(TOKEN)}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+async function apiSave(members, logs) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ token: TOKEN, members, logs }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+}
+
+// ─── Petits composants ───
+function BadgeMatricule({ value }) {
+  return <span style={{ display:"inline-block", fontFamily:"monospace", fontWeight:700,
+    fontSize:13, padding:"2px 8px", borderRadius:2, background:C.navy, color:"#fff",
+    borderLeft:`3px solid ${C.gold}`, letterSpacing:"0.05em" }}>{value}</span>;
+}
+
+function BoolCell({ value, onToggle }) {
+  return <button onClick={onToggle} title="Cliquer pour basculer"
+    style={{ width:28, height:28, borderRadius:2, fontWeight:700, fontSize:13,
+      background: value ? "#E3F0E8" : "#F7E8E8", color: value ? C.green : C.red,
+      border:`1px solid ${value ? "#BCD9C7" : "#E5C5C5"}` }}>
+    {value ? "✓" : "✕"}
+  </button>;
+}
+
+function StatutPill({ statut, onCycle }) {
+  return <button onClick={onCycle} title="Cliquer pour changer le statut"
+    style={{ padding:"4px 10px", borderRadius:99, fontSize:12, fontWeight:600,
+      color:"#fff", background:STATUT_COLOR[statut], whiteSpace:"nowrap" }}>
+    {statut}
+  </button>;
+}
+
+function StatCard({ label, value, color }) {
+  return <div style={{ background:"#fff", borderRadius:6, padding:16,
+    border:`1px solid ${C.line}`, borderTop:`3px solid ${color || C.blue}` }}>
+    <div style={{ fontSize:30, fontWeight:700, color:C.ink }}>{value}</div>
+    <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.08em", color:C.grey }}>{label}</div>
+  </div>;
+}
+
+function CoverageBar({ label, count, total }) {
+  const pct = total ? Math.round((count / total) * 100) : 0;
+  return <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+    <span style={{ fontSize:13, width:140, flexShrink:0, color:C.ink }}>{label}</span>
+    <div style={{ flex:1, height:12, borderRadius:2, overflow:"hidden", background:C.blueSoft }}>
+      <div style={{ height:"100%", width:pct+"%", background:C.blue }} />
+    </div>
+    <span style={{ fontSize:11, fontFamily:"monospace", width:70, textAlign:"right", color:C.grey }}>
+      {count}/{total} · {pct}%
+    </span>
+  </div>;
+}
+
+// ─── Application ───
+function App() {
+  const [members, setMembers] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [loadError, setLoadError] = useState("");
+  const [saveState, setSaveState] = useState("ok"); // ok | saving | error
+  const [page, setPage] = useState("accueil");
+  const [vue, setVue] = useState("formations");
+  const [showAdd, setShowAdd] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [form, setForm] = useState({ matricule:"", grade:"Field Agent",
+    nom:"", prenom:"", dateEntree:"", iban:"", telephone:"" });
+  const [formError, setFormError] = useState("");
+
+  // Chargement initial depuis le Google Sheet
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await apiLoad();
+        setMembers(data.members || SEED);
+        setLogs(data.logs || []);
+        if (!data.members) apiSave(SEED, []).catch(() => {});
+      } catch (e) {
+        setLoadError("Connexion au registre impossible : " + e.message +
+          " — vérifie API_URL, le TOKEN et le déploiement Apps Script.");
+      }
+    })();
+  }, []);
+
+  // Sauvegarde + journalisation (snapshot = état AVANT la modification)
+  const persist = async (list, action) => {
+    let newLogs = logs;
+    if (action && members) {
+      const entry = {
+        id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+        date: new Date().toLocaleString("fr-FR"),
+        action,
+        snapshot: members,
+      };
+      newLogs = [entry, ...logs].slice(0, MAX_LOGS);
+      setLogs(newLogs);
+    }
+    setMembers(list);
+    setSaveState("saving");
+    try {
+      await apiSave(list, newLogs);
+      setSaveState("ok");
+    } catch (e) {
+      console.error(e);
+      setSaveState("error");
+    }
+  };
+
+  const restoreFrom = (entry) =>
+    persist(entry.snapshot, `↩ Retour arrière : état restauré avant « ${entry.action} »`);
+
+  if (loadError) {
+    return <div style={{ minHeight:"100vh", display:"flex", alignItems:"center",
+      justifyContent:"center", background:C.paper, padding:24 }}>
+      <div style={{ maxWidth:480, background:"#FBEDED", border:"1px solid #E5C5C5",
+        color:C.red, borderRadius:6, padding:20, fontSize:14 }}>{loadError}</div>
+    </div>;
+  }
+
+  if (members === null) {
+    return <div style={{ minHeight:"100vh", display:"flex", alignItems:"center",
+      justifyContent:"center", background:C.paper, color:C.grey }}>
+      Chargement du registre…
+    </div>;
+  }
+
+  const sorted = sortMembers(members);
+  const presents = members.filter(m => m.statut === "Présent");
+  const absents = members.filter(m => m.statut === "Absent");
+  const misAPied = members.filter(m => m.statut === "Mis à pied");
+
+  // ── Actions ──
+  const toggleBool = (matricule, field) => {
+    const m = members.find(x => x.matricule === matricule);
+    const newVal = !m[field];
+    persist(members.map(x => x.matricule === matricule ? { ...x, [field]: newVal } : x),
+      `${matricule} : ${FIELD_LABELS[field]} ${newVal ? "validé" : "retiré"}`);
+  };
+
+  const cycleStatut = (matricule) => {
+    const m = members.find(x => x.matricule === matricule);
+    const next = STATUTS[(STATUTS.indexOf(m.statut) + 1) % STATUTS.length];
+    persist(members.map(x => x.matricule === matricule ? { ...x, statut: next } : x),
+      `${matricule} : statut → ${next}`);
+  };
+
+  const setPerso = (matricule, field, value) =>
+    persist(members.map(m => m.matricule === matricule ? { ...m, [field]: value } : m),
+      `${matricule} : ${FIELD_LABELS[field]} modifié`);
+
+  const promote = (matricule, dir) => {
+    const m = members.find(x => x.matricule === matricule);
+    const i = GRADES.indexOf(m.grade) + dir;
+    if (i < 0 || i >= GRADES.length) return;
+    persist(members.map(x => x.matricule === matricule ? { ...x, grade: GRADES[i] } : x),
+      `${matricule} : ${dir < 0 ? "promu" : "rétrogradé"} → ${GRADES[i]}`);
+  };
+
+  const removeMember = (matricule) => {
+    persist(members.filter(m => m.matricule !== matricule), `${matricule} radié du registre`);
+    setConfirmDelete(null);
+  };
+
+  const addMember = () => {
+    const mat = form.matricule.trim().toUpperCase();
+    if (!/^E-\d{2}$/.test(mat)) { setFormError("Matricule invalide — format attendu : E-00"); return; }
+    if (members.some(m => m.matricule === mat)) { setFormError("Ce matricule existe déjà dans le registre."); return; }
+    const nouveau = makeMember(mat, form.grade, []);
+    nouveau.nom = form.nom; nouveau.prenom = form.prenom;
+    nouveau.dateEntree = form.dateEntree; nouveau.iban = form.iban; nouveau.telephone = form.telephone;
+    persist([...members, nouveau], `${mat} recruté (${form.grade})`);
+    setShowAdd(false);
+    setForm({ matricule:"", grade:"Field Agent", nom:"", prenom:"", dateEntree:"", iban:"", telephone:"" });
+    setFormError("");
+  };
+
+  const VUES = {
+    formations: { label:"Formations", bool:[...BOOL_FIELDS.formations, ...BOOL_FIELDS.qualif, ...BOOL_FIELDS.leading] },
+    ppa: { label:"PPA", bool:BOOL_FIELDS.ppa },
+    permis: { label:"Permis", bool:BOOL_FIELDS.permis },
+    perso: { label:"Infos perso", bool:[] },
+    tout: { label:"Tout", bool:ALL_BOOL },
+  };
+  const vueActive = VUES[vue];
+
+  const inputStyle = { border:`1px solid ${C.line}`, borderRadius:3, padding:"4px 6px",
+    fontSize:13, color:C.ink, width:"100%", minWidth:90, background:"#fff" };
+
+  const SAVE_BADGE = {
+    ok:     { txt:"✓ Enregistré", bg:"#E3F0E8", fg:C.green },
+    saving: { txt:"⟳ Sauvegarde…", bg:C.blueSoft, fg:C.blue },
+    error:  { txt:"⚠ Sauvegarde échouée — réessaie", bg:"#F7E8E8", fg:C.red },
+  }[saveState];
+
+  return (
+    <div style={{ minHeight:"100vh", background:C.paper, color:C.ink }}>
+      {/* ── Bandeau ── */}
+      <header style={{ background:C.navy, borderBottom:`3px solid ${C.gold}` }}>
+        <div style={{ maxWidth:1120, margin:"0 auto", padding:"16px 20px",
+          display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:40, height:40, borderRadius:"50%", display:"flex",
+              alignItems:"center", justifyContent:"center", fontSize:18,
+              border:`2px solid ${C.gold}`, color:C.gold }}>★</div>
+            <div>
+              <div style={{ color:"#fff", fontWeight:700, letterSpacing:"0.15em",
+                textTransform:"uppercase", fontSize:13 }}>United States Secret Service</div>
+              <div style={{ fontSize:11, letterSpacing:"0.08em", color:"#9FB2CC" }}>
+                Registre des effectifs &amp; formations</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+            <span style={{ fontSize:11, fontWeight:600, padding:"4px 10px", borderRadius:99,
+              background:SAVE_BADGE.bg, color:SAVE_BADGE.fg }}>{SAVE_BADGE.txt}</span>
+            <nav style={{ display:"flex", gap:8 }}>
+              {[["accueil","Accueil"],["effectifs","Effectifs"],["journal","Journal"]].map(([id,label]) => (
+                <button key={id} onClick={() => setPage(id)}
+                  style={{ padding:"6px 16px", borderRadius:2, fontSize:13, fontWeight:600,
+                    textTransform:"uppercase", letterSpacing:"0.05em",
+                    ...(page === id
+                      ? { background:C.gold, color:C.navyDeep }
+                      : { background:"transparent", color:"#C8D4E5", border:"1px solid #2C456B" }) }}>
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main style={{ maxWidth:1120, margin:"0 auto", padding:"24px 20px" }}>
+        {page === "accueil" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:24 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(150px, 1fr))", gap:16 }}>
+              <StatCard label="Effectif total" value={members.length} color={C.navy} />
+              <StatCard label="Présents" value={presents.length} color={C.green} />
+              <StatCard label="Absents" value={absents.length} color={C.amber} />
+              <StatCard label="Mis à pied" value={misAPied.length} color={C.red} />
+            </div>
+
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))", gap:24 }}>
+              <section style={{ background:"#fff", borderRadius:6, padding:20, border:`1px solid ${C.line}` }}>
+                <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                  letterSpacing:"0.08em", marginBottom:12, color:C.navy }}>
+                  Agents en service ({presents.length})</h2>
+                {presents.length === 0 &&
+                  <p style={{ fontSize:13, color:C.grey }}>Aucun agent présent. Le service est vide.</p>}
+                <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:8 }}>
+                  {sortMembers(presents).map(m => (
+                    <li key={m.matricule} style={{ display:"flex", alignItems:"center", gap:12, fontSize:13 }}>
+                      <BadgeMatricule value={m.matricule} />
+                      <span style={{ fontWeight:500 }}>{m.grade}</span>
+                      <span style={{ color:C.grey }}>
+                        {(m.prenom || m.nom) ? `${m.prenom} ${m.nom}`.trim() : "—"}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section style={{ background:"#fff", borderRadius:6, padding:20,
+                border:`1px solid ${C.line}`, display:"flex", flexDirection:"column", gap:12 }}>
+                <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                  letterSpacing:"0.08em", color:C.navy }}>Couverture des formations</h2>
+                {[["formaInitiale","Forma. initiale"],["cpo","C.P.O"],["convoi","Convoi"],
+                  ["sams","SAMS"],["ppa1","PPA I"],["permisVoiture","Permis voiture"],
+                  ["permisHeli","Permis héli"]].map(([k,label]) => (
+                  <CoverageBar key={k} label={label}
+                    count={members.filter(m => m[k]).length} total={members.length} />
+                ))}
+              </section>
+            </div>
+
+            {misAPied.length > 0 && (
+              <div style={{ borderRadius:6, padding:16, fontSize:13, display:"flex",
+                alignItems:"center", gap:12, background:"#FBEDED",
+                border:"1px solid #E5C5C5", color:C.red }}>
+                <strong>⚠ Mesures disciplinaires en cours :</strong>
+                {sortMembers(misAPied).map(m => m.matricule).join(", ")}
+              </div>
+            )}
+          </div>
+        )}
+
+        {page === "effectifs" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+              flexWrap:"wrap", gap:12 }}>
+              <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+                {Object.entries(VUES).map(([id, v]) => (
+                  <button key={id} onClick={() => setVue(id)}
+                    style={{ padding:"6px 12px", fontSize:13, borderRadius:2, fontWeight:600,
+                      ...(vue === id
+                        ? { background:C.blue, color:"#fff" }
+                        : { background:"#fff", color:C.blue, border:`1px solid ${C.line}` }) }}>
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => { setShowAdd(true); setFormError(""); }}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  color:"#fff", background:C.green }}>+ Recruter un membre</button>
+            </div>
+
+            <div style={{ background:"#fff", borderRadius:6, overflowX:"auto", border:`1px solid ${C.line}` }}>
+              <table style={{ width:"100%", fontSize:13 }}>
+                <thead>
+                  <tr style={{ background:C.navy }}>
+                    {["Matricule","Grade","Statut"].map(h => (
+                      <th key={h} style={{ padding:"8px 12px", textAlign:"left", fontSize:11,
+                        textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
+                        whiteSpace:"nowrap" }}>{h}</th>
+                    ))}
+                    {(vue === "perso" || vue === "tout") && PERSO_FIELDS.map(([k,label]) => (
+                      <th key={k} style={{ padding:"8px 12px", textAlign:"left", fontSize:11,
+                        textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
+                        whiteSpace:"nowrap" }}>{label}</th>
+                    ))}
+                    {vueActive.bool.map(([k,label]) => (
+                      <th key={k} style={{ padding:"8px", textAlign:"center", fontSize:11,
+                        textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
+                        whiteSpace:"nowrap" }}>{label}</th>
+                    ))}
+                    <th style={{ padding:"8px 12px", textAlign:"right", fontSize:11,
+                      textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map((m, idx) => (
+                    <tr key={m.matricule} style={{ borderTop:`1px solid ${C.line}`,
+                      background: idx % 2 ? "#FAFBFD" : "#fff" }}>
+                      <td style={{ padding:"8px 12px" }}><BadgeMatricule value={m.matricule} /></td>
+                      <td style={{ padding:"8px 12px", whiteSpace:"nowrap", fontWeight:500 }}>{m.grade}</td>
+                      <td style={{ padding:"8px 12px" }}>
+                        <StatutPill statut={m.statut} onCycle={() => cycleStatut(m.matricule)} /></td>
+
+                      {(vue === "perso" || vue === "tout") && PERSO_FIELDS.map(([k]) => (
+                        <td key={k} style={{ padding:8 }}>
+                          <input style={inputStyle} defaultValue={m[k]} placeholder="—"
+                            onBlur={e => { if (e.target.value !== m[k]) setPerso(m.matricule, k, e.target.value); }} />
+                        </td>
+                      ))}
+
+                      {vueActive.bool.map(([k]) => (
+                        <td key={k} style={{ padding:8, textAlign:"center" }}>
+                          <BoolCell value={m[k]} onToggle={() => toggleBool(m.matricule, k)} />
+                        </td>
+                      ))}
+
+                      <td style={{ padding:"8px 12px" }}>
+                        <div style={{ display:"flex", alignItems:"center",
+                          justifyContent:"flex-end", gap:4 }}>
+                          <button onClick={() => promote(m.matricule, -1)}
+                            disabled={GRADES.indexOf(m.grade) === 0}
+                            title="Monter en grade"
+                            style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                              background:C.blueSoft, color:C.blue,
+                              opacity: GRADES.indexOf(m.grade) === 0 ? 0.25 : 1 }}>▲</button>
+                          <button onClick={() => promote(m.matricule, 1)}
+                            disabled={GRADES.indexOf(m.grade) === GRADES.length - 1}
+                            title="Descendre en grade"
+                            style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                              background:C.blueSoft, color:C.blue,
+                              opacity: GRADES.indexOf(m.grade) === GRADES.length - 1 ? 0.25 : 1 }}>▼</button>
+                          {confirmDelete === m.matricule ? (
+                            <button onClick={() => removeMember(m.matricule)}
+                              style={{ padding:"0 8px", height:28, borderRadius:2, fontSize:11,
+                                fontWeight:700, color:"#fff", background:C.red }}>Confirmer ?</button>
+                          ) : (
+                            <button onClick={() => setConfirmDelete(m.matricule)}
+                              title="Retirer du registre"
+                              style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                                background:"#F7E8E8", color:C.red }}>✕</button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {sorted.length === 0 && (
+                    <tr><td colSpan={20} style={{ padding:"24px 16px", textAlign:"center", color:C.grey }}>
+                      Registre vide — recrutez un premier membre.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ fontSize:11, color:C.grey }}>
+              ✓ / ✕ : cliquer pour valider ou retirer une formation · Statut : cliquer pour faire défiler
+              Présent → Absent → Mis à pied · Infos perso : modifier puis cliquer ailleurs pour enregistrer.
+            </p>
+          </div>
+        )}
+
+        {page === "journal" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+              flexWrap:"wrap", gap:12 }}>
+              <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                letterSpacing:"0.08em", color:C.navy }}>Journal des opérations ({logs.length})</h2>
+              {logs.length > 0 && (
+                <button onClick={() => restoreFrom(logs[0])}
+                  style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                    color:"#fff", background:C.blue }}>↩ Annuler la dernière action</button>
+              )}
+            </div>
+
+            <div style={{ background:"#fff", borderRadius:6, border:`1px solid ${C.line}` }}>
+              {logs.length === 0 && (
+                <p style={{ padding:"24px 16px", fontSize:13, textAlign:"center", color:C.grey }}>
+                  Aucune opération enregistrée pour l'instant. Les modifications du registre apparaîtront ici.
+                </p>
+              )}
+              {logs.map((entry, idx) => (
+                <div key={entry.id} style={{ display:"flex", alignItems:"center",
+                  justifyContent:"space-between", gap:12, padding:"10px 16px", flexWrap:"wrap",
+                  borderTop: idx === 0 ? "none" : `1px solid ${C.line}`,
+                  background: idx % 2 ? "#FAFBFD" : "#fff" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
+                    <span style={{ fontSize:11, fontFamily:"monospace",
+                      whiteSpace:"nowrap", color:C.grey }}>{entry.date}</span>
+                    <span style={{ fontSize:13, fontWeight:500,
+                      color: entry.action.startsWith("↩") ? C.blue : C.ink }}>{entry.action}</span>
+                  </div>
+                  <button onClick={() => restoreFrom(entry)}
+                    title="Restaurer le registre tel qu'il était AVANT cette action"
+                    style={{ padding:"4px 12px", fontSize:11, borderRadius:2, fontWeight:600,
+                      whiteSpace:"nowrap", background:C.blueSoft, color:C.blue,
+                      border:`1px solid ${C.line}` }}>Revenir avant</button>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize:11, color:C.grey }}>
+              « Revenir avant » restaure le registre dans l'état où il se trouvait juste avant l'action
+              concernée (les actions plus récentes sont donc annulées). Une restauration est elle-même
+              journalisée. Le journal conserve les {MAX_LOGS} dernières opérations.
+            </p>
+          </div>
+        )}
+      </main>
+
+      {/* ── Modale recrutement ── */}
+      {showAdd && (
+        <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
+          justifyContent:"center", padding:16, zIndex:50, background:"rgba(9,24,48,0.55)" }}
+          onClick={() => setShowAdd(false)}>
+          <div style={{ background:"#fff", borderRadius:6, width:"100%", maxWidth:440,
+            padding:20, display:"flex", flexDirection:"column", gap:12,
+            borderTop:`4px solid ${C.gold}` }}
+            onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontWeight:700, textTransform:"uppercase",
+              letterSpacing:"0.08em", fontSize:13, color:C.navy }}>
+              Recrutement d'un nouveau membre</h2>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+              <label style={{ display:"flex", flexDirection:"column", gap:4,
+                fontSize:11, fontWeight:600, color:C.grey }}>
+                Matricule (E-00) *
+                <input style={inputStyle} value={form.matricule} placeholder="E-00"
+                  onChange={e => setForm({ ...form, matricule: e.target.value })} />
+              </label>
+              <label style={{ display:"flex", flexDirection:"column", gap:4,
+                fontSize:11, fontWeight:600, color:C.grey }}>
+                Grade
+                <select style={inputStyle} value={form.grade}
+                  onChange={e => setForm({ ...form, grade: e.target.value })}>
+                  {GRADES.map(g => <option key={g}>{g}</option>)}
+                </select>
+              </label>
+              {PERSO_FIELDS.map(([k,label]) => (
+                <label key={k} style={{ display:"flex", flexDirection:"column", gap:4,
+                  fontSize:11, fontWeight:600, color:C.grey }}>
+                  {label}
+                  <input style={inputStyle} value={form[k]}
+                    onChange={e => setForm({ ...form, [k]: e.target.value })} />
+                </label>
+              ))}
+            </div>
+            {formError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{formError}</p>}
+            <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:4 }}>
+              <button onClick={() => setShowAdd(false)}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                  border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
+              <button onClick={addMember}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  color:"#fff", background:C.green }}>Recruter</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
