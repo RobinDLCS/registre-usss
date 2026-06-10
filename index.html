@@ -11,20 +11,20 @@
   * { box-sizing: border-box; margin: 0; }
   body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
   button { cursor: pointer; font-family: inherit; border: none; }
-  input, select { font-family: inherit; }
+  button:disabled { cursor: default; }
+  input, select, textarea { font-family: inherit; }
   table { border-collapse: collapse; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef } = React;
+const { useState, useEffect } = React;
 
 // ════════════════════════════════════════════
-//  ⚠ CONFIGURATION — à remplir avant publication
+//  ⚠ CONFIGURATION
 // ════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec"; // se termine par /exec
-const TOKEN   = "USSS-Falcon-7392";               // même valeur que dans Code.gs
+const API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec";
 
 // ─── Palette institutionnelle ───
 const C = {
@@ -59,9 +59,25 @@ const ALL_BOOL = [...BOOL_FIELDS.ppa, ...BOOL_FIELDS.qualif, ...BOOL_FIELDS.perm
 const FIELD_LABELS = Object.fromEntries([...ALL_BOOL, ...PERSO_FIELDS]);
 const MAX_LOGS = 50;
 
+// ─── Aptitudes opérationnelles (règles modifiables ici) ───
+const apteConvoi = m => m.formaInitiale && m.convoi && m.permisVoiture && m.ppa1;
+const apteCPO    = m => m.formaInitiale && m.cpo && m.sams && m.ppa1;
+const APTITUDES = [
+  ["Convoi",          apteConvoi,
+    "Forma. initiale + Convoi + Permis voiture + PPA I"],
+  ["C.P.O",           apteCPO,
+    "Forma. initiale + C.P.O + SAMS + PPA I"],
+  ["Motorcade Lead",  m => apteConvoi(m) && m.motorcadeLeading,
+    "Apte Convoi + Motorcade leading"],
+  ["C.P.O Lead",      m => apteCPO(m) && m.cpoLeading,
+    "Apte C.P.O + C.P.O leading"],
+  ["Operation Lead",  m => apteConvoi(m) && apteCPO(m) && m.motorcadeLeading && m.cpoLeading && m.operationLeading,
+    "Aptes Motorcade & C.P.O Lead + Operation leading"],
+];
+
 function makeMember(matricule, grade, bools) {
   const m = { matricule, grade, statut: "Présent",
-    nom: "", prenom: "", dateEntree: "", iban: "", telephone: "" };
+    nom: "", prenom: "", dateEntree: "", iban: "", telephone: "", rapports: [] };
   ALL_BOOL.forEach((f, i) => { m[f[0]] = bools[i] || false; });
   return m;
 }
@@ -92,44 +108,64 @@ const sortMembers = (list) =>
     return g !== 0 ? g : a.matricule.localeCompare(b.matricule);
   });
 
-// ─── API Google Sheets (Apps Script) ───
+// ─── API Apps Script ───
 async function apiLoad() {
-  const res = await fetch(`${API_URL}?token=${encodeURIComponent(TOKEN)}`);
+  const res = await fetch(API_URL);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   return data;
 }
-async function apiSave(members, logs) {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ token: TOKEN, members, logs }),
-  });
+async function apiLogin(login, password) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "login", login, password }) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+async function apiSave(session, members, logs) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "save", session, members, logs }) });
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 }
 
 // ─── Petits composants ───
-function BadgeMatricule({ value }) {
-  return <span style={{ display:"inline-block", fontFamily:"monospace", fontWeight:700,
+function BadgeMatricule({ value, onClick }) {
+  return <button onClick={onClick} title="Ouvrir la fiche agent"
+    style={{ display:"inline-block", fontFamily:"monospace", fontWeight:700,
     fontSize:13, padding:"2px 8px", borderRadius:2, background:C.navy, color:"#fff",
-    borderLeft:`3px solid ${C.gold}`, letterSpacing:"0.05em" }}>{value}</span>;
+    borderLeft:`3px solid ${C.gold}`, letterSpacing:"0.05em",
+    cursor: onClick ? "pointer" : "default" }}>{value}</button>;
 }
 
-function BoolCell({ value, onToggle }) {
-  return <button onClick={onToggle} title="Cliquer pour basculer"
+function BoolCell({ value, onToggle, readonly }) {
+  return <button onClick={readonly ? undefined : onToggle}
+    title={readonly ? "Lecture seule — connecte-toi pour modifier" : "Cliquer pour basculer"}
     style={{ width:28, height:28, borderRadius:2, fontWeight:700, fontSize:13,
       background: value ? "#E3F0E8" : "#F7E8E8", color: value ? C.green : C.red,
-      border:`1px solid ${value ? "#BCD9C7" : "#E5C5C5"}` }}>
+      border:`1px solid ${value ? "#BCD9C7" : "#E5C5C5"}`,
+      cursor: readonly ? "default" : "pointer", opacity: readonly ? 0.8 : 1 }}>
     {value ? "✓" : "✕"}
   </button>;
 }
 
-function StatutPill({ statut, onCycle }) {
-  return <button onClick={onCycle} title="Cliquer pour changer le statut"
+function StatutPill({ statut, onCycle, readonly }) {
+  return <button onClick={readonly ? undefined : onCycle}
+    title={readonly ? "Lecture seule" : "Cliquer pour changer le statut"}
     style={{ padding:"4px 10px", borderRadius:99, fontSize:12, fontWeight:600,
-      color:"#fff", background:STATUT_COLOR[statut], whiteSpace:"nowrap" }}>
+      color:"#fff", background:STATUT_COLOR[statut], whiteSpace:"nowrap",
+      cursor: readonly ? "default" : "pointer" }}>
     {statut}
   </button>;
+}
+
+function ApteBadge({ ok, label }) {
+  return <span style={{ display:"inline-block", padding:"3px 8px", borderRadius:2,
+    fontSize:11, fontWeight:600, whiteSpace:"nowrap",
+    background: ok ? "#E3F0E8" : "#F6F7F9",
+    color: ok ? C.green : C.grey,
+    border:`1px solid ${ok ? "#BCD9C7" : C.line}`,
+    textDecoration: ok ? "none" : "line-through" }}>{label}</span>;
 }
 
 function StatCard({ label, value, color }) {
@@ -153,6 +189,11 @@ function CoverageBar({ label, count, total }) {
   </div>;
 }
 
+function SectionTitle({ children }) {
+  return <h3 style={{ fontSize:12, fontWeight:700, textTransform:"uppercase",
+    letterSpacing:"0.08em", color:C.navy, margin:"14px 0 8px" }}>{children}</h3>;
+}
+
 // ─── Application ───
 function App() {
   const [members, setMembers] = useState(null);
@@ -167,29 +208,67 @@ function App() {
     nom:"", prenom:"", dateEntree:"", iban:"", telephone:"" });
   const [formError, setFormError] = useState("");
 
-  // Chargement initial depuis le Google Sheet
+  // Authentification
+  const [session, setSession] = useState(null); // { token, login }
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginForm, setLoginForm] = useState({ login:"", password:"" });
+  const [loginError, setLoginError] = useState("");
+  const [loginBusy, setLoginBusy] = useState(false);
+
+  // Fiche agent + rapport d'incident
+  const [ficheMat, setFicheMat] = useState(null);
+  const [rapportTexte, setRapportTexte] = useState("");
+
+  const editor = session !== null;
+
+  // Chargement initial + session mémorisée
   useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("usss-session");
+      if (saved) setSession(JSON.parse(saved));
+    } catch (e) {}
     (async () => {
       try {
         const data = await apiLoad();
         setMembers(data.members || SEED);
         setLogs(data.logs || []);
-        if (!data.members) apiSave(SEED, []).catch(() => {});
       } catch (e) {
         setLoadError("Connexion au registre impossible : " + e.message +
-          " — vérifie API_URL, le TOKEN et le déploiement Apps Script.");
+          " — vérifie API_URL et le déploiement Apps Script.");
       }
     })();
   }, []);
 
+  const doLogin = async () => {
+    setLoginBusy(true); setLoginError("");
+    try {
+      const data = await apiLogin(loginForm.login, loginForm.password);
+      const s = { token: data.token, login: data.login };
+      setSession(s);
+      try { sessionStorage.setItem("usss-session", JSON.stringify(s)); } catch (e) {}
+      setShowLogin(false);
+      setLoginForm({ login:"", password:"" });
+    } catch (e) {
+      setLoginError(e.message);
+    }
+    setLoginBusy(false);
+  };
+
+  const doLogout = () => {
+    setSession(null);
+    try { sessionStorage.removeItem("usss-session"); } catch (e) {}
+  };
+
   // Sauvegarde + journalisation (snapshot = état AVANT la modification)
   const persist = async (list, action) => {
+    if (!editor) return;
     let newLogs = logs;
     if (action && members) {
       const entry = {
         id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
         date: new Date().toLocaleString("fr-FR"),
         action,
+        auteur: session.login,
         snapshot: members,
       };
       newLogs = [entry, ...logs].slice(0, MAX_LOGS);
@@ -198,11 +277,16 @@ function App() {
     setMembers(list);
     setSaveState("saving");
     try {
-      await apiSave(list, newLogs);
+      await apiSave(session.token, list, newLogs);
       setSaveState("ok");
     } catch (e) {
       console.error(e);
       setSaveState("error");
+      if (String(e.message).includes("Session")) {
+        doLogout();
+        setShowLogin(true);
+        setLoginError("Ta session a expiré — reconnecte-toi puis refais la dernière action.");
+      }
     }
   };
 
@@ -228,6 +312,7 @@ function App() {
   const presents = members.filter(m => m.statut === "Présent");
   const absents = members.filter(m => m.statut === "Absent");
   const misAPied = members.filter(m => m.statut === "Mis à pied");
+  const fiche = ficheMat ? members.find(m => m.matricule === ficheMat) : null;
 
   // ── Actions ──
   const toggleBool = (matricule, field) => {
@@ -259,6 +344,7 @@ function App() {
   const removeMember = (matricule) => {
     persist(members.filter(m => m.matricule !== matricule), `${matricule} radié du registre`);
     setConfirmDelete(null);
+    if (ficheMat === matricule) setFicheMat(null);
   };
 
   const addMember = () => {
@@ -274,11 +360,29 @@ function App() {
     setFormError("");
   };
 
+  const addRapport = () => {
+    const texte = rapportTexte.trim();
+    if (!texte || !fiche) return;
+    const rapport = { id: Date.now() + "-" + Math.random().toString(36).slice(2, 5),
+      date: new Date().toLocaleString("fr-FR"), auteur: session.login, texte };
+    persist(members.map(m => m.matricule === fiche.matricule
+        ? { ...m, rapports: [rapport, ...(m.rapports || [])] } : m),
+      `${fiche.matricule} : rapport d'incident rédigé par ${session.login}`);
+    setRapportTexte("");
+  };
+
+  const deleteRapport = (rapportId) => {
+    persist(members.map(m => m.matricule === fiche.matricule
+        ? { ...m, rapports: (m.rapports || []).filter(r => r.id !== rapportId) } : m),
+      `${fiche.matricule} : rapport d'incident supprimé`);
+  };
+
   const VUES = {
     formations: { label:"Formations", bool:[...BOOL_FIELDS.formations, ...BOOL_FIELDS.qualif, ...BOOL_FIELDS.leading] },
     ppa: { label:"PPA", bool:BOOL_FIELDS.ppa },
     permis: { label:"Permis", bool:BOOL_FIELDS.permis },
     perso: { label:"Infos perso", bool:[] },
+    aptitudes: { label:"Aptitudes", bool:[] },
     tout: { label:"Tout", bool:ALL_BOOL },
   };
   const vueActive = VUES[vue];
@@ -286,11 +390,13 @@ function App() {
   const inputStyle = { border:`1px solid ${C.line}`, borderRadius:3, padding:"4px 6px",
     fontSize:13, color:C.ink, width:"100%", minWidth:90, background:"#fff" };
 
-  const SAVE_BADGE = {
+  const SAVE_BADGE = editor ? {
     ok:     { txt:"✓ Enregistré", bg:"#E3F0E8", fg:C.green },
     saving: { txt:"⟳ Sauvegarde…", bg:C.blueSoft, fg:C.blue },
-    error:  { txt:"⚠ Sauvegarde échouée — réessaie", bg:"#F7E8E8", fg:C.red },
-  }[saveState];
+    error:  { txt:"⚠ Sauvegarde échouée", bg:"#F7E8E8", fg:C.red },
+  }[saveState] : { txt:"👁 Lecture seule", bg:"#F6F7F9", fg:C.grey };
+
+  const ficheLogs = fiche ? logs.filter(l => l.action.includes(fiche.matricule)) : [];
 
   return (
     <div style={{ minHeight:"100vh", background:C.paper, color:C.ink }}>
@@ -312,6 +418,20 @@ function App() {
           <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
             <span style={{ fontSize:11, fontWeight:600, padding:"4px 10px", borderRadius:99,
               background:SAVE_BADGE.bg, color:SAVE_BADGE.fg }}>{SAVE_BADGE.txt}</span>
+            {editor ? (
+              <span style={{ display:"flex", alignItems:"center", gap:6 }}>
+                <span style={{ fontSize:11, color:"#C8D4E5" }}>
+                  ✎ {session.login}</span>
+                <button onClick={doLogout}
+                  style={{ padding:"4px 10px", fontSize:11, borderRadius:2,
+                    background:"transparent", color:"#C8D4E5",
+                    border:"1px solid #2C456B" }}>Déconnexion</button>
+              </span>
+            ) : (
+              <button onClick={() => { setShowLogin(true); setLoginError(""); }}
+                style={{ padding:"4px 12px", fontSize:11, fontWeight:600, borderRadius:2,
+                  background:C.gold, color:C.navyDeep }}>🔑 Connexion éditeur</button>
+            )}
             <nav style={{ display:"flex", gap:8 }}>
               {[["accueil","Accueil"],["effectifs","Effectifs"],["journal","Journal"]].map(([id,label]) => (
                 <button key={id} onClick={() => setPage(id)}
@@ -348,7 +468,7 @@ function App() {
                 <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:8 }}>
                   {sortMembers(presents).map(m => (
                     <li key={m.matricule} style={{ display:"flex", alignItems:"center", gap:12, fontSize:13 }}>
-                      <BadgeMatricule value={m.matricule} />
+                      <BadgeMatricule value={m.matricule} onClick={() => setFicheMat(m.matricule)} />
                       <span style={{ fontWeight:500 }}>{m.grade}</span>
                       <span style={{ color:C.grey }}>
                         {(m.prenom || m.nom) ? `${m.prenom} ${m.nom}`.trim() : "—"}</span>
@@ -369,6 +489,43 @@ function App() {
                 ))}
               </section>
             </div>
+
+            <section style={{ background:"#fff", borderRadius:6, padding:20, border:`1px solid ${C.line}` }}>
+              <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                letterSpacing:"0.08em", marginBottom:12, color:C.navy }}>
+                Répartition par grade</h2>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(210px, 1fr))", gap:8 }}>
+                {GRADES.map(g => {
+                  const n = members.filter(m => m.grade === g).length;
+                  return (
+                    <div key={g} style={{ display:"flex", alignItems:"center",
+                      justifyContent:"space-between", gap:8, padding:"6px 10px",
+                      borderRadius:3, fontSize:13,
+                      background: n > 0 ? C.blueSoft : "#F6F7F9",
+                      border:`1px solid ${C.line}`,
+                      color: n > 0 ? C.ink : C.grey }}>
+                      <span style={{ fontWeight:500 }}>{g}</span>
+                      <span style={{ fontFamily:"monospace", fontWeight:700,
+                        minWidth:24, textAlign:"center", borderRadius:2, padding:"1px 6px",
+                        background: n > 0 ? C.blue : "#E2E6EC",
+                        color: n > 0 ? "#fff" : C.grey }}>{n}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section style={{ background:"#fff", borderRadius:6, padding:20, border:`1px solid ${C.line}` }}>
+              <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                letterSpacing:"0.08em", marginBottom:12, color:C.navy }}>
+                Capacité opérationnelle (agents présents)</h2>
+              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                {APTITUDES.map(([label, test]) => (
+                  <CoverageBar key={label} label={"Apte " + label}
+                    count={presents.filter(test).length} total={presents.length} />
+                ))}
+              </div>
+            </section>
 
             {misAPied.length > 0 && (
               <div style={{ borderRadius:6, padding:16, fontSize:13, display:"flex",
@@ -396,9 +553,11 @@ function App() {
                   </button>
                 ))}
               </div>
-              <button onClick={() => { setShowAdd(true); setFormError(""); }}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
-                  color:"#fff", background:C.green }}>+ Recruter un membre</button>
+              {editor && (
+                <button onClick={() => { setShowAdd(true); setFormError(""); }}
+                  style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                    color:"#fff", background:C.green }}>+ Recruter un membre</button>
+              )}
             </div>
 
             <div style={{ background:"#fff", borderRadius:6, overflowX:"auto", border:`1px solid ${C.line}` }}>
@@ -415,64 +574,85 @@ function App() {
                         textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
                         whiteSpace:"nowrap" }}>{label}</th>
                     ))}
+                    {vue === "aptitudes" && APTITUDES.map(([label]) => (
+                      <th key={label} style={{ padding:"8px", textAlign:"center", fontSize:11,
+                        textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
+                        whiteSpace:"nowrap" }}>{label}</th>
+                    ))}
                     {vueActive.bool.map(([k,label]) => (
                       <th key={k} style={{ padding:"8px", textAlign:"center", fontSize:11,
                         textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
                         whiteSpace:"nowrap" }}>{label}</th>
                     ))}
-                    <th style={{ padding:"8px 12px", textAlign:"right", fontSize:11,
-                      textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff" }}>Actions</th>
+                    {editor && <th style={{ padding:"8px 12px", textAlign:"right", fontSize:11,
+                      textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff" }}>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {sorted.map((m, idx) => (
                     <tr key={m.matricule} style={{ borderTop:`1px solid ${C.line}`,
                       background: idx % 2 ? "#FAFBFD" : "#fff" }}>
-                      <td style={{ padding:"8px 12px" }}><BadgeMatricule value={m.matricule} /></td>
+                      <td style={{ padding:"8px 12px" }}>
+                        <BadgeMatricule value={m.matricule} onClick={() => setFicheMat(m.matricule)} /></td>
                       <td style={{ padding:"8px 12px", whiteSpace:"nowrap", fontWeight:500 }}>{m.grade}</td>
                       <td style={{ padding:"8px 12px" }}>
-                        <StatutPill statut={m.statut} onCycle={() => cycleStatut(m.matricule)} /></td>
+                        <StatutPill statut={m.statut} readonly={!editor}
+                          onCycle={() => cycleStatut(m.matricule)} /></td>
 
                       {(vue === "perso" || vue === "tout") && PERSO_FIELDS.map(([k]) => (
                         <td key={k} style={{ padding:8 }}>
-                          <input style={inputStyle} defaultValue={m[k]} placeholder="—"
-                            onBlur={e => { if (e.target.value !== m[k]) setPerso(m.matricule, k, e.target.value); }} />
+                          {editor ? (
+                            <input style={inputStyle} defaultValue={m[k]} placeholder="—"
+                              onBlur={e => { if (e.target.value !== m[k]) setPerso(m.matricule, k, e.target.value); }} />
+                          ) : (
+                            <span style={{ fontSize:13, color: m[k] ? C.ink : C.grey }}>{m[k] || "—"}</span>
+                          )}
+                        </td>
+                      ))}
+
+                      {vue === "aptitudes" && APTITUDES.map(([label, test]) => (
+                        <td key={label} style={{ padding:8, textAlign:"center" }}>
+                          <span style={{ fontWeight:700, fontSize:13,
+                            color: test(m) ? C.green : "#D5DAE1" }}>{test(m) ? "✓" : "✕"}</span>
                         </td>
                       ))}
 
                       {vueActive.bool.map(([k]) => (
                         <td key={k} style={{ padding:8, textAlign:"center" }}>
-                          <BoolCell value={m[k]} onToggle={() => toggleBool(m.matricule, k)} />
+                          <BoolCell value={m[k]} readonly={!editor}
+                            onToggle={() => toggleBool(m.matricule, k)} />
                         </td>
                       ))}
 
-                      <td style={{ padding:"8px 12px" }}>
-                        <div style={{ display:"flex", alignItems:"center",
-                          justifyContent:"flex-end", gap:4 }}>
-                          <button onClick={() => promote(m.matricule, -1)}
-                            disabled={GRADES.indexOf(m.grade) === 0}
-                            title="Monter en grade"
-                            style={{ width:28, height:28, borderRadius:2, fontWeight:700,
-                              background:C.blueSoft, color:C.blue,
-                              opacity: GRADES.indexOf(m.grade) === 0 ? 0.25 : 1 }}>▲</button>
-                          <button onClick={() => promote(m.matricule, 1)}
-                            disabled={GRADES.indexOf(m.grade) === GRADES.length - 1}
-                            title="Descendre en grade"
-                            style={{ width:28, height:28, borderRadius:2, fontWeight:700,
-                              background:C.blueSoft, color:C.blue,
-                              opacity: GRADES.indexOf(m.grade) === GRADES.length - 1 ? 0.25 : 1 }}>▼</button>
-                          {confirmDelete === m.matricule ? (
-                            <button onClick={() => removeMember(m.matricule)}
-                              style={{ padding:"0 8px", height:28, borderRadius:2, fontSize:11,
-                                fontWeight:700, color:"#fff", background:C.red }}>Confirmer ?</button>
-                          ) : (
-                            <button onClick={() => setConfirmDelete(m.matricule)}
-                              title="Retirer du registre"
+                      {editor && (
+                        <td style={{ padding:"8px 12px" }}>
+                          <div style={{ display:"flex", alignItems:"center",
+                            justifyContent:"flex-end", gap:4 }}>
+                            <button onClick={() => promote(m.matricule, -1)}
+                              disabled={GRADES.indexOf(m.grade) === 0}
+                              title="Monter en grade"
                               style={{ width:28, height:28, borderRadius:2, fontWeight:700,
-                                background:"#F7E8E8", color:C.red }}>✕</button>
-                          )}
-                        </div>
-                      </td>
+                                background:C.blueSoft, color:C.blue,
+                                opacity: GRADES.indexOf(m.grade) === 0 ? 0.25 : 1 }}>▲</button>
+                            <button onClick={() => promote(m.matricule, 1)}
+                              disabled={GRADES.indexOf(m.grade) === GRADES.length - 1}
+                              title="Descendre en grade"
+                              style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                                background:C.blueSoft, color:C.blue,
+                                opacity: GRADES.indexOf(m.grade) === GRADES.length - 1 ? 0.25 : 1 }}>▼</button>
+                            {confirmDelete === m.matricule ? (
+                              <button onClick={() => removeMember(m.matricule)}
+                                style={{ padding:"0 8px", height:28, borderRadius:2, fontSize:11,
+                                  fontWeight:700, color:"#fff", background:C.red }}>Confirmer ?</button>
+                            ) : (
+                              <button onClick={() => setConfirmDelete(m.matricule)}
+                                title="Retirer du registre"
+                                style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                                  background:"#F7E8E8", color:C.red }}>✕</button>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {sorted.length === 0 && (
@@ -482,10 +662,19 @@ function App() {
                 </tbody>
               </table>
             </div>
-            <p style={{ fontSize:11, color:C.grey }}>
-              ✓ / ✕ : cliquer pour valider ou retirer une formation · Statut : cliquer pour faire défiler
-              Présent → Absent → Mis à pied · Infos perso : modifier puis cliquer ailleurs pour enregistrer.
-            </p>
+            {vue === "aptitudes" ? (
+              <div style={{ fontSize:11, color:C.grey, display:"flex", flexDirection:"column", gap:2 }}>
+                {APTITUDES.map(([label, _, regle]) => (
+                  <span key={label}><strong>Apte {label}</strong> = {regle}</span>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize:11, color:C.grey }}>
+                {editor
+                  ? "✓ / ✕ : cliquer pour valider ou retirer une formation · Statut : cliquer pour faire défiler Présent → Absent → Mis à pied · Infos perso : modifier puis cliquer ailleurs pour enregistrer · Matricule : ouvrir la fiche agent."
+                  : "Mode lecture seule — connecte-toi en éditeur pour modifier le registre. Cliquer sur un matricule ouvre la fiche agent."}
+              </p>
+            )}
           </div>
         )}
 
@@ -495,7 +684,7 @@ function App() {
               flexWrap:"wrap", gap:12 }}>
               <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
                 letterSpacing:"0.08em", color:C.navy }}>Journal des opérations ({logs.length})</h2>
-              {logs.length > 0 && (
+              {editor && logs.length > 0 && (
                 <button onClick={() => restoreFrom(logs[0])}
                   style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
                     color:"#fff", background:C.blue }}>↩ Annuler la dernière action</button>
@@ -505,7 +694,7 @@ function App() {
             <div style={{ background:"#fff", borderRadius:6, border:`1px solid ${C.line}` }}>
               {logs.length === 0 && (
                 <p style={{ padding:"24px 16px", fontSize:13, textAlign:"center", color:C.grey }}>
-                  Aucune opération enregistrée pour l'instant. Les modifications du registre apparaîtront ici.
+                  Aucune opération enregistrée pour l'instant.
                 </p>
               )}
               {logs.map((entry, idx) => (
@@ -513,17 +702,23 @@ function App() {
                   justifyContent:"space-between", gap:12, padding:"10px 16px", flexWrap:"wrap",
                   borderTop: idx === 0 ? "none" : `1px solid ${C.line}`,
                   background: idx % 2 ? "#FAFBFD" : "#fff" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0, flexWrap:"wrap" }}>
                     <span style={{ fontSize:11, fontFamily:"monospace",
                       whiteSpace:"nowrap", color:C.grey }}>{entry.date}</span>
+                    {entry.auteur && (
+                      <span style={{ fontSize:11, fontWeight:600, padding:"1px 6px",
+                        borderRadius:2, background:C.blueSoft, color:C.blue }}>{entry.auteur}</span>
+                    )}
                     <span style={{ fontSize:13, fontWeight:500,
                       color: entry.action.startsWith("↩") ? C.blue : C.ink }}>{entry.action}</span>
                   </div>
-                  <button onClick={() => restoreFrom(entry)}
-                    title="Restaurer le registre tel qu'il était AVANT cette action"
-                    style={{ padding:"4px 12px", fontSize:11, borderRadius:2, fontWeight:600,
-                      whiteSpace:"nowrap", background:C.blueSoft, color:C.blue,
-                      border:`1px solid ${C.line}` }}>Revenir avant</button>
+                  {editor && (
+                    <button onClick={() => restoreFrom(entry)}
+                      title="Restaurer le registre tel qu'il était AVANT cette action"
+                      style={{ padding:"4px 12px", fontSize:11, borderRadius:2, fontWeight:600,
+                        whiteSpace:"nowrap", background:C.blueSoft, color:C.blue,
+                        border:`1px solid ${C.line}` }}>Revenir avant</button>
+                  )}
                 </div>
               ))}
             </div>
@@ -536,8 +731,160 @@ function App() {
         )}
       </main>
 
+      {/* ── Fiche agent ── */}
+      {fiche && (
+        <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
+          justifyContent:"center", padding:16, zIndex:50, background:"rgba(9,24,48,0.55)" }}
+          onClick={() => setFicheMat(null)}>
+          <div style={{ background:"#fff", borderRadius:6, width:"100%", maxWidth:640,
+            maxHeight:"85vh", overflowY:"auto", padding:20,
+            borderTop:`4px solid ${C.gold}` }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+              gap:12, flexWrap:"wrap" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                <BadgeMatricule value={fiche.matricule} />
+                <div>
+                  <div style={{ fontWeight:700, fontSize:15 }}>
+                    {(fiche.prenom || fiche.nom) ? `${fiche.prenom} ${fiche.nom}`.trim() : "Identité non renseignée"}
+                  </div>
+                  <div style={{ fontSize:12, color:C.grey }}>{fiche.grade}</div>
+                </div>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <StatutPill statut={fiche.statut} readonly={!editor}
+                  onCycle={() => cycleStatut(fiche.matricule)} />
+                <button onClick={() => setFicheMat(null)}
+                  style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                    background:"#F6F7F9", color:C.grey, border:`1px solid ${C.line}` }}>✕</button>
+              </div>
+            </div>
+
+            <SectionTitle>Aptitudes opérationnelles</SectionTitle>
+            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+              {APTITUDES.map(([label, test]) => (
+                <ApteBadge key={label} ok={test(fiche)} label={label} />
+              ))}
+            </div>
+
+            <SectionTitle>Qualifications</SectionTitle>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap:6 }}>
+              {ALL_BOOL.map(([k, label]) => (
+                <div key={k} style={{ display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
+                  <BoolCell value={fiche[k]} readonly={!editor}
+                    onToggle={() => toggleBool(fiche.matricule, k)} />
+                  <span style={{ color: fiche[k] ? C.ink : C.grey }}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <SectionTitle>Informations personnelles</SectionTitle>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:10 }}>
+              {PERSO_FIELDS.map(([k, label]) => (
+                <label key={k} style={{ display:"flex", flexDirection:"column", gap:3,
+                  fontSize:11, fontWeight:600, color:C.grey }}>
+                  {label}
+                  {editor ? (
+                    <input style={inputStyle} defaultValue={fiche[k]} placeholder="—"
+                      onBlur={e => { if (e.target.value !== fiche[k]) setPerso(fiche.matricule, k, e.target.value); }} />
+                  ) : (
+                    <span style={{ fontSize:13, fontWeight:400, color: fiche[k] ? C.ink : C.grey }}>
+                      {fiche[k] || "—"}</span>
+                  )}
+                </label>
+              ))}
+            </div>
+
+            <SectionTitle>Supervision — rapports d'incident ({(fiche.rapports || []).length})</SectionTitle>
+            {editor && (
+              <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:10 }}>
+                <textarea value={rapportTexte} rows={3}
+                  placeholder={"Rédiger un rapport d'incident concernant " + fiche.matricule + "…"}
+                  onChange={e => setRapportTexte(e.target.value)}
+                  style={{ ...inputStyle, resize:"vertical" }} />
+                <button onClick={addRapport} disabled={!rapportTexte.trim()}
+                  style={{ alignSelf:"flex-end", padding:"5px 14px", fontSize:12,
+                    borderRadius:2, fontWeight:600, color:"#fff",
+                    background: rapportTexte.trim() ? C.red : "#D5DAE1" }}>
+                  Déposer le rapport</button>
+              </div>
+            )}
+            {(fiche.rapports || []).length === 0 && (
+              <p style={{ fontSize:12, color:C.grey }}>Aucun rapport — dossier disciplinaire vierge.</p>
+            )}
+            {(fiche.rapports || []).map(r => (
+              <div key={r.id} style={{ borderLeft:`3px solid ${C.red}`, background:"#FCF7F7",
+                borderRadius:"0 3px 3px 0", padding:"8px 12px", marginBottom:6 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:8 }}>
+                  <span style={{ fontSize:11, color:C.grey }}>
+                    {r.date} — <strong style={{ color:C.red }}>{r.auteur}</strong></span>
+                  {editor && (
+                    <button onClick={() => deleteRapport(r.id)} title="Supprimer ce rapport"
+                      style={{ fontSize:11, background:"transparent", color:C.grey }}>✕</button>
+                  )}
+                </div>
+                <p style={{ fontSize:13, marginTop:4, whiteSpace:"pre-wrap" }}>{r.texte}</p>
+              </div>
+            ))}
+
+            <SectionTitle>Historique ({ficheLogs.length})</SectionTitle>
+            {ficheLogs.length === 0 && (
+              <p style={{ fontSize:12, color:C.grey }}>Aucune opération récente concernant cet agent.</p>
+            )}
+            <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+              {ficheLogs.slice(0, 15).map(l => (
+                <div key={l.id} style={{ fontSize:12, display:"flex", gap:8, flexWrap:"wrap" }}>
+                  <span style={{ fontFamily:"monospace", color:C.grey, whiteSpace:"nowrap" }}>{l.date}</span>
+                  {l.auteur && <span style={{ fontWeight:600, color:C.blue }}>{l.auteur}</span>}
+                  <span>{l.action}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modale connexion ── */}
+      {showLogin && (
+        <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
+          justifyContent:"center", padding:16, zIndex:60, background:"rgba(9,24,48,0.55)" }}
+          onClick={() => setShowLogin(false)}>
+          <div style={{ background:"#fff", borderRadius:6, width:"100%", maxWidth:340,
+            padding:20, display:"flex", flexDirection:"column", gap:12,
+            borderTop:`4px solid ${C.gold}` }}
+            onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontWeight:700, textTransform:"uppercase",
+              letterSpacing:"0.08em", fontSize:13, color:C.navy }}>Connexion éditeur</h2>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Identifiant
+              <input style={inputStyle} value={loginForm.login} autoFocus
+                onChange={e => setLoginForm({ ...loginForm, login: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLogin(); }} />
+            </label>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Mot de passe
+              <input style={inputStyle} type="password" value={loginForm.password}
+                onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLogin(); }} />
+            </label>
+            {loginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{loginError}</p>}
+            <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
+              <button onClick={() => setShowLogin(false)}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                  border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
+              <button onClick={doLogin} disabled={loginBusy}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  color:"#fff", background: loginBusy ? "#7A93B5" : C.blue }}>
+                {loginBusy ? "Vérification…" : "Se connecter"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Modale recrutement ── */}
-      {showAdd && (
+      {showAdd && editor && (
         <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
           justifyContent:"center", padding:16, zIndex:50, background:"rgba(9,24,48,0.55)" }}
           onClick={() => setShowAdd(false)}>
