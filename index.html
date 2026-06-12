@@ -108,6 +108,52 @@ const sortMembers = (list) =>
     return g !== 0 ? g : a.matricule.localeCompare(b.matricule);
   });
 
+// ─── Helpers pointeuse (services pouvant traverser minuit) ───
+function dureeMinutes(hd, hf) {
+  if (!hd || !hf) return 0;
+  const [h1, m1] = hd.split(":").map(Number);
+  const [h2, m2] = hf.split(":").map(Number);
+  let d = (h2 * 60 + m2) - (h1 * 60 + m1);
+  if (d <= 0) d += 24 * 60; // passe minuit
+  return d;
+}
+function formatDuree(min) {
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h${String(m).padStart(2, "0")}`;
+}
+function formatDateFR(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+function dateFinService(dateDebut, hd, hf) {
+  if (!dateDebut) return "";
+  if (hf > hd) return dateDebut;
+  const d = new Date(dateDebut + "T12:00:00"); // midi évite les soucis de DST
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+function lundiDeLaSemaine(isoDate) {
+  if (!isoDate) return "";
+  const d = new Date(isoDate + "T12:00:00");
+  const jour = d.getDay(); // 0=dim, 1=lun, ..., 6=sam
+  const decalage = jour === 0 ? -6 : 1 - jour;
+  d.setDate(d.getDate() + decalage);
+  return d.toISOString().slice(0, 10);
+}
+function decaleSemaine(lundiISO, nbSemaines) {
+  const d = new Date(lundiISO + "T12:00:00");
+  d.setDate(d.getDate() + 7 * nbSemaines);
+  return d.toISOString().slice(0, 10);
+}
+function dimancheISO(lundiISO) {
+  const d = new Date(lundiISO + "T12:00:00");
+  d.setDate(d.getDate() + 6);
+  return d.toISOString().slice(0, 10);
+}
+
 // ─── API Apps Script ───
 async function apiLoad() {
   const res = await fetch(API_URL);
@@ -250,6 +296,7 @@ function App() {
   const [pointageError, setPointageError] = useState("");
   const [pointageBusy, setPointageBusy] = useState(false);
   const [filtreMat, setFiltreMat] = useState("");
+  const [lundiSelect, setLundiSelect] = useState(lundiDeLaSemaine(todayISO));
 
   // Fiche agent + rapport d'incident
   const [ficheMat, setFicheMat] = useState(null);
@@ -257,6 +304,8 @@ function App() {
 
   const editor = session !== null;
   const agentLogged = agentSession !== null;
+  // Un agent simple ne voit que la pointeuse ; un éditeur a accès à tout.
+  const pageEffective = (agentLogged && !editor) ? "pointeuse" : page;
 
   // Chargement initial + sessions mémorisées
   useEffect(() => {
@@ -329,8 +378,8 @@ function App() {
     if (!f.date)       { setPointageError("Date requise."); return; }
     if (!f.heureDebut) { setPointageError("Heure de prise de service requise."); return; }
     if (!f.heureFin)   { setPointageError("Heure de fin de service requise."); return; }
-    if (f.heureFin <= f.heureDebut) {
-      setPointageError("L'heure de fin doit être postérieure à l'heure de début.");
+    if (f.heureDebut === f.heureFin) {
+      setPointageError("L'heure de début et de fin sont identiques — durée nulle.");
       return;
     }
     if (!f.missions.trim()) { setPointageError("Décris au moins une mission effectuée."); return; }
@@ -414,6 +463,138 @@ function App() {
     return <div style={{ minHeight:"100vh", display:"flex", alignItems:"center",
       justifyContent:"center", background:C.paper, color:C.grey }}>
       Chargement du registre…
+    </div>;
+  }
+
+  // ── Écran de choix d'accès si personne n'est connecté ──
+  if (!editor && !agentLogged) {
+    return <div style={{ minHeight:"100vh", background:C.paper,
+      display:"flex", flexDirection:"column" }}>
+      <header style={{ background:C.navy, borderBottom:`3px solid ${C.gold}`, padding:"16px 20px" }}>
+        <div style={{ maxWidth:1120, margin:"0 auto", display:"flex", alignItems:"center", gap:12 }}>
+          <div style={{ width:40, height:40, borderRadius:"50%", display:"flex",
+            alignItems:"center", justifyContent:"center", fontSize:18,
+            border:`2px solid ${C.gold}`, color:C.gold }}>★</div>
+          <div>
+            <div style={{ color:"#fff", fontWeight:700, letterSpacing:"0.15em",
+              textTransform:"uppercase", fontSize:13 }}>United States Secret Service</div>
+            <div style={{ fontSize:11, letterSpacing:"0.08em", color:"#9FB2CC" }}>
+              Registre des effectifs &amp; pointeuse</div>
+          </div>
+        </div>
+      </header>
+      <main style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+        <div style={{ background:"#fff", borderRadius:8, padding:"36px 32px",
+          maxWidth:560, width:"100%", textAlign:"center",
+          border:`1px solid ${C.line}`, borderTop:`4px solid ${C.gold}` }}>
+          <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.15em",
+            color:C.grey, marginBottom:8 }}>Sélectionne ton mode d'accès</div>
+          <h1 style={{ fontSize:22, fontWeight:700, color:C.navy, marginBottom:24 }}>
+            Authentification requise</h1>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))",
+            gap:14, marginBottom:20 }}>
+            <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
+              style={{ padding:"22px 14px", borderRadius:4, background:"#fff",
+                border:`1px solid ${C.line}`, borderTop:`3px solid ${C.blue}`,
+                display:"flex", flexDirection:"column", gap:6, textAlign:"center" }}>
+              <div style={{ fontSize:30 }}>👮</div>
+              <div style={{ fontWeight:700, color:C.navy, textTransform:"uppercase",
+                letterSpacing:"0.08em", fontSize:13 }}>Agent</div>
+              <div style={{ fontSize:11, color:C.grey, lineHeight:1.4 }}>
+                Pointer un service, consulter mes propres heures</div>
+            </button>
+            <button onClick={() => { setShowLogin(true); setLoginError(""); }}
+              style={{ padding:"22px 14px", borderRadius:4, background:"#fff",
+                border:`1px solid ${C.line}`, borderTop:`3px solid ${C.gold}`,
+                display:"flex", flexDirection:"column", gap:6, textAlign:"center" }}>
+              <div style={{ fontSize:30 }}>🔑</div>
+              <div style={{ fontWeight:700, color:C.navy, textTransform:"uppercase",
+                letterSpacing:"0.08em", fontSize:13 }}>Supervision</div>
+              <div style={{ fontSize:11, color:C.grey, lineHeight:1.4 }}>
+                Gestion complète : effectifs, formations, pointages, récap hebdo</div>
+            </button>
+          </div>
+          <p style={{ fontSize:11, color:C.grey }}>
+            Contacte l'administration pour obtenir tes identifiants.
+          </p>
+        </div>
+      </main>
+      {/* Modales de connexion */}
+      {showLogin && (
+        <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
+          justifyContent:"center", padding:16, zIndex:60, background:"rgba(9,24,48,0.55)" }}
+          onClick={() => setShowLogin(false)}>
+          <div style={{ background:"#fff", borderRadius:6, width:"100%", maxWidth:340,
+            padding:20, display:"flex", flexDirection:"column", gap:12,
+            borderTop:`4px solid ${C.gold}` }}
+            onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontWeight:700, textTransform:"uppercase",
+              letterSpacing:"0.08em", fontSize:13, color:C.navy }}>Connexion supervision</h2>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Identifiant
+              <input style={inputStyle} value={loginForm.login} autoFocus
+                onChange={e => setLoginForm({ ...loginForm, login: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLogin(); }} />
+            </label>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Mot de passe
+              <input style={inputStyle} type="password" value={loginForm.password}
+                onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLogin(); }} />
+            </label>
+            {loginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{loginError}</p>}
+            <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
+              <button onClick={() => setShowLogin(false)}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                  border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
+              <button onClick={doLogin} disabled={loginBusy}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  color:"#fff", background: loginBusy ? "#7A93B5" : C.blue }}>
+                {loginBusy ? "Vérification…" : "Se connecter"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAgentLogin && (
+        <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
+          justifyContent:"center", padding:16, zIndex:60, background:"rgba(9,24,48,0.55)" }}
+          onClick={() => setShowAgentLogin(false)}>
+          <div style={{ background:"#fff", borderRadius:6, width:"100%", maxWidth:340,
+            padding:20, display:"flex", flexDirection:"column", gap:12,
+            borderTop:`4px solid ${C.gold}` }}
+            onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontWeight:700, textTransform:"uppercase",
+              letterSpacing:"0.08em", fontSize:13, color:C.navy }}>Connexion agent</h2>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Matricule (E-XX)
+              <input style={inputStyle} value={agentLoginForm.matricule} autoFocus
+                placeholder="E-00"
+                onChange={e => setAgentLoginForm({ ...agentLoginForm, matricule: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLoginAgent(); }} />
+            </label>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Mot de passe
+              <input style={inputStyle} type="password" value={agentLoginForm.password}
+                onChange={e => setAgentLoginForm({ ...agentLoginForm, password: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLoginAgent(); }} />
+            </label>
+            {agentLoginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{agentLoginError}</p>}
+            <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
+              <button onClick={() => setShowAgentLogin(false)}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                  border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
+              <button onClick={doLoginAgent} disabled={agentLoginBusy}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  color:"#fff", background: agentLoginBusy ? "#7A93B5" : C.blue }}>
+                {agentLoginBusy ? "Vérification…" : "Pointer entrée"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>;
   }
 
@@ -527,7 +708,7 @@ function App() {
           <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
             <span style={{ fontSize:11, fontWeight:600, padding:"4px 10px", borderRadius:99,
               background:SAVE_BADGE.bg, color:SAVE_BADGE.fg }}>{SAVE_BADGE.txt}</span>
-            {editor ? (
+            {editor && (
               <span style={{ display:"flex", alignItems:"center", gap:6 }}>
                 <span style={{ fontSize:11, color:"#C8D4E5" }}>
                   ✎ {session.login}</span>
@@ -536,12 +717,8 @@ function App() {
                     background:"transparent", color:"#C8D4E5",
                     border:"1px solid #2C456B" }}>Déconnexion</button>
               </span>
-            ) : (
-              <button onClick={() => { setShowLogin(true); setLoginError(""); }}
-                style={{ padding:"4px 12px", fontSize:11, fontWeight:600, borderRadius:2,
-                  background:C.gold, color:C.navyDeep }}>🔑 Connexion éditeur</button>
             )}
-            {agentLogged ? (
+            {agentLogged && (
               <span style={{ display:"flex", alignItems:"center", gap:6 }}>
                 <span style={{ fontSize:11, color:"#C8D4E5" }}>
                   👮 {agentSession.matricule}</span>
@@ -550,30 +727,30 @@ function App() {
                     background:"transparent", color:"#C8D4E5",
                     border:"1px solid #2C456B" }}>Pointer sortie</button>
               </span>
-            ) : (
-              <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
-                style={{ padding:"4px 12px", fontSize:11, fontWeight:600, borderRadius:2,
-                  background:"transparent", color:"#fff",
-                  border:`1px solid ${C.gold}` }}>👮 Connexion agent</button>
             )}
-            <nav style={{ display:"flex", gap:8 }}>
-              {[["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["journal","Journal"]].map(([id,label]) => (
-                <button key={id} onClick={() => setPage(id)}
-                  style={{ padding:"6px 16px", borderRadius:2, fontSize:13, fontWeight:600,
-                    textTransform:"uppercase", letterSpacing:"0.05em",
-                    ...(page === id
-                      ? { background:C.gold, color:C.navyDeep }
-                      : { background:"transparent", color:"#C8D4E5", border:"1px solid #2C456B" }) }}>
-                  {label}
-                </button>
-              ))}
-            </nav>
+            {(editor || agentLogged) && (
+              <nav style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                {(editor
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"]]
+                ).map(([id,label]) => (
+                  <button key={id} onClick={() => setPage(id)}
+                    style={{ padding:"6px 16px", borderRadius:2, fontSize:13, fontWeight:600,
+                      textTransform:"uppercase", letterSpacing:"0.05em",
+                      ...(pageEffective === id
+                        ? { background:C.gold, color:C.navyDeep }
+                        : { background:"transparent", color:"#C8D4E5", border:"1px solid #2C456B" }) }}>
+                    {label}
+                  </button>
+                ))}
+              </nav>
+            )}
           </div>
         </div>
       </header>
 
       <main style={{ maxWidth:1120, margin:"0 auto", padding:"24px 20px" }}>
-        {page === "accueil" && (
+        {pageEffective === "accueil" && (
           <div style={{ display:"flex", flexDirection:"column", gap:24 }}>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(150px, 1fr))", gap:16 }}>
               <StatCard label="Effectif total" value={members.length} color={C.navy} />
@@ -662,7 +839,7 @@ function App() {
           </div>
         )}
 
-        {page === "effectifs" && (
+        {pageEffective === "effectifs" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
               flexWrap:"wrap", gap:12 }}>
@@ -802,11 +979,15 @@ function App() {
           </div>
         )}
 
-        {page === "pointeuse" && (() => {
+        {pageEffective === "pointeuse" && (() => {
           const filtre = filtreMat.trim().toUpperCase();
-          const listeAffichee = filtre
-            ? pointages.filter(p => p.matricule.includes(filtre))
+          // L'agent ne voit que ses propres pointages. L'éditeur peut tout filtrer.
+          const visibles = (agentLogged && !editor)
+            ? pointages.filter(p => p.matricule === agentSession.matricule)
             : pointages;
+          const listeAffichee = (editor && filtre)
+            ? visibles.filter(p => p.matricule.includes(filtre))
+            : visibles;
           return (
             <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
               {/* ── Formulaire de pointage ── */}
@@ -838,7 +1019,7 @@ function App() {
                       gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:10 }}>
                       <label style={{ display:"flex", flexDirection:"column", gap:4,
                         fontSize:11, fontWeight:600, color:C.grey }}>
-                        Date du service
+                        Date de prise de service
                         <input type="date" style={inputStyle} value={pointageForm.date}
                           onChange={e => setPointageForm({ ...pointageForm, date: e.target.value })} />
                       </label>
@@ -855,6 +1036,21 @@ function App() {
                           onChange={e => setPointageForm({ ...pointageForm, heureFin: e.target.value })} />
                       </label>
                     </div>
+                    {pointageForm.heureDebut && pointageForm.heureFin &&
+                      pointageForm.heureDebut !== pointageForm.heureFin && (() => {
+                      const min = dureeMinutes(pointageForm.heureDebut, pointageForm.heureFin);
+                      const nuit = pointageForm.heureFin <= pointageForm.heureDebut;
+                      return (
+                        <div style={{ fontSize:12, color:C.navy, background:C.blueSoft,
+                          padding:"6px 10px", borderRadius:3, border:`1px solid ${C.line}` }}>
+                          <strong>Durée décomptée :</strong> {formatDuree(min)}
+                          {nuit && <span style={{ color:C.grey }}>
+                            {" "}· service de nuit, fin le {formatDateFR(dateFinService(
+                              pointageForm.date, pointageForm.heureDebut, pointageForm.heureFin))}
+                          </span>}
+                        </div>
+                      );
+                    })()}
                     <label style={{ display:"flex", flexDirection:"column", gap:4,
                       fontSize:11, fontWeight:600, color:C.grey }}>
                       Missions effectuées *
@@ -889,13 +1085,24 @@ function App() {
               <section style={{ display:"flex", flexDirection:"column", gap:12 }}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
                   flexWrap:"wrap", gap:12 }}>
-                  <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
-                    letterSpacing:"0.08em", color:C.navy }}>
-                    Pointages enregistrés ({listeAffichee.length}{filtre && ` / ${pointages.length}`})
-                  </h2>
-                  <input style={{ ...inputStyle, maxWidth:200 }}
-                    placeholder="Filtrer par matricule (E-XX)"
-                    value={filtreMat} onChange={e => setFiltreMat(e.target.value)} />
+                  <div style={{ display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap" }}>
+                    <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                      letterSpacing:"0.08em", color:C.navy }}>
+                      Pointages enregistrés ({listeAffichee.length}{filtre && ` / ${pointages.length}`})
+                    </h2>
+                    {listeAffichee.length > 0 && (
+                      <span style={{ fontSize:12, color:C.grey }}>
+                        Total : <strong style={{ color:C.navy }}>{formatDuree(
+                          listeAffichee.reduce((acc, p) => acc + dureeMinutes(p.heureDebut, p.heureFin), 0)
+                        )}</strong>
+                      </span>
+                    )}
+                  </div>
+                  {editor && (
+                    <input style={{ ...inputStyle, maxWidth:200 }}
+                      placeholder="Filtrer par matricule (E-XX)"
+                      value={filtreMat} onChange={e => setFiltreMat(e.target.value)} />
+                  )}
                 </div>
 
                 {listeAffichee.length === 0 && (
@@ -912,6 +1119,10 @@ function App() {
                     const mb = members.find(x => x.matricule === p.matricule);
                     const peutSupprimer = editor ||
                       (agentLogged && agentSession.matricule === p.matricule);
+                    const dureeMin = dureeMinutes(p.heureDebut, p.heureFin);
+                    const nuit = p.heureFin <= p.heureDebut;
+                    const dateFin = nuit
+                      ? dateFinService(p.date, p.heureDebut, p.heureFin) : p.date;
                     return (
                       <article key={p.id} style={{ background:"#fff", borderRadius:6,
                         border:`1px solid ${C.line}`, borderLeft:`3px solid ${C.blue}`,
@@ -927,10 +1138,16 @@ function App() {
                               </span>
                             )}
                           </div>
-                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
                             <span style={{ fontSize:12, fontFamily:"monospace", color:C.navy,
                               fontWeight:600 }}>
-                              {p.date} · {p.heureDebut} → {p.heureFin}
+                              {nuit
+                                ? `${formatDateFR(p.date)} ${p.heureDebut} → ${formatDateFR(dateFin)} ${p.heureFin}`
+                                : `${formatDateFR(p.date)} · ${p.heureDebut} → ${p.heureFin}`}
+                            </span>
+                            <span style={{ fontSize:11, fontWeight:700, padding:"2px 8px",
+                              borderRadius:2, background:C.gold, color:C.navyDeep }}>
+                              {formatDuree(dureeMin)}
                             </span>
                             {peutSupprimer && (
                               <button onClick={() => removePointage(p.id)}
@@ -961,7 +1178,114 @@ function App() {
           );
         })()}
 
-        {page === "journal" && (
+        {pageEffective === "recap" && editor && (() => {
+          const dimSel = dimancheISO(lundiSelect);
+          const dansSemaine = pointages.filter(p => lundiDeLaSemaine(p.date) === lundiSelect);
+          const totauxParMat = {};
+          dansSemaine.forEach(p => {
+            totauxParMat[p.matricule] = (totauxParMat[p.matricule] || 0)
+              + dureeMinutes(p.heureDebut, p.heureFin);
+          });
+          const totalGlobal = Object.values(totauxParMat).reduce((a, b) => a + b, 0);
+          const semaineCourante = lundiSelect === lundiDeLaSemaine(todayISO);
+          // Tri : agents avec heures en tête (desc), puis le reste par grade
+          const sortedRecap = sortMembers(members).slice().sort((a, b) => {
+            const ha = totauxParMat[a.matricule] || 0;
+            const hb = totauxParMat[b.matricule] || 0;
+            return hb - ha;
+          });
+          return (
+            <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+              <section style={{ background:"#fff", borderRadius:6, padding:16,
+                border:`1px solid ${C.line}`, display:"flex", alignItems:"center",
+                justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <button onClick={() => setLundiSelect(decaleSemaine(lundiSelect, -1))}
+                    style={{ width:32, height:32, borderRadius:2, fontWeight:700,
+                      background:C.blueSoft, color:C.blue, border:`1px solid ${C.line}` }}>◀</button>
+                  <div style={{ minWidth:220, textAlign:"center" }}>
+                    <div style={{ fontSize:11, textTransform:"uppercase",
+                      letterSpacing:"0.08em", color:C.grey }}>
+                      Semaine{semaineCourante && " en cours"}</div>
+                    <div style={{ fontSize:14, fontWeight:700, color:C.navy }}>
+                      {formatDateFR(lundiSelect)} → {formatDateFR(dimSel)}
+                    </div>
+                  </div>
+                  <button onClick={() => setLundiSelect(decaleSemaine(lundiSelect, 1))}
+                    style={{ width:32, height:32, borderRadius:2, fontWeight:700,
+                      background:C.blueSoft, color:C.blue, border:`1px solid ${C.line}` }}>▶</button>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  {!semaineCourante && (
+                    <button onClick={() => setLundiSelect(lundiDeLaSemaine(todayISO))}
+                      style={{ padding:"6px 12px", fontSize:12, borderRadius:2, fontWeight:600,
+                        background:"#fff", color:C.blue, border:`1px solid ${C.line}` }}>
+                      Semaine actuelle</button>
+                  )}
+                  <div style={{ textAlign:"right" }}>
+                    <div style={{ fontSize:11, textTransform:"uppercase",
+                      letterSpacing:"0.08em", color:C.grey }}>Total cumulé</div>
+                    <div style={{ fontSize:18, fontWeight:700, color:C.navy }}>
+                      {formatDuree(totalGlobal)}</div>
+                  </div>
+                </div>
+              </section>
+
+              <div style={{ background:"#fff", borderRadius:6, overflowX:"auto",
+                border:`1px solid ${C.line}` }}>
+                <table style={{ width:"100%", fontSize:13 }}>
+                  <thead>
+                    <tr style={{ background:C.navy }}>
+                      {["Matricule","Identité","Grade","Statut","Services","Heures"].map(h => (
+                        <th key={h} style={{ padding:"8px 12px", textAlign:"left", fontSize:11,
+                          textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
+                          whiteSpace:"nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedRecap.map((m, idx) => {
+                      const min = totauxParMat[m.matricule] || 0;
+                      const nb = dansSemaine.filter(p => p.matricule === m.matricule).length;
+                      const zero = min === 0;
+                      return (
+                        <tr key={m.matricule} style={{ borderTop:`1px solid ${C.line}`,
+                          background: idx % 2 ? "#FAFBFD" : "#fff", opacity: zero ? 0.55 : 1 }}>
+                          <td style={{ padding:"8px 12px" }}>
+                            <BadgeMatricule value={m.matricule} onClick={() => setFicheMat(m.matricule)} />
+                          </td>
+                          <td style={{ padding:"8px 12px", color: (m.prenom || m.nom) ? C.ink : C.grey }}>
+                            {(m.prenom || m.nom) ? `${m.prenom} ${m.nom}`.trim() : "—"}
+                          </td>
+                          <td style={{ padding:"8px 12px", whiteSpace:"nowrap", fontSize:12 }}>{m.grade}</td>
+                          <td style={{ padding:"8px 12px" }}>
+                            <StatutPill statut={m.statut} readonly /></td>
+                          <td style={{ padding:"8px 12px", fontFamily:"monospace", fontSize:12, color:C.grey }}>
+                            {nb === 0 ? "—" : nb + (nb > 1 ? " services" : " service")}
+                          </td>
+                          <td style={{ padding:"8px 12px" }}>
+                            <span style={{ fontWeight:700, fontSize:13,
+                              color: zero ? C.grey : C.navy }}>{formatDuree(min)}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ fontSize:11, color:C.grey }}>
+                Comptabilisation des services dont la <strong>date de prise de service</strong>
+                appartient à la semaine sélectionnée (lundi 00h00 → dimanche 23h59). Un service
+                de nuit est entièrement comptabilisé dans la semaine de son démarrage, même s'il
+                déborde sur le lundi suivant. Clique sur un matricule pour ouvrir la fiche agent
+                ; pour supprimer un pointage aberrant, va dans l'onglet Pointeuse et filtre par
+                matricule.
+              </p>
+            </div>
+          );
+        })()}
+
+        {pageEffective === "journal" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
               flexWrap:"wrap", gap:12 }}>
