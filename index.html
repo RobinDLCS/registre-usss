@@ -353,8 +353,11 @@ function App() {
 
   const editor = session !== null;
   const agentLogged = agentSession !== null;
-  // Un agent simple ne voit que la pointeuse ; un éditeur a accès à tout.
-  const pageEffective = (agentLogged && !editor) ? "pointeuse" : page;
+  // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
+  const PAGES_AGENT = ["pointeuse", "rapports"];
+  const pageEffective = (agentLogged && !editor)
+    ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
+    : page;
 
   // Chargement initial + sessions mémorisées
   useEffect(() => {
