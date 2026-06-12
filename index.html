@@ -128,6 +128,25 @@ async function apiSave(session, members, logs) {
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 }
+async function apiLoginAgent(matricule, password) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "login_agent", matricule, password }) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+async function apiAddPointage(session, pointage) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "add_pointage", session, pointage }) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+}
+async function apiDeletePointage(session, pointageId) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "delete_pointage", session, pointageId }) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+}
 
 // ─── Petits composants ───
 function BadgeMatricule({ value, onClick }) {
@@ -208,30 +227,53 @@ function App() {
     nom:"", prenom:"", dateEntree:"", iban:"", telephone:"" });
   const [formError, setFormError] = useState("");
 
-  // Authentification
+  // Authentification éditeur
   const [session, setSession] = useState(null); // { token, login }
   const [showLogin, setShowLogin] = useState(false);
   const [loginForm, setLoginForm] = useState({ login:"", password:"" });
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
 
+  // Authentification agent (pointeuse)
+  const [agentSession, setAgentSession] = useState(null); // { token, matricule }
+  const [showAgentLogin, setShowAgentLogin] = useState(false);
+  const [agentLoginForm, setAgentLoginForm] = useState({ matricule:"", password:"" });
+  const [agentLoginError, setAgentLoginError] = useState("");
+  const [agentLoginBusy, setAgentLoginBusy] = useState(false);
+
+  // Pointeuse
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const [pointages, setPointages] = useState([]);
+  const [pointageForm, setPointageForm] = useState({
+    date: todayISO, heureDebut: "", heureFin: "", missions: "", resume: "",
+  });
+  const [pointageError, setPointageError] = useState("");
+  const [pointageBusy, setPointageBusy] = useState(false);
+  const [filtreMat, setFiltreMat] = useState("");
+
   // Fiche agent + rapport d'incident
   const [ficheMat, setFicheMat] = useState(null);
   const [rapportTexte, setRapportTexte] = useState("");
 
   const editor = session !== null;
+  const agentLogged = agentSession !== null;
 
-  // Chargement initial + session mémorisée
+  // Chargement initial + sessions mémorisées
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem("usss-session");
       if (saved) setSession(JSON.parse(saved));
+    } catch (e) {}
+    try {
+      const savedA = sessionStorage.getItem("usss-agent");
+      if (savedA) setAgentSession(JSON.parse(savedA));
     } catch (e) {}
     (async () => {
       try {
         const data = await apiLoad();
         setMembers(data.members || SEED);
         setLogs(data.logs || []);
+        setPointages(data.pointages || []);
       } catch (e) {
         setLoadError("Connexion au registre impossible : " + e.message +
           " — vérifie API_URL et le déploiement Apps Script.");
@@ -257,6 +299,73 @@ function App() {
   const doLogout = () => {
     setSession(null);
     try { sessionStorage.removeItem("usss-session"); } catch (e) {}
+  };
+
+  const doLoginAgent = async () => {
+    setAgentLoginBusy(true); setAgentLoginError("");
+    try {
+      const data = await apiLoginAgent(agentLoginForm.matricule, agentLoginForm.password);
+      const s = { token: data.token, matricule: data.matricule };
+      setAgentSession(s);
+      try { sessionStorage.setItem("usss-agent", JSON.stringify(s)); } catch (e) {}
+      setShowAgentLogin(false);
+      setAgentLoginForm({ matricule:"", password:"" });
+    } catch (e) {
+      setAgentLoginError(e.message);
+    }
+    setAgentLoginBusy(false);
+  };
+
+  const doLogoutAgent = () => {
+    setAgentSession(null);
+    try { sessionStorage.removeItem("usss-agent"); } catch (e) {}
+  };
+
+  // Ajout d'un pointage par l'agent connecté
+  const submitPointage = async () => {
+    setPointageError("");
+    if (!agentLogged) { setPointageError("Connecte-toi en tant qu'agent pour pointer."); return; }
+    const f = pointageForm;
+    if (!f.date)       { setPointageError("Date requise."); return; }
+    if (!f.heureDebut) { setPointageError("Heure de prise de service requise."); return; }
+    if (!f.heureFin)   { setPointageError("Heure de fin de service requise."); return; }
+    if (f.heureFin <= f.heureDebut) {
+      setPointageError("L'heure de fin doit être postérieure à l'heure de début.");
+      return;
+    }
+    if (!f.missions.trim()) { setPointageError("Décris au moins une mission effectuée."); return; }
+
+    const p = {
+      id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      matricule: agentSession.matricule,
+      date: f.date,
+      heureDebut: f.heureDebut,
+      heureFin: f.heureFin,
+      missions: f.missions.trim(),
+      resume: f.resume.trim(),
+      createdAt: new Date().toLocaleString("fr-FR"),
+    };
+    setPointageBusy(true);
+    try {
+      await apiAddPointage(agentSession.token, p);
+      setPointages([p, ...pointages]);
+      setPointageForm({ date: todayISO, heureDebut:"", heureFin:"", missions:"", resume:"" });
+    } catch (e) {
+      setPointageError(e.message);
+      if (String(e.message).includes("Session")) doLogoutAgent();
+    }
+    setPointageBusy(false);
+  };
+
+  const removePointage = async (pid) => {
+    const token = agentSession ? agentSession.token : (session ? session.token : null);
+    if (!token) return;
+    try {
+      await apiDeletePointage(token, pid);
+      setPointages(pointages.filter(p => p.id !== pid));
+    } catch (e) {
+      alert("Suppression impossible : " + e.message);
+    }
   };
 
   // Sauvegarde + journalisation (snapshot = état AVANT la modification)
@@ -432,8 +541,23 @@ function App() {
                 style={{ padding:"4px 12px", fontSize:11, fontWeight:600, borderRadius:2,
                   background:C.gold, color:C.navyDeep }}>🔑 Connexion éditeur</button>
             )}
+            {agentLogged ? (
+              <span style={{ display:"flex", alignItems:"center", gap:6 }}>
+                <span style={{ fontSize:11, color:"#C8D4E5" }}>
+                  👮 {agentSession.matricule}</span>
+                <button onClick={doLogoutAgent}
+                  style={{ padding:"4px 10px", fontSize:11, borderRadius:2,
+                    background:"transparent", color:"#C8D4E5",
+                    border:"1px solid #2C456B" }}>Pointer sortie</button>
+              </span>
+            ) : (
+              <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
+                style={{ padding:"4px 12px", fontSize:11, fontWeight:600, borderRadius:2,
+                  background:"transparent", color:"#fff",
+                  border:`1px solid ${C.gold}` }}>👮 Connexion agent</button>
+            )}
             <nav style={{ display:"flex", gap:8 }}>
-              {[["accueil","Accueil"],["effectifs","Effectifs"],["journal","Journal"]].map(([id,label]) => (
+              {[["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["journal","Journal"]].map(([id,label]) => (
                 <button key={id} onClick={() => setPage(id)}
                   style={{ padding:"6px 16px", borderRadius:2, fontSize:13, fontWeight:600,
                     textTransform:"uppercase", letterSpacing:"0.05em",
@@ -678,6 +802,165 @@ function App() {
           </div>
         )}
 
+        {page === "pointeuse" && (() => {
+          const filtre = filtreMat.trim().toUpperCase();
+          const listeAffichee = filtre
+            ? pointages.filter(p => p.matricule.includes(filtre))
+            : pointages;
+          return (
+            <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
+              {/* ── Formulaire de pointage ── */}
+              <section style={{ background:"#fff", borderRadius:6, padding:20,
+                border:`1px solid ${C.line}`, borderTop:`3px solid ${C.gold}` }}>
+                <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                  letterSpacing:"0.08em", color:C.navy, marginBottom:12 }}>
+                  Pointer un service</h2>
+
+                {!agentLogged ? (
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                    gap:12, padding:"12px 14px", background:C.blueSoft, borderRadius:4, flexWrap:"wrap" }}>
+                    <span style={{ fontSize:13, color:C.ink }}>
+                      Connecte-toi en tant qu'agent pour enregistrer un service.
+                    </span>
+                    <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
+                      style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:2,
+                        color:"#fff", background:C.blue }}>👮 Connexion agent</button>
+                  </div>
+                ) : (
+                  <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      <BadgeMatricule value={agentSession.matricule} />
+                      <span style={{ fontSize:13, color:C.grey }}>
+                        Pointage au nom de {agentSession.matricule}
+                      </span>
+                    </div>
+                    <div style={{ display:"grid",
+                      gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:10 }}>
+                      <label style={{ display:"flex", flexDirection:"column", gap:4,
+                        fontSize:11, fontWeight:600, color:C.grey }}>
+                        Date du service
+                        <input type="date" style={inputStyle} value={pointageForm.date}
+                          onChange={e => setPointageForm({ ...pointageForm, date: e.target.value })} />
+                      </label>
+                      <label style={{ display:"flex", flexDirection:"column", gap:4,
+                        fontSize:11, fontWeight:600, color:C.grey }}>
+                        Prise de service
+                        <input type="time" style={inputStyle} value={pointageForm.heureDebut}
+                          onChange={e => setPointageForm({ ...pointageForm, heureDebut: e.target.value })} />
+                      </label>
+                      <label style={{ display:"flex", flexDirection:"column", gap:4,
+                        fontSize:11, fontWeight:600, color:C.grey }}>
+                        Fin de service
+                        <input type="time" style={inputStyle} value={pointageForm.heureFin}
+                          onChange={e => setPointageForm({ ...pointageForm, heureFin: e.target.value })} />
+                      </label>
+                    </div>
+                    <label style={{ display:"flex", flexDirection:"column", gap:4,
+                      fontSize:11, fontWeight:600, color:C.grey }}>
+                      Missions effectuées *
+                      <textarea rows={3} value={pointageForm.missions}
+                        placeholder="Ex. Convoi POTUS Vinewood → LSIA, escorte VIP étranger…"
+                        style={{ ...inputStyle, resize:"vertical" }}
+                        onChange={e => setPointageForm({ ...pointageForm, missions: e.target.value })} />
+                    </label>
+                    <label style={{ display:"flex", flexDirection:"column", gap:4,
+                      fontSize:11, fontWeight:600, color:C.grey }}>
+                      Résumé d'activité (optionnel)
+                      <textarea rows={3} value={pointageForm.resume}
+                        placeholder="Observations, incidents notables, faits marquants du service…"
+                        style={{ ...inputStyle, resize:"vertical" }}
+                        onChange={e => setPointageForm({ ...pointageForm, resume: e.target.value })} />
+                    </label>
+                    {pointageError && (
+                      <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{pointageError}</p>
+                    )}
+                    <div style={{ display:"flex", justifyContent:"flex-end" }}>
+                      <button onClick={submitPointage} disabled={pointageBusy}
+                        style={{ padding:"7px 18px", fontSize:13, fontWeight:600, borderRadius:2,
+                          color:"#fff", background: pointageBusy ? "#7A93B5" : C.green }}>
+                        {pointageBusy ? "Enregistrement…" : "Valider le pointage"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* ── Historique des pointages ── */}
+              <section style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                  flexWrap:"wrap", gap:12 }}>
+                  <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                    letterSpacing:"0.08em", color:C.navy }}>
+                    Pointages enregistrés ({listeAffichee.length}{filtre && ` / ${pointages.length}`})
+                  </h2>
+                  <input style={{ ...inputStyle, maxWidth:200 }}
+                    placeholder="Filtrer par matricule (E-XX)"
+                    value={filtreMat} onChange={e => setFiltreMat(e.target.value)} />
+                </div>
+
+                {listeAffichee.length === 0 && (
+                  <p style={{ padding:"24px 16px", fontSize:13, textAlign:"center",
+                    color:C.grey, background:"#fff", borderRadius:6, border:`1px solid ${C.line}` }}>
+                    {pointages.length === 0
+                      ? "Aucun pointage enregistré pour l'instant."
+                      : "Aucun pointage ne correspond au filtre."}
+                  </p>
+                )}
+
+                <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                  {listeAffichee.map(p => {
+                    const mb = members.find(x => x.matricule === p.matricule);
+                    const peutSupprimer = editor ||
+                      (agentLogged && agentSession.matricule === p.matricule);
+                    return (
+                      <article key={p.id} style={{ background:"#fff", borderRadius:6,
+                        border:`1px solid ${C.line}`, borderLeft:`3px solid ${C.blue}`,
+                        padding:"12px 16px" }}>
+                        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                          gap:10, flexWrap:"wrap", marginBottom:6 }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+                            <BadgeMatricule value={p.matricule} onClick={() => setFicheMat(p.matricule)} />
+                            {mb && <span style={{ fontSize:12, color:C.grey }}>{mb.grade}</span>}
+                            {mb && (mb.prenom || mb.nom) && (
+                              <span style={{ fontSize:12, color:C.grey }}>
+                                {`${mb.prenom} ${mb.nom}`.trim()}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                            <span style={{ fontSize:12, fontFamily:"monospace", color:C.navy,
+                              fontWeight:600 }}>
+                              {p.date} · {p.heureDebut} → {p.heureFin}
+                            </span>
+                            {peutSupprimer && (
+                              <button onClick={() => removePointage(p.id)}
+                                title="Supprimer ce pointage"
+                                style={{ width:24, height:24, borderRadius:2, fontWeight:700,
+                                  background:"#F7E8E8", color:C.red, fontSize:12 }}>✕</button>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ fontSize:13, color:C.ink, marginTop:4 }}>
+                          <strong style={{ fontSize:11, textTransform:"uppercase",
+                            letterSpacing:"0.05em", color:C.grey }}>Missions</strong>
+                          <p style={{ marginTop:2, whiteSpace:"pre-wrap" }}>{p.missions}</p>
+                        </div>
+                        {p.resume && (
+                          <div style={{ fontSize:13, color:C.ink, marginTop:8 }}>
+                            <strong style={{ fontSize:11, textTransform:"uppercase",
+                              letterSpacing:"0.05em", color:C.grey }}>Résumé</strong>
+                            <p style={{ marginTop:2, whiteSpace:"pre-wrap", color:C.grey }}>{p.resume}</p>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+          );
+        })()}
+
         {page === "journal" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
@@ -878,6 +1161,46 @@ function App() {
                 style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
                   color:"#fff", background: loginBusy ? "#7A93B5" : C.blue }}>
                 {loginBusy ? "Vérification…" : "Se connecter"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modale connexion agent ── */}
+      {showAgentLogin && (
+        <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center",
+          justifyContent:"center", padding:16, zIndex:60, background:"rgba(9,24,48,0.55)" }}
+          onClick={() => setShowAgentLogin(false)}>
+          <div style={{ background:"#fff", borderRadius:6, width:"100%", maxWidth:340,
+            padding:20, display:"flex", flexDirection:"column", gap:12,
+            borderTop:`4px solid ${C.gold}` }}
+            onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontWeight:700, textTransform:"uppercase",
+              letterSpacing:"0.08em", fontSize:13, color:C.navy }}>Connexion agent</h2>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Matricule (E-XX)
+              <input style={inputStyle} value={agentLoginForm.matricule} autoFocus
+                placeholder="E-00"
+                onChange={e => setAgentLoginForm({ ...agentLoginForm, matricule: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLoginAgent(); }} />
+            </label>
+            <label style={{ display:"flex", flexDirection:"column", gap:4,
+              fontSize:11, fontWeight:600, color:C.grey }}>
+              Mot de passe
+              <input style={inputStyle} type="password" value={agentLoginForm.password}
+                onChange={e => setAgentLoginForm({ ...agentLoginForm, password: e.target.value })}
+                onKeyDown={e => { if (e.key === "Enter") doLoginAgent(); }} />
+            </label>
+            {agentLoginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{agentLoginError}</p>}
+            <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
+              <button onClick={() => setShowAgentLogin(false)}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                  border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
+              <button onClick={doLoginAgent} disabled={agentLoginBusy}
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  color:"#fff", background: agentLoginBusy ? "#7A93B5" : C.blue }}>
+                {agentLoginBusy ? "Vérification…" : "Pointer entrée"}</button>
             </div>
           </div>
         </div>
