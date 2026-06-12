@@ -108,6 +108,15 @@ const sortMembers = (list) =>
     return g !== 0 ? g : a.matricule.localeCompare(b.matricule);
   });
 
+// Toujours convertir un matricule en format strict E-NN ("e16", "E 16", "E-016" → "E-16")
+function normaliseMat(s) {
+  if (!s) return "";
+  const clean = String(s).trim().toUpperCase().replace(/\s+/g, "");
+  const m = clean.match(/^E-?(\d{1,3})$/);
+  if (!m) return clean;
+  return "E-" + String(parseInt(m[1], 10)).padStart(2, "0");
+}
+
 const inputStyle = { border:`1px solid ${C.line}`, borderRadius:3, padding:"4px 6px",
   fontSize:13, color:C.ink, width:"100%", minWidth:90, background:"#fff" };
 
@@ -980,13 +989,13 @@ function App() {
         )}
 
         {pageEffective === "pointeuse" && (() => {
-          const filtre = filtreMat.trim().toUpperCase();
+          const filtre = normaliseMat(filtreMat);
           // L'agent ne voit que ses propres pointages. L'éditeur peut tout filtrer.
           const visibles = (agentLogged && !editor)
-            ? pointages.filter(p => p.matricule === agentSession.matricule)
+            ? pointages.filter(p => normaliseMat(p.matricule) === normaliseMat(agentSession.matricule))
             : pointages;
           const listeAffichee = (editor && filtre)
-            ? visibles.filter(p => p.matricule.includes(filtre))
+            ? visibles.filter(p => normaliseMat(p.matricule).includes(filtre))
             : visibles;
           return (
             <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
@@ -1116,9 +1125,10 @@ function App() {
 
                 <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                   {listeAffichee.map(p => {
-                    const mb = members.find(x => x.matricule === p.matricule);
+                    const matKey = normaliseMat(p.matricule);
+                    const mb = members.find(x => normaliseMat(x.matricule) === matKey);
                     const peutSupprimer = editor ||
-                      (agentLogged && agentSession.matricule === p.matricule);
+                      (agentLogged && normaliseMat(agentSession.matricule) === matKey);
                     const dureeMin = dureeMinutes(p.heureDebut, p.heureFin);
                     const nuit = p.heureFin <= p.heureDebut;
                     const dateFin = nuit
@@ -1130,7 +1140,7 @@ function App() {
                         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
                           gap:10, flexWrap:"wrap", marginBottom:6 }}>
                           <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
-                            <BadgeMatricule value={p.matricule} onClick={() => setFicheMat(p.matricule)} />
+                            <BadgeMatricule value={matKey} onClick={() => setFicheMat(matKey)} />
                             {mb && <span style={{ fontSize:12, color:C.grey }}>{mb.grade}</span>}
                             {mb && (mb.prenom || mb.nom) && (
                               <span style={{ fontSize:12, color:C.grey }}>
@@ -1183,15 +1193,16 @@ function App() {
           const dansSemaine = pointages.filter(p => lundiDeLaSemaine(p.date) === lundiSelect);
           const totauxParMat = {};
           dansSemaine.forEach(p => {
-            totauxParMat[p.matricule] = (totauxParMat[p.matricule] || 0)
+            const key = normaliseMat(p.matricule);
+            totauxParMat[key] = (totauxParMat[key] || 0)
               + dureeMinutes(p.heureDebut, p.heureFin);
           });
           const totalGlobal = Object.values(totauxParMat).reduce((a, b) => a + b, 0);
           const semaineCourante = lundiSelect === lundiDeLaSemaine(todayISO);
           // Tri : agents avec heures en tête (desc), puis le reste par grade
           const sortedRecap = sortMembers(members).slice().sort((a, b) => {
-            const ha = totauxParMat[a.matricule] || 0;
-            const hb = totauxParMat[b.matricule] || 0;
+            const ha = totauxParMat[normaliseMat(a.matricule)] || 0;
+            const hb = totauxParMat[normaliseMat(b.matricule)] || 0;
             return hb - ha;
           });
           return (
@@ -1245,8 +1256,9 @@ function App() {
                   </thead>
                   <tbody>
                     {sortedRecap.map((m, idx) => {
-                      const min = totauxParMat[m.matricule] || 0;
-                      const nb = dansSemaine.filter(p => p.matricule === m.matricule).length;
+                      const matKey = normaliseMat(m.matricule);
+                      const min = totauxParMat[matKey] || 0;
+                      const nb = dansSemaine.filter(p => normaliseMat(p.matricule) === matKey).length;
                       const zero = min === 0;
                       return (
                         <tr key={m.matricule} style={{ borderTop:`1px solid ${C.line}`,
