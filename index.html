@@ -108,6 +108,9 @@ const sortMembers = (list) =>
     return g !== 0 ? g : a.matricule.localeCompare(b.matricule);
   });
 
+const inputStyle = { border:`1px solid ${C.line}`, borderRadius:3, padding:"4px 6px",
+  fontSize:13, color:C.ink, width:"100%", minWidth:90, background:"#fff" };
+
 // ─── Helpers pointeuse (services pouvant traverser minuit) ───
 function dureeMinutes(hd, hf) {
   if (!hd || !hf) return 0;
@@ -676,9 +679,6 @@ function App() {
     tout: { label:"Tout", bool:ALL_BOOL },
   };
   const vueActive = VUES[vue];
-
-  const inputStyle = { border:`1px solid ${C.line}`, borderRadius:3, padding:"4px 6px",
-    fontSize:13, color:C.ink, width:"100%", minWidth:90, background:"#fff" };
 
   const SAVE_BADGE = editor ? {
     ok:     { txt:"✓ Enregistré", bg:"#E3F0E8", fg:C.green },
