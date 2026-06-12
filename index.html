@@ -1247,7 +1247,7 @@ function App() {
                 <table style={{ width:"100%", fontSize:13 }}>
                   <thead>
                     <tr style={{ background:C.navy }}>
-                      {["Matricule","Identité","Grade","Statut","Services","Heures"].map(h => (
+                      {["Matricule","IBAN","Grade","Statut","Services","Heures"].map(h => (
                         <th key={h} style={{ padding:"8px 12px", textAlign:"left", fontSize:11,
                           textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
                           whiteSpace:"nowrap" }}>{h}</th>
@@ -1266,8 +1266,9 @@ function App() {
                           <td style={{ padding:"8px 12px" }}>
                             <BadgeMatricule value={m.matricule} onClick={() => setFicheMat(m.matricule)} />
                           </td>
-                          <td style={{ padding:"8px 12px", color: (m.prenom || m.nom) ? C.ink : C.grey }}>
-                            {(m.prenom || m.nom) ? `${m.prenom} ${m.nom}`.trim() : "—"}
+                          <td style={{ padding:"8px 12px", fontFamily:"monospace", fontSize:12,
+                            color: m.iban ? C.ink : C.grey }}>
+                            {m.iban || "—"}
                           </td>
                           <td style={{ padding:"8px 12px", whiteSpace:"nowrap", fontSize:12 }}>{m.grade}</td>
                           <td style={{ padding:"8px 12px" }}>
