@@ -249,13 +249,6 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
   </div>
 </div>
 
-<div class="top-bar">
-  <div class="top-bar-inner">
-    <a onclick="enterRegistre()">Espace agents</a>
-    <a onclick="enterRegistre()">Supervision</a>
-  </div>
-</div>
-
 <nav>
   <div class="nav-inner">
     <div class="nav-brand" onclick="showPage('home')">
@@ -458,7 +451,7 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
   </div>
   <section class="section-wrap gray">
     <div class="container">
-      <div class="recruit-layout">
+      <div class="recruit-layout" style="grid-template-columns:1fr;">
         <div class="recruit-sidebar">
           <h2>Conditions d'Admission</h2>
           <div class="rule"></div>
@@ -477,19 +470,6 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
             <li>Équipement et matériel de dernière génération.</li>
             <li>Couverture assurance et mutuelle prise en charge par le Bureau.</li>
           </ul>
-        </div>
-        <div>
-          <div class="form-box">
-            <div class="form-box-head">
-              <h3>Candidature</h3>
-              <p>Le recrutement se fait sur dossier et entretien.</p>
-            </div>
-            <div class="form-box-body">
-              <span class="lock-ico"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--blue-dark)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-              <p class="lock-msg">Déjà agent ou superviseur ? Accédez à votre espace pour le registre, la pointeuse et les rapports.</p>
-              <button class="discord-btn" onclick="enterRegistre()">Accéder à l'espace agents &amp; supervision</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -517,8 +497,8 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
     <div class="footer-col">
       <h4>Contact</h4>
       <ul>
-        <li><span style="line-height:1.7;">Field Office — United States Secret Service</span></li>
-        <li><span style="line-height:1.7;">State of San Andreas</span></li>
+        <li><a href="https://discord.gg/nRwSxPWJy" target="_blank" rel="noopener" style="line-height:1.7;">Field Office — United States Secret Service</a></li>
+        <li><a href="https://discord.gg/nRwSxPWJy" target="_blank" rel="noopener" style="line-height:1.7;">State of San Andreas</a></li>
       </ul>
     </div>
   </div>
