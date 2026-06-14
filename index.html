@@ -3,27 +3,548 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<title>USSS — Registre des effectifs</title>
+<title>United States Secret Service</title>
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="United States Secret Service">
+<meta property="og:description" content="L'USSS (United States Secret Service) est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.">
+<meta name="theme-color"        content="#00263a">
+<meta name="description"        content="L'USSS (United States Secret Service) est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; }
-  body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
-  button { cursor: pointer; font-family: inherit; border: none; }
-  button:disabled { cursor: default; }
-  input, select, textarea { font-family: inherit; }
-  table { border-collapse: collapse; }
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --blue-dark:#00263a;
+  --blue-mid:#003f6b;
+  --blue:#005ea2;
+  --blue-light:#d9e8f6;
+  --gold:#b69435;
+  --red:#b22234;
+  --white:#ffffff;
+  --off-white:#f5f5f0;
+  --gray-light:#e8e8e4;
+  --gray-mid:#71717a;
+  --text:#1b1b1b;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--font);font-weight:400;background:var(--white);color:var(--text);min-height:100vh;}
+h1,h2,h3,h4,h5,h6{font-family:var(--font);font-weight:700;}
+button{cursor:pointer;font-family:inherit;border:none;}
+input,select,textarea{font-family:inherit;}
+
+/* ── TOP UTILITY BAR ── */
+.top-bar{background:var(--blue-dark);padding:6px 0;}
+.top-bar-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:flex-end;align-items:center;}
+.top-bar a{color:rgba(255,255,255,0.65);font-size:12px;text-decoration:none;cursor:pointer;margin-left:20px;}
+.top-bar a:hover{color:var(--white);}
+
+/* ── MAIN NAV ── */
+nav{background:var(--white);border-bottom:1px solid var(--gray-light);position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:stretch;justify-content:space-between;}
+.nav-brand{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:pointer;}
+.nav-brand img{height:52px;width:52px;object-fit:contain;}
+.nav-brand-text .name{font-size:16px;font-weight:700;color:var(--blue-dark);line-height:1.2;}
+.nav-brand-text .sub{font-size:11px;color:var(--gray-mid);letter-spacing:1px;text-transform:uppercase;}
+.nav-links{display:flex;align-items:stretch;}
+.nav-item{position:relative;display:flex;align-items:center;}
+.nav-link{padding:0 16px;font-size:14px;font-weight:600;color:var(--blue-dark);cursor:pointer;display:flex;align-items:center;gap:5px;height:100%;border-bottom:3px solid transparent;transition:border-color .2s,color .2s;white-space:nowrap;}
+.nav-link:hover,.nav-link.active{border-bottom-color:var(--blue);color:var(--blue);}
+.nav-link.cta{background:var(--blue-dark);color:#fff;margin:12px 0 12px 8px;border-radius:6px;border-bottom:none;}
+.nav-link.cta:hover{background:var(--blue);color:#fff;}
+
+/* ── PAGES ── */
+.page{display:none;flex-direction:column;min-height:calc(100vh - 73px);}
+.page.active{display:flex;}
+
+/* ── HERO ── */
+.hero{position:relative;background:var(--blue-dark);overflow:hidden;min-height:520px;}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(1200px 400px at 80% -10%,rgba(0,94,162,0.45),transparent 60%);}
+.hero-content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px 24px;display:flex;align-items:center;}
+.hero-text{max-width:620px;}
+.hero-text .eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#a8c5e0;margin-bottom:16px;font-weight:600;}
+.hero-text h1{font-size:46px;color:var(--white);line-height:1.2;font-weight:700;margin-bottom:20px;}
+.hero-text p{font-size:18px;color:rgba(255,255,255,0.8);line-height:1.7;margin-bottom:32px;font-weight:300;}
+.hero-buttons{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-hero-primary{background:var(--blue);color:var(--white);padding:14px 32px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:background .2s;border-radius:6px;}
+.btn-hero-primary:hover{background:#004a82;}
+.btn-hero-outline{background:transparent;color:var(--white);padding:13px 32px;font-size:15px;font-weight:600;border:2px solid rgba(255,255,255,0.5);cursor:pointer;transition:border-color .2s;border-radius:6px;}
+.btn-hero-outline:hover{border-color:var(--white);}
+
+/* ── FEATURE CARDS ── */
+.features{background:var(--off-white);}
+.features-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
+.feature-card{background:var(--white);border-right:1px solid var(--gray-light);padding:32px 24px;cursor:pointer;transition:background .2s;position:relative;overflow:hidden;}
+.feature-card:last-child{border-right:none;}
+.feature-card::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:var(--blue);transform:scaleX(0);transition:transform .3s;}
+.feature-card:hover::after{transform:scaleX(1);}
+.feature-card:hover{background:#fafaf8;}
+.feature-card h3{font-size:18px;color:var(--blue-dark);margin-bottom:10px;font-weight:700;}
+.feature-card p{font-size:14px;color:var(--gray-mid);line-height:1.6;}
+.feature-icon{width:48px;height:48px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin-bottom:16px;border-radius:10px;}
+
+/* ── SECTIONS ── */
+.section-wrap{padding:64px 0;}
+.section-wrap.gray{background:var(--off-white);}
+.section-wrap.dark{background:var(--blue-dark);}
+.container{max-width:1200px;margin:0 auto;padding:0 24px;}
+.section-head{margin-bottom:40px;}
+.section-head h2{font-size:30px;color:var(--blue-dark);font-weight:700;margin-bottom:8px;}
+.section-wrap.dark .section-head h2{color:var(--white);}
+.section-head .lead{font-size:16px;color:var(--gray-mid);line-height:1.6;}
+.section-head .rule{width:48px;height:3px;background:var(--blue);margin-top:14px;border-radius:2px;}
+.section-head.row{display:flex;justify-content:space-between;align-items:flex-end;}
+
+/* ── NEWS CARDS ── */
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.news-card{background:var(--white);padding:28px 24px;cursor:pointer;transition:background .2s;border-top:3px solid var(--blue-light);position:relative;border-radius:10px;}
+.news-card:hover{background:#f8fbff;}
+.nc-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:10px;display:block;}
+.nc-title{font-size:17px;color:var(--blue-dark);line-height:1.4;margin-bottom:10px;font-weight:700;}
+.nc-excerpt{font-size:14px;color:var(--gray-mid);line-height:1.6;}
+.nc-date{font-size:12px;color:var(--gray-mid);margin-top:14px;}
+
+/* ── ADMIN PEOPLE / CHIEFS ── */
+.admin-people{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.person-card{background:var(--white);padding:28px 20px;text-align:center;border-top:3px solid transparent;transition:all .2s;border-radius:10px;border:1px solid var(--gray-light);}
+.person-card:hover{background:#f0f6ff;border-top-color:var(--blue);}
+.person-avatar{width:90px;height:90px;border-radius:50%;background:var(--blue-light);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--blue-dark);font-weight:700;border:3px solid var(--gray-light);}
+.person-role{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:6px;}
+.person-name{font-size:15px;color:var(--blue-dark);font-weight:700;}
+
+/* ── PAGE HEADER ── */
+.page-header{background:var(--blue-dark);padding:56px 0 36px;border-bottom:4px solid var(--blue);}
+.page-header .breadcrumb{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px;}
+.page-header .breadcrumb span{color:var(--white);cursor:pointer;}
+.page-header .breadcrumb span:hover{text-decoration:underline;}
+.page-header h1{font-size:38px;color:var(--white);font-weight:700;}
+.page-header p{font-size:16px;color:rgba(255,255,255,0.7);margin-top:10px;max-width:640px;line-height:1.7;}
+
+/* ── DIVISIONS ── */
+.div-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.div-card{background:var(--white);display:grid;grid-template-columns:96px 1fr;overflow:hidden;border:1px solid var(--gray-light);transition:all .2s;border-radius:10px;}
+.div-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,94,162,0.1);}
+.div-badge{background:var(--blue-dark);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;letter-spacing:1px;}
+.div-body{padding:22px 24px 20px;}
+.div-name{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:4px;}
+.div-full{font-size:17px;color:var(--blue-dark);font-weight:700;margin-bottom:10px;line-height:1.3;}
+.div-desc{font-size:13px;color:var(--gray-mid);line-height:1.7;}
+.div-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.tag{font-size:11px;background:var(--blue-light);color:var(--blue-mid);padding:3px 10px;font-weight:600;border-radius:4px;}
+
+/* ── CHIEFS HERO CARDS ── */
+.chief-card-hero{background:var(--blue-mid);padding:36px;display:grid;grid-template-columns:90px 1fr;gap:28px;align-items:center;border-radius:10px;transition:background .2s;}
+.chief-card-hero:hover{background:var(--blue);}
+.chief-card-hero .chief-init{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;border:3px solid rgba(255,255,255,0.3);flex-shrink:0;}
+.chief-card-hero .chief-role{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:8px;}
+.chief-card-hero .chief-name{font-size:18px;color:var(--white);font-weight:700;margin-bottom:8px;}
+.chief-card-hero .chief-desc{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.7;}
+.chief-card{background:var(--white);padding:30px 26px;border-top:3px solid var(--gray-light);transition:all .2s;border-radius:10px;border:1px solid var(--gray-light);}
+.chief-card:hover{border-top-color:var(--blue);background:#f8fbff;}
+.chief-card .chief-init{width:64px;height:64px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:16px;border:2px solid var(--blue);}
+.chief-card .chief-role{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:6px;}
+.chief-card .chief-name{font-size:17px;color:var(--blue-dark);font-weight:700;margin-bottom:10px;}
+.chief-card .chief-desc{font-size:14px;color:var(--gray-mid);line-height:1.7;}
+
+/* ── RECRUIT ── */
+.recruit-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:48px 0;}
+.recruit-sidebar h2{font-size:22px;color:var(--blue-dark);margin-bottom:6px;font-weight:700;}
+.recruit-sidebar .rule{width:48px;height:3px;background:var(--blue);margin:10px 0 24px;border-radius:2px;}
+.req-list{list-style:none;}
+.req-list li{padding:12px 0;border-bottom:1px solid var(--gray-light);font-size:14px;color:var(--text);line-height:1.6;padding-left:20px;position:relative;}
+.req-list li::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);position:absolute;left:0;top:8px;}
+.req-list.benefits li::before{background:#198754;}
+.form-box{background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.form-box-head{background:var(--blue-dark);padding:28px 32px;}
+.form-box-head h3{font-size:20px;color:var(--white);font-weight:700;}
+.form-box-head p{font-size:14px;color:rgba(255,255,255,0.65);margin-top:6px;}
+.form-box-body{padding:32px;text-align:center;}
+.lock-ico{font-size:0;margin-bottom:12px;display:block;opacity:0.2;}
+.lock-msg{font-size:13px;color:var(--gray-mid);margin-bottom:24px;line-height:1.6;}
+.discord-btn{background:var(--blue-dark);color:var(--white);border:none;width:100%;padding:16px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .2s;border-radius:6px;}
+.discord-btn:hover{background:var(--blue);}
+
+/* ── NEWS FULL ── */
+.news-tabs-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:24px;border-bottom:2px solid var(--gray-light);}
+.news-tab{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;transition:color .2s,border-color .2s;display:flex;align-items:center;gap:6px;}
+.news-tab:hover{color:var(--blue);}
+.news-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-count{font-size:11px;background:var(--blue-light);color:var(--blue);padding:1px 7px;border-radius:10px;font-weight:700;}
+.news-tab.active .tab-count{background:var(--blue);color:var(--white);}
+.news-cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.news-card-full{background:var(--white);border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--gray-light);transition:all .2s;display:flex;flex-direction:column;}
+.news-card-full:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,94,162,0.1);transform:translateY(-2px);}
+.news-card-full.hidden{display:none;}
+.ncf-thumb{height:150px;background:linear-gradient(135deg,var(--blue-light),var(--blue-mid));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;letter-spacing:2px;}
+.ncf-body{padding:20px;flex:1;display:flex;flex-direction:column;}
+.ncf-title{font-size:16px;font-weight:700;color:var(--blue-dark);line-height:1.4;margin:8px 0 10px;}
+.ncf-excerpt{font-size:13px;color:var(--gray-mid);line-height:1.6;flex:1;}
+.ncf-date{font-size:11px;color:var(--gray-mid);margin-top:12px;}
+.news-main-article{background:var(--white);padding:40px;border-radius:10px;border:1px solid var(--gray-light);}
+.nma-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:12px;display:block;}
+.nma-title{font-size:26px;color:var(--blue-dark);line-height:1.35;font-weight:700;margin-bottom:18px;}
+.nma-body p{font-size:15px;color:var(--text);line-height:1.8;margin-bottom:1rem;}
+.btn-outline{background:transparent;border:2px solid var(--blue);color:var(--blue);padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border-radius:6px;}
+.btn-outline:hover{background:var(--blue);color:var(--white);}
+
+/* ── FOOTER ── */
+footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px 0 0;}
+.footer-grid{max-width:1200px;margin:0 auto;padding:0 24px 40px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;}
+.footer-brand img{height:60px;width:60px;object-fit:contain;background:#fff;border-radius:10px;padding:6px;margin-bottom:16px;}
+.footer-brand p{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;}
+.footer-col h4{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);font-weight:700;margin-bottom:16px;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:10px;}
+.footer-col ul li a,.footer-col ul li span{color:rgba(255,255,255,0.65);font-size:14px;text-decoration:none;cursor:pointer;transition:color .2s;}
+.footer-col ul li a:hover,.footer-col ul li span:hover{color:var(--white);}
+.footer-bottom{max-width:1200px;margin:0 auto;padding:20px 24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,0.35);flex-wrap:wrap;gap:8px;}
+
+/* ── NOTIF ── */
+.notif{position:fixed;top:80px;right:24px;background:var(--blue-dark);color:var(--white);border-left:4px solid var(--blue);padding:14px 20px;font-size:13px;z-index:500;transform:translateX(140%);transition:transform .3s;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.2);border-radius:8px;}
+.notif.show{transform:translateX(0);}
+
+/* ── ESPACE REGISTRE (CONNEXION) ── */
+#registre-app{display:none;min-height:100vh;background:var(--off-white);}
+.reg-topbar{position:sticky;top:0;z-index:400;background:var(--blue-dark);border-bottom:3px solid var(--gold);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;gap:12px;flex-wrap:wrap;}
+.reg-brand{display:flex;align-items:center;gap:12px;}
+.reg-brand img{height:34px;width:auto;background:#fff;border-radius:6px;padding:3px 6px;}
+.reg-title{color:#fff;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.reg-back{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;}
+.reg-back:hover{background:rgba(255,255,255,.1);}
+
+@media(max-width:880px){
+  .features-grid{grid-template-columns:repeat(2,1fr);}
+  .news-grid,.news-cards-grid{grid-template-columns:1fr;}
+  .admin-people{grid-template-columns:repeat(2,1fr);}
+  .div-grid,.recruit-layout{grid-template-columns:1fr;}
+  .chiefs-row-2,.chiefs-row-3{grid-template-columns:1fr !important;}
+  .footer-grid{grid-template-columns:1fr;gap:28px;}
+  .hero-text h1{font-size:34px;}
+}
 </style>
 </head>
 <body>
-<div id="root"></div>
+
+<!-- ════════ SITE PUBLIC ════════ -->
+<div id="site-public">
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <a onclick="enterRegistre()">Espace agents</a>
+    <a onclick="enterRegistre()">Supervision</a>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="showPage('home')">
+      <img src="https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg" alt="USSS" onerror="this.style.visibility='hidden'">
+      <div class="nav-brand-text">
+        <div class="name">United States Secret Service</div>
+        <div class="sub">DEPARTMENT OF HOMELAND SECURITY</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-item"><div class="nav-link" id="nav-home"      onclick="showPage('home')">Accueil</div></div>
+      <div class="nav-item"><div class="nav-link" id="nav-divisions" onclick="showPage('divisions')">Divisions</div></div>
+      <div class="nav-item"><div class="nav-link" id="nav-chiefs"    onclick="showPage('chiefs')">Chief's Office</div></div>
+      <div class="nav-item"><div class="nav-link" id="nav-news"      onclick="showPage('news')">Actualités</div></div>
+      <div class="nav-item"><div class="nav-link" id="nav-recruit"   onclick="showPage('recruit')">Recrutement</div></div>
+      <div class="nav-item"><div class="nav-link cta" onclick="enterRegistre()">Connexion</div></div>
+    </div>
+  </div>
+</nav>
+
+<div class="notif" id="notif"></div>
+
+<!-- PAGE: HOME -->
+<div class="page" id="page-home">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="eyebrow">Agence Fédérale · DEPARTMENT OF HOMELAND SECURITY</div>
+        <h1>United States Secret Service</h1>
+        <p>L'USSS est l'agence fédérale chargée de la protection des hautes personnalités de l'État et de la lutte contre la criminalité financière et les menaces visant les institutions.</p>
+        <div class="hero-buttons">
+          <button class="btn-hero-primary" onclick="showPage('recruit')">Nous rejoindre</button>
+          <button class="btn-hero-outline" onclick="enterRegistre()">Espace agents &amp; supervision</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="features-grid">
+      <div class="feature-card" onclick="showPage('divisions')">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Divisions</h3>
+        <p>Des unités spécialisées dans la protection rapprochée et l'investigation.</p>
+      </div>
+      <div class="feature-card" onclick="showPage('chiefs')">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <h3>Chief's Office</h3>
+        <p>Le commandement du Field Office et son état-major.</p>
+      </div>
+      <div class="feature-card" onclick="showPage('news')">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
+        <h3>Actualités</h3>
+        <p>Communiqués officiels et annonces du Bureau.</p>
+      </div>
+      <div class="feature-card" onclick="showPage('recruit')">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3>Recrutement</h3>
+        <p>Rejoignez l'élite de la protection fédérale.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="section-wrap dark">
+    <div class="container">
+      <div class="section-head">
+        <h2>Nos Missions</h2>
+        <p class="lead" style="color:rgba(255,255,255,0.6)">L'USSS opère sur quatre axes stratégiques au service de la sécurité de l'État.</p>
+        <div class="rule"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;">
+        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">01 · PROTECTION</div>
+          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Protection des Hautes Personnalités</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Assurer la sécurité rapprochée des plus hautes autorités de l'État et de leurs familles.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">02 · CONVOIS</div>
+          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Escorte &amp; Motorcade</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Planifier et sécuriser les déplacements officiels et les convois à haut risque.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">03 · INVESTIGATION</div>
+          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Criminalité Financière</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Enquêter sur la contrefaçon, la fraude et les atteintes au système financier.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">04 · MENACES</div>
+          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Neutralisation des Menaces</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Identifier, analyser et neutraliser toute menace visant les personnes protégées.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-wrap gray">
+    <div class="container">
+      <div class="section-head row">
+        <div>
+          <h2>Actualités</h2>
+          <p class="lead">Les derniers communiqués de l'USSS.</p>
+          <div class="rule"></div>
+        </div>
+        <button class="btn-outline" onclick="showPage('news')">Toutes les actualités →</button>
+      </div>
+      <div class="news-grid" id="home-news-grid"></div>
+    </div>
+  </section>
+
+  <section class="section-wrap">
+    <div class="container">
+      <div class="section-head">
+        <h2>Chief's Office</h2>
+        <p class="lead">Le commandement du Field Office.</p>
+        <div class="rule"></div>
+      </div>
+      <div class="admin-people">
+        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">CO</div><div class="person-role">Chief Operating</div><div class="person-name">— à définir —</div></div>
+        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">AC</div><div class="person-role">Assistant Chief</div><div class="person-name">— à définir —</div></div>
+        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">DC</div><div class="person-role">Deputy Chief</div><div class="person-name">— à définir —</div></div>
+        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">CS</div><div class="person-role">Chief Supervisor</div><div class="person-name">— à définir —</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PAGE: DIVISIONS -->
+<div class="page" id="page-divisions">
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Divisions</div>
+      <h1>Divisions</h1>
+      <p>Des unités spécialisées au service de la protection et de l'investigation fédérale.</p>
+    </div>
+  </div>
+  <section class="section-wrap">
+    <div class="container">
+      <div class="div-grid">
+        <div class="div-card"><div class="div-badge">PPD</div><div class="div-body"><div class="div-name">PPD</div><div class="div-full">Presidential Protective Division</div><p class="div-desc">Protection rapprochée permanente des plus hautes autorités de l'État lors de leurs fonctions et déplacements.</p><div class="div-tags"><span class="tag">Protection</span><span class="tag">Rapprochée</span></div></div></div>
+        <div class="div-card"><div class="div-badge">DPD</div><div class="div-body"><div class="div-name">DPD</div><div class="div-full">Dignitary Protection Division</div><p class="div-desc">Protection des personnalités, dignitaires et hôtes officiels lors des événements et apparitions publiques.</p><div class="div-tags"><span class="tag">Escorte</span><span class="tag">Événements</span></div></div></div>
+        <div class="div-card"><div class="div-badge">CAT</div><div class="div-body"><div class="div-name">CAT</div><div class="div-full">Counter Assault Team</div><p class="div-desc">Unité tactique d'intervention déployée en cas de menace armée contre une personne protégée.</p><div class="div-tags"><span class="tag">Tactique</span><span class="tag">Haute menace</span></div></div></div>
+        <div class="div-card"><div class="div-badge">INV</div><div class="div-body"><div class="div-name">INV</div><div class="div-full">Investigations Division</div><p class="div-desc">Enquêtes sur la contrefaçon, la fraude financière et les menaces visant les institutions.</p><div class="div-tags"><span class="tag">Investigation</span><span class="tag">Financier</span></div></div></div>
+        <div class="div-card"><div class="div-badge">ASD</div><div class="div-body"><div class="div-name">ASD</div><div class="div-full">Air Support Division</div><p class="div-desc">Transport aérien des autorités, surveillance et soutien aérien lors des opérations.</p><div class="div-tags"><span class="tag">Aérien</span><span class="tag">Surveillance</span></div></div></div>
+        <div class="div-card"><div class="div-badge">K9</div><div class="div-body"><div class="div-name">K9</div><div class="div-full">K9 Unit</div><p class="div-desc">Détection d'explosifs et d'éléments dangereux, appui aux opérations de protection.</p><div class="div-tags"><span class="tag">Cynophile</span><span class="tag">Détection</span></div></div></div>
+        <div class="div-card"><div class="div-badge">UD</div><div class="div-body"><div class="div-name">UD</div><div class="div-full">Uniformed Division</div><p class="div-desc">Sécurisation des périmètres, points de contrôle et infrastructures sensibles.</p><div class="div-tags"><span class="tag">Périmètre</span><span class="tag">Sécurisation</span></div></div></div>
+        <div class="div-card"><div class="div-badge">COM</div><div class="div-body"><div class="div-name">COM</div><div class="div-full">Communications Division</div><p class="div-desc">Communication officielle, recrutement et relations publiques de l'agence.</p><div class="div-tags"><span class="tag">Communication</span><span class="tag">Recrutement</span></div></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PAGE: CHIEF'S OFFICE -->
+<div class="page" id="page-chiefs">
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Chief's Office</div>
+      <h1>Chief's Office</h1>
+      <p>Le commandement du Field Office et son état-major.</p>
+    </div>
+  </div>
+  <section class="section-wrap">
+    <div class="container">
+      <div class="chiefs-row-2" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px;">
+        <div class="chief-card-hero"><div class="chief-init">CO</div><div><div class="chief-role">Lead Field Office</div><div class="chief-name">Chief Operating — à définir</div><p class="chief-desc">Responsable principal de l'agence : supervision des opérations, coordination des divisions et direction stratégique du Bureau.</p></div></div>
+        <div class="chief-card-hero"><div class="chief-init">AC</div><div><div class="chief-role">Co-Lead Field Office</div><div class="chief-name">Assistant Chief — à définir</div><p class="chief-desc">Assiste le Chief dans la gestion globale et assure le commandement en son absence.</p></div></div>
+      </div>
+      <div class="chiefs-row-3" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px;">
+        <div class="chief-card"><div class="chief-init">DC</div><div class="chief-role">Lead Protective Ops</div><div class="chief-name">Deputy Chief — à définir</div><p class="chief-desc">Dirige les opérations de protection rapprochée et les interventions sensibles.</p></div>
+        <div class="chief-card"><div class="chief-init">CS</div><div class="chief-role">Lead Investigations</div><div class="chief-name">Chief Supervisor — à définir</div><p class="chief-desc">Supervise les enquêtes financières et le suivi des dossiers sensibles.</p></div>
+      </div>
+      <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--blue);font-weight:700;padding:20px 0 16px;border-top:1px solid var(--gray-light);">Supervisor Team</div>
+      <div class="chiefs-row-3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+        <div class="chief-card"><div class="chief-init">SS</div><div class="chief-role">Senior Supervisor</div><div class="chief-name">— à définir —</div></div>
+        <div class="chief-card"><div class="chief-init">SS</div><div class="chief-role">Senior Supervisor</div><div class="chief-name">— à définir —</div></div>
+        <div class="chief-card"><div class="chief-init">DS</div><div class="chief-role">Deputy Supervisor</div><div class="chief-name">— à définir —</div></div>
+        <div class="chief-card"><div class="chief-init">DS</div><div class="chief-role">Deputy Supervisor</div><div class="chief-name">— à définir —</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PAGE: ACTUALITÉS -->
+<div class="page" id="page-news">
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><span onclick="closeArticle()">Accueil</span> › <span onclick="closeArticle()">Actualités</span></div>
+      <h1>Actualités</h1>
+      <p>Les derniers communiqués et actualités de l'USSS.</p>
+    </div>
+  </div>
+  <section class="section-wrap gray">
+    <div class="container">
+      <div id="news-list-view">
+        <div class="news-tabs-bar" id="news-tabs-bar"></div>
+        <div class="news-cards-grid" id="news-cards-grid"></div>
+        <div id="news-empty-cat" style="display:none;text-align:center;padding:60px 0;color:var(--gray-mid)">Aucune actualité dans cette catégorie.</div>
+      </div>
+      <div id="news-article-view" style="display:none">
+        <button onclick="closeArticle()" class="btn-outline" style="margin-bottom:24px">← Retour aux actualités</button>
+        <div class="news-main-article">
+          <span class="nma-tag" id="art-tag"></span>
+          <h2 class="nma-title" id="art-title"></h2>
+          <div class="nma-body" id="art-body"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PAGE: RECRUTEMENT -->
+<div class="page" id="page-recruit">
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Recrutement</div>
+      <h1>Rejoindre l'USSS</h1>
+      <p>Rejoignez l'élite de la protection fédérale.</p>
+    </div>
+  </div>
+  <section class="section-wrap gray">
+    <div class="container">
+      <div class="recruit-layout">
+        <div class="recruit-sidebar">
+          <h2>Conditions d'Admission</h2>
+          <div class="rule"></div>
+          <ul class="req-list">
+            <li>Présenter un casier judiciaire exempt de toute condamnation incompatible avec les fonctions exercées.</li>
+            <li>Être titulaire de la nationalité américaine.</li>
+            <li>Avoir atteint l'âge légal de la majorité à la date du recrutement.</li>
+            <li>Disponibilité régulière fortement recommandée dans le cadre des nécessités de service.</li>
+            <li>Une expérience préalable au sein d'une institution fédérale constitue un atout.</li>
+          </ul>
+          <h2 style="margin-top:32px;">Avantages</h2>
+          <div class="rule"></div>
+          <ul class="req-list benefits">
+            <li>Programme de formation continue et d'entraînement spécialisé.</li>
+            <li>Primes d'activité et d'implication selon les critères du service.</li>
+            <li>Équipement et matériel de dernière génération.</li>
+            <li>Couverture assurance et mutuelle prise en charge par le Bureau.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="form-box">
+            <div class="form-box-head">
+              <h3>Candidature</h3>
+              <p>Le recrutement se fait sur dossier et entretien.</p>
+            </div>
+            <div class="form-box-body">
+              <span class="lock-ico"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--blue-dark)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <p class="lock-msg">Déjà agent ou superviseur ? Accédez à votre espace pour le registre, la pointeuse et les rapports.</p>
+              <button class="discord-btn" onclick="enterRegistre()">Accéder à l'espace agents &amp; supervision</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg" alt="USSS" onerror="this.style.display='none'">
+      <p>L'United States Secret Service est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <ul>
+        <li><span onclick="showPage('home')">Accueil</span></li>
+        <li><span onclick="showPage('divisions')">Divisions</span></li>
+        <li><span onclick="showPage('chiefs')">Chief's Office</span></li>
+        <li><span onclick="showPage('news')">Actualités</span></li>
+        <li><span onclick="showPage('recruit')">Recrutement</span></li>
+        <li><span onclick="enterRegistre()">Connexion</span></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><span style="line-height:1.7;">Field Office — United States Secret Service</span></li>
+        <li><span style="line-height:1.7;">State of San Andreas</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025-2026 United States Secret Service — Department of Homeland Security. Tous droits réservés.</div>
+    <div>Field Office — San Andreas</div>
+  </div>
+</footer>
+
+</div><!-- /#site-public -->
+
+<!-- ════════ ESPACE REGISTRE (React) ════════ -->
+<div id="registre-app">
+  <div class="reg-topbar">
+    <div class="reg-brand">
+      <img src="https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg" alt="USSS">
+      <span class="reg-title">Espace agents &amp; supervision</span>
+    </div>
+    <button class="reg-back" onclick="exitRegistre()">← Retour au site public</button>
+  </div>
+  <div id="root"></div>
+</div>
+
+<!-- App registre (React) -->
 <script type="text/babel" data-presets="react">
+
 const { useState, useEffect, useRef } = React;
 
 // ════════════════════════════════════════════
@@ -31,15 +552,14 @@ const { useState, useEffect, useRef } = React;
 // ════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec";
 
-const LOGO_USSS = "data:image/jpeg;base64,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";
-const MAP_URL = "https://www.bragitoff.com/wp-content/uploads/2015/11/GTAV-HD-MAP-satellite.jpg";
-const CARTE_POLL_MS = 4000;   // fréquence de synchronisation de la carte
+const LOGO_USSS = "https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg";
+const LOGO_DOC  = "https://content.govdelivery.com/attachments/fancy_images/USDHSSS/2025/02/11097308/govdelivery-suite-2025-002-original_original.png";
 
 // ─── Palette institutionnelle ───
 const C = {
-  navy: "#0E2240", navyDeep: "#091830", blue: "#1D4E89", blueSoft: "#E8EEF6",
-  gold: "#C9A24B", line: "#D6DEE8", ink: "#1A2433", grey: "#6B7686",
-  green: "#2E7D4F", amber: "#B5882A", red: "#B23B3B", paper: "#F3F5F8",
+  navy: "#00263a", navyDeep: "#001a29", blue: "#005ea2", blueSoft: "#d9e8f6",
+  gold: "#b69435", line: "#e8e8e4", ink: "#1b1b1b", grey: "#71717a",
+  green: "#198754", amber: "#b69435", red: "#b22234", paper: "#f5f5f0",
 };
 
 const GRADES = [
@@ -234,28 +754,6 @@ async function apiDeleteRapport(session, rapportId) {
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 }
-// ─── Carte tactique partagée ───
-async function apiLoadCarte(knownV) {
-  const res = await fetch(API_URL, { method: "POST",
-    body: JSON.stringify({ action: "load_carte", v: knownV }) });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data; // { v, strokes? , same? }
-}
-async function apiAddCarteTrait(session, trait) {
-  const res = await fetch(API_URL, { method: "POST",
-    body: JSON.stringify({ action: "add_carte_trait", session, trait }) });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data; // { ok, v }
-}
-async function apiClearCarte(session) {
-  const res = await fetch(API_URL, { method: "POST",
-    body: JSON.stringify({ action: "clear_carte", session }) });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data; // { ok, v }
-}
 
 // ─── Petits composants ───
 function BadgeMatricule({ value, onClick }) {
@@ -322,468 +820,6 @@ function SectionTitle({ children }) {
     letterSpacing:"0.08em", color:C.navy, margin:"14px 0 8px" }}>{children}</h3>;
 }
 
-// ─── Carte tactique interactive (dessin vectoriel synchronisé) ───
-// Outils : pinceau, gomme, ligne, flèche, rectangle, cercle + couleur & épaisseur.
-// Les traits sont des vecteurs synchronisés via le backend (visibles par tous).
-// Zoom : Ctrl + molette. Effacement global : superviseur uniquement.
-// Repère visuel du rayon effectif (pinceau/gomme) qui suit le curseur.
-function CarteInteractive({ role, identifiant, token }) {
-  const V = 1092;                 // espace virtuel (taille native de la carte)
-  const wrapRef = useRef(null);
-  const mapCv = useRef(null);     // calque carte satellite
-  const baseCv = useRef(null);    // calque traits validés
-  const liveCv = useRef(null);    // calque aperçu + curseur
-  const mapImg = useRef(null);    // objet Image de la carte
-  const view = useRef({ scale: 1, ox: 0, oy: 0 }); // transform écran
-  const drawing = useRef(false);
-  const curPts = useRef([]);      // points du trait libre en cours (coords virtuelles)
-  const start = useRef({ x: 0, y: 0 });
-  const cursor = useRef({ x: -999, y: -999, on: false });
-  const strokesRef = useRef([]);  // traits validés (source : serveur)
-  const versionRef = useRef(0);
-  const sizeRef = useRef(900);
-
-  const [outil, setOutil] = useState("pinceau");
-  const [couleur, setCouleur] = useState("#E11D48");
-  const [epaisseur, setEpaisseur] = useState(6);
-  const [side, setSide] = useState(900);
-  const [sync, setSync] = useState("…");        // état de synchro affiché
-  const [showSize, setShowSize] = useState(false); // aperçu de taille centré
-  const epaisseurRef = useRef(6);
-  const outilRef = useRef("pinceau");
-  const couleurRef = useRef("#E11D48");
-  useEffect(() => { epaisseurRef.current = epaisseur; }, [epaisseur]);
-  useEffect(() => { outilRef.current = outil; }, [outil]);
-  useEffect(() => { couleurRef.current = couleur; }, [couleur]);
-
-  const OUTILS = [
-    ["pinceau", "Pinceau", "🖌"],
-    ["ligne",   "Ligne",   "／"],
-    ["fleche",  "Flèche",  "➤"],
-    ["rect",    "Rectangle", "▭"],
-    ["cercle",  "Cercle",  "◯"],
-    ["gomme",   "Gomme",   "🧽"],
-  ];
-  const PALETTE = ["#E11D48","#F59E0B","#FACC15","#22C55E","#0EA5E9","#1D4E89","#7C3AED","#111827","#FFFFFF"];
-  const estForme = (t) => t === "ligne" || t === "fleche" || t === "rect" || t === "cercle";
-  const largeurEffective = (t, w) => (t === "gomme" ? w * 3 : w);
-
-  // Dimensionne la zone (carrée) et initialise la vue ajustée.
-  useEffect(() => {
-    function resize() {
-      const w = wrapRef.current ? wrapRef.current.clientWidth : 900;
-      const s = Math.max(280, Math.min(w, 1000));
-      sizeRef.current = s;
-      setSide(s);
-      view.current = { scale: s / V, ox: 0, oy: 0 };
-      redrawMap();
-      redrawBase();
-    }
-    resize();
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-  }, []);
-
-  // Charge l'image de la carte (depuis l'URL distante).
-  useEffect(() => {
-    const img = new Image();
-    // NB : pas de crossOrigin → la carte s'affiche même sans en-tête CORS.
-    // L'export PNG bascule sur les annotations seules si le canvas est protégé.
-    img.onload = () => { mapImg.current = img; redrawMap(); };
-    img.onerror = () => { mapImg.current = null; redrawMap(); };
-    img.src = MAP_URL;
-  }, []);
-
-  // Synchronisation périodique avec le serveur.
-  useEffect(() => {
-    let alive = true;
-    async function tick() {
-      try {
-        const data = await apiLoadCarte(versionRef.current);
-        if (!alive) return;
-        if (!data.same && Array.isArray(data.strokes)) {
-          strokesRef.current = data.strokes;
-          versionRef.current = data.v;
-          redrawBase();
-        } else if (data.v != null) {
-          versionRef.current = data.v;
-        }
-        setSync("✓ synchronisé");
-      } catch (e) {
-        if (alive) setSync("⚠ hors-ligne");
-      }
-    }
-    tick();
-    const iv = setInterval(tick, CARTE_POLL_MS);
-    return () => { alive = false; clearInterval(iv); };
-  }, []);
-
-  function redrawMap() {
-    const cv = mapCv.current; if (!cv) return;
-    const ctx = cv.getContext("2d");
-    const { scale, ox, oy } = view.current;
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.fillStyle = "#0b1722";
-    ctx.fillRect(0, 0, cv.width, cv.height);
-    if (mapImg.current) {
-      ctx.drawImage(mapImg.current, ox, oy, V * scale, V * scale);
-    }
-  }
-
-  function traceStroke(ctx, st) {
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.lineWidth = largeurEffective(st.t, st.w);
-    ctx.strokeStyle = st.c;
-    ctx.fillStyle = st.c;
-    if (st.t === "gomme") ctx.globalCompositeOperation = "destination-out";
-    const p = st.p;
-    ctx.beginPath();
-    if (st.t === "pinceau" || st.t === "gomme") {
-      if (p.length >= 2) {
-        ctx.moveTo(p[0], p[1]);
-        for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i+1]);
-        if (p.length === 2) ctx.lineTo(p[0] + 0.01, p[1] + 0.01);
-        ctx.stroke();
-      }
-    } else if (st.t === "ligne") {
-      ctx.moveTo(p[0], p[1]); ctx.lineTo(p[2], p[3]); ctx.stroke();
-    } else if (st.t === "rect") {
-      ctx.strokeRect(Math.min(p[0],p[2]), Math.min(p[1],p[3]),
-        Math.abs(p[2]-p[0]), Math.abs(p[3]-p[1]));
-    } else if (st.t === "cercle") {
-      const r = Math.hypot(p[2]-p[0], p[3]-p[1]);
-      ctx.arc(p[0], p[1], r, 0, Math.PI*2); ctx.stroke();
-    } else if (st.t === "fleche") {
-      ctx.moveTo(p[0], p[1]); ctx.lineTo(p[2], p[3]); ctx.stroke();
-      const ang = Math.atan2(p[3]-p[1], p[2]-p[0]);
-      const h = Math.max(14, st.w*3);
-      ctx.beginPath();
-      ctx.moveTo(p[2], p[3]);
-      ctx.lineTo(p[2] - h*Math.cos(ang - Math.PI/7), p[3] - h*Math.sin(ang - Math.PI/7));
-      ctx.lineTo(p[2] - h*Math.cos(ang + Math.PI/7), p[3] - h*Math.sin(ang + Math.PI/7));
-      ctx.closePath(); ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function redrawBase() {
-    const cv = baseCv.current; if (!cv) return;
-    const ctx = cv.getContext("2d");
-    const { scale, ox, oy } = view.current;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.setTransform(scale, 0, 0, scale, ox, oy);
-    for (const st of strokesRef.current) traceStroke(ctx, st);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-  }
-
-  // Aperçu (forme en cours + repère de taille du pinceau/gomme).
-  function redrawLive(previewStroke) {
-    const cv = liveCv.current; if (!cv) return;
-    const ctx = cv.getContext("2d");
-    const { scale, ox, oy } = view.current;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    if (previewStroke) {
-      ctx.setTransform(scale, 0, 0, scale, ox, oy);
-      traceStroke(ctx, previewStroke);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-    // Repère de rayon (cercle) pour pinceau & gomme
-    const c = cursor.current;
-    const t = outilRef.current;
-    if ((t === "pinceau" || t === "gomme") && (c.on || showSize)) {
-      const diam = largeurEffective(t, epaisseurRef.current) * scale;
-      const r = Math.max(2, diam / 2);
-      let cx = c.x, cy = c.y;
-      if (!c.on && showSize) { cx = cv.width / 2; cy = cv.height / 2; }
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI*2);
-      ctx.strokeStyle = t === "gomme" ? "#ffffff" : couleurRef.current;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 3]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
-    }
-  }
-
-  // ── conversions écran ↔ virtuel ──
-  function screenPos(e) {
-    const r = liveCv.current.getBoundingClientRect();
-    const t = e.touches && e.touches[0] ? e.touches[0]
-            : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : e);
-    const sx = liveCv.current.width / r.width;
-    const sy = liveCv.current.height / r.height;
-    return { x: (t.clientX - r.left) * sx, y: (t.clientY - r.top) * sy };
-  }
-  function toVirtual(sp) {
-    const { scale, ox, oy } = view.current;
-    return { x: (sp.x - ox) / scale, y: (sp.y - oy) / scale };
-  }
-
-  function down(e) {
-    e.preventDefault();
-    drawing.current = true;
-    const v = toVirtual(screenPos(e));
-    start.current = v;
-    curPts.current = [v.x, v.y];
-    cursor.current = { ...screenPos(e), on: true };
-  }
-
-  function move(e) {
-    const sp = screenPos(e);
-    cursor.current = { x: sp.x, y: sp.y, on: true };
-    if (!drawing.current) { redrawLive(null); return; }
-    e.preventDefault();
-    const v = toVirtual(sp);
-    const t = outilRef.current;
-    if (t === "pinceau" || t === "gomme") {
-      const pts = curPts.current;
-      const lx = pts[pts.length - 2], ly = pts[pts.length - 1];
-      if (Math.hypot(v.x - lx, v.y - ly) > 1.5) pts.push(v.x, v.y);
-      redrawLive({ t, c: couleurRef.current, w: epaisseurRef.current, p: pts });
-    } else {
-      redrawLive({ t, c: couleurRef.current, w: epaisseurRef.current,
-        p: [start.current.x, start.current.y, v.x, v.y] });
-    }
-  }
-
-  async function up(e) {
-    if (!drawing.current) return;
-    drawing.current = false;
-    const t = outilRef.current;
-    let p;
-    if (t === "pinceau" || t === "gomme") {
-      p = curPts.current.slice();
-      if (p.length > 800) { // sous-échantillonnage de sécurité
-        const step = Math.ceil(p.length / 800);
-        const reduced = [];
-        for (let i = 0; i < p.length; i += 2 * step) reduced.push(p[i], p[i+1]);
-        p = reduced;
-      }
-    } else {
-      const v = toVirtual(screenPos(e));
-      p = [start.current.x, start.current.y, v.x, v.y];
-    }
-    curPts.current = [];
-    const st = {
-      id: Date.now() + "-" + Math.random().toString(36).slice(2, 6),
-      t, c: couleurRef.current, w: epaisseurRef.current,
-      p: p.map(n => Math.round(n)), au: identifiant || role,
-    };
-    // Affichage immédiat (optimiste)
-    strokesRef.current = strokesRef.current.concat([st]);
-    redrawBase();
-    redrawLive(null);
-    if (!token) { setSync("⚠ non connecté"); return; }
-    try {
-      const r = await apiAddCarteTrait(token, st);
-      if (r && r.v != null) versionRef.current = r.v;
-      setSync("✓ synchronisé");
-    } catch (err) {
-      setSync("⚠ échec d'envoi");
-    }
-  }
-
-  function leave() {
-    cursor.current = { x: -999, y: -999, on: false };
-    if (!drawing.current) redrawLive(null);
-  }
-
-  // Zoom Ctrl + molette (centré sur le curseur).
-  function wheel(e) {
-    if (!e.ctrlKey) return;          // sans Ctrl : on laisse défiler la page
-    e.preventDefault();
-    const sp = screenPos(e);
-    const vw = view.current;
-    const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
-    const minScale = sizeRef.current / V;       // 1x = carte ajustée au cadre
-    const maxScale = minScale * 8;
-    const ns = Math.min(maxScale, Math.max(minScale, vw.scale * factor));
-    // garde le point virtuel sous le curseur immobile
-    const vx = (sp.x - vw.ox) / vw.scale;
-    const vy = (sp.y - vw.oy) / vw.scale;
-    vw.ox = sp.x - vx * ns;
-    vw.oy = sp.y - vy * ns;
-    vw.scale = ns;
-    // clamp pour ne pas sortir la carte du cadre
-    const span = V * ns;
-    const s = sizeRef.current;
-    vw.ox = Math.min(0, Math.max(s - span, vw.ox));
-    vw.oy = Math.min(0, Math.max(s - span, vw.oy));
-    redrawMap(); redrawBase(); redrawLive(null);
-  }
-
-  function resetZoom() {
-    view.current = { scale: sizeRef.current / V, ox: 0, oy: 0 };
-    redrawMap(); redrawBase(); redrawLive(null);
-  }
-
-  // Repère de taille temporaire au changement d'épaisseur.
-  function changeEpaisseur(val) {
-    setEpaisseur(val);
-    epaisseurRef.current = val;
-    setShowSize(true);
-    redrawLive(null);
-    clearTimeout(changeEpaisseur._t);
-    changeEpaisseur._t = setTimeout(() => { setShowSize(false); redrawLive(null); }, 1100);
-  }
-  useEffect(() => { redrawLive(null); }, [showSize, outil, couleur, epaisseur]);
-  // Après redimensionnement (canvas recréés/vidés), on réajuste et on redessine.
-  useEffect(() => {
-    view.current = { scale: side / V, ox: 0, oy: 0 };
-    redrawMap(); redrawBase(); redrawLive(null);
-  }, [side]);
-
-  async function effacerTout() {
-    if (role !== "superviseur") return;
-    if (!window.confirm("Effacer la carte pour TOUS les utilisateurs ?")) return;
-    try {
-      const r = await apiClearCarte(token);
-      strokesRef.current = [];
-      if (r && r.v != null) versionRef.current = r.v;
-      redrawBase();
-      setSync("✓ carte effacée");
-    } catch (e) { setSync("⚠ échec effacement"); }
-  }
-
-  function telecharger() {
-    const s = sizeRef.current;
-    const out = document.createElement("canvas");
-    out.width = s; out.height = s;
-    const octx = out.getContext("2d");
-    octx.fillStyle = "#0b1722"; octx.fillRect(0, 0, s, s);
-    const { scale, ox, oy } = view.current;
-    try {
-      if (mapImg.current) octx.drawImage(mapImg.current, ox, oy, V*scale, V*scale);
-      octx.drawImage(baseCv.current, 0, 0);
-    } catch (err) {
-      // image distante non exportable (CORS) : on exporte les seules annotations
-      octx.clearRect(0, 0, s, s);
-      octx.drawImage(baseCv.current, 0, 0);
-    }
-    let url;
-    try { url = out.toDataURL("image/png"); }
-    catch (err) {
-      const only = document.createElement("canvas");
-      only.width = s; only.height = s;
-      only.getContext("2d").drawImage(baseCv.current, 0, 0);
-      url = only.toDataURL("image/png");
-    }
-    const link = document.createElement("a");
-    link.download = "carte-tactique-" + Date.now() + ".png";
-    link.href = url; link.click();
-  }
-
-  const btnOutil = (actif) => ({
-    padding:"7px 12px", fontSize:12, fontWeight:600, borderRadius:4,
-    border:`1px solid ${actif ? C.navy : C.line}`,
-    background: actif ? C.navy : "#fff", color: actif ? "#fff" : C.ink,
-    display:"flex", alignItems:"center", gap:6,
-  });
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
-        flexWrap:"wrap", gap:12 }}>
-        <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
-          letterSpacing:"0.08em", color:C.navy }}>Carte tactique interactive</h2>
-        <span style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <span style={{ fontSize:11, color:C.grey }}>
-            {role === "superviseur" ? "✎ Superviseur" : "👮 Agent"}
-            {identifiant ? " · " + identifiant : ""}
-          </span>
-          <span style={{ fontSize:11, fontWeight:600, padding:"2px 8px", borderRadius:99,
-            background: sync.indexOf("⚠") === 0 ? "#FBEAEA" : C.blueSoft,
-            color: sync.indexOf("⚠") === 0 ? C.red : C.blue }}>{sync}</span>
-        </span>
-      </div>
-
-      <div style={{ background:"#fff", border:`1px solid ${C.line}`, borderRadius:6,
-        padding:12, display:"flex", flexWrap:"wrap", alignItems:"center", gap:14 }}>
-        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-          {OUTILS.map(([id, label, ico]) => (
-            <button key={id} onClick={() => setOutil(id)} style={btnOutil(outil === id)}>
-              <span style={{ fontSize:14 }}>{ico}</span>{label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ width:1, height:28, background:C.line }} />
-
-        <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
-          {PALETTE.map(c => (
-            <button key={c} onClick={() => setCouleur(c)} title={c}
-              style={{ width:24, height:24, borderRadius:"50%", background:c,
-                border: couleur === c ? `3px solid ${C.navy}` : `1px solid ${C.line}`,
-                boxShadow: c === "#FFFFFF" ? "inset 0 0 0 1px "+C.line : "none" }} />
-          ))}
-          <input type="color" value={couleur} onChange={e => setCouleur(e.target.value)}
-            title="Couleur personnalisée"
-            style={{ width:30, height:26, padding:0, border:`1px solid ${C.line}`,
-              borderRadius:4, background:"#fff", cursor:"pointer" }} />
-        </div>
-
-        <div style={{ width:1, height:28, background:C.line }} />
-
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <span style={{ fontSize:11, color:C.grey, textTransform:"uppercase",
-            letterSpacing:"0.06em" }}>Épaisseur</span>
-          <input type="range" min={1} max={48} value={epaisseur}
-            onChange={e => changeEpaisseur(Number(e.target.value))} style={{ width:120 }} />
-          <span style={{ fontSize:12, fontWeight:600, color:C.navy, width:26,
-            textAlign:"right" }}>{epaisseur}</span>
-        </div>
-
-        <div style={{ flex:1 }} />
-
-        <button onClick={resetZoom}
-          style={{ padding:"7px 12px", fontSize:12, fontWeight:600, borderRadius:4,
-            background:"#fff", color:C.navy, border:`1px solid ${C.line}` }}>⤢ Zoom 1:1</button>
-        <button onClick={telecharger}
-          style={{ padding:"7px 14px", fontSize:12, fontWeight:600, borderRadius:4,
-            background:C.blue, color:"#fff" }}>⤓ PNG</button>
-        {role === "superviseur" && (
-          <button onClick={effacerTout}
-            style={{ padding:"7px 14px", fontSize:12, fontWeight:600, borderRadius:4,
-              background:"#fff", color:C.red, border:`1px solid ${C.red}` }}>Tout effacer</button>
-        )}
-      </div>
-
-      <div ref={wrapRef} style={{ width:"100%", display:"flex", justifyContent:"center" }}>
-        <div style={{ position:"relative", width:side, height:side,
-          border:`1px solid ${C.line}`, borderRadius:6, overflow:"hidden",
-          boxShadow:"0 1px 6px rgba(14,34,64,0.12)", background:"#0b1722",
-          touchAction:"none" }}>
-          <canvas ref={mapCv} width={side} height={side}
-            style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} />
-          <canvas ref={baseCv} width={side} height={side}
-            style={{ position:"absolute", inset:0, width:"100%", height:"100%" }} />
-          <canvas ref={liveCv} width={side} height={side}
-            style={{ position:"absolute", inset:0, width:"100%", height:"100%",
-              cursor: (outil === "pinceau" || outil === "gomme") ? "none" : "crosshair" }}
-            onMouseDown={down} onMouseMove={move} onMouseUp={up} onMouseLeave={leave}
-            onTouchStart={down} onTouchMove={move} onTouchEnd={up}
-            onWheel={wheel} />
-        </div>
-      </div>
-
-      <p style={{ fontSize:11, color:C.grey, lineHeight:1.5 }}>
-        Annotations partagées en temps quasi réel entre tous les utilisateurs connectés
-        (rafraîchissement toutes les {Math.round(CARTE_POLL_MS/1000)} s).
-        <strong> Ctrl + molette</strong> pour zoomer, <strong>⤢ Zoom 1:1</strong> pour réinitialiser.
-        {role === "superviseur"
-          ? " En tant que superviseur, « Tout effacer » réinitialise la carte pour tout le monde."
-          : " Seul un superviseur peut effacer l'ensemble de la carte."}
-      </p>
-    </div>
-  );
-}
-
 // ─── Application ───
 function App() {
   const [members, setMembers] = useState(null);
@@ -840,7 +876,7 @@ function App() {
   const editor = session !== null;
   const agentLogged = agentSession !== null;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
-  const PAGES_AGENT = ["pointeuse", "rapports", "carte"];
+  const PAGES_AGENT = ["pointeuse", "rapports"];
   const pageEffective = (agentLogged && !editor)
     ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
     : page;
@@ -1411,8 +1447,8 @@ function App() {
             {(editor || agentLogged) && (
               <nav style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                 {(editor
-                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["rapports","Rapports"],["carte","Carte"],["journal","Journal"]]
-                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["carte","Carte"]]
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["rapports","Rapports"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"],["rapports","Rapports"]]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"6px 16px", borderRadius:2, fontSize:13, fontWeight:600,
@@ -2093,14 +2129,6 @@ function App() {
           );
         })()}
 
-        {pageEffective === "carte" && (
-          <CarteInteractive
-            role={editor ? "superviseur" : "agent"}
-            identifiant={editor ? (session && session.login) : (agentSession && agentSession.matricule)}
-            token={editor ? (session && session.token) : (agentSession && agentSession.token)}
-          />
-        )}
-
         {pageEffective === "journal" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
@@ -2577,7 +2605,7 @@ function App() {
                 width:"100%" }}>
                 {/* En-tête */}
                 <div style={{ textAlign:"center", marginBottom:20 }}>
-                  <img src={LOGO_USSS} alt="USSS"
+                  <img src={LOGO_DOC} alt="United States Secret Service"
                     style={{ maxWidth:380, width:"100%", height:"auto" }} />
                   <div style={{ fontSize:18, marginTop:14, color:"#1A2433",
                     letterSpacing:"0.05em", fontWeight:500 }}>— RAPPORT —</div>
@@ -2734,6 +2762,112 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+
+<!-- JS site vitrine -->
+<script>
+// ── NEWS (statique) ──
+var NEWS_DATA = [
+  { id:1, category:"Communiqué", date:"8 Juin 2026", title:"Mise en service du nouveau Field Office",
+    excerpt:"L'USSS annonce l'ouverture de son nouveau Field Office, doté d'infrastructures modernisées au service des opérations.",
+    body:"<p>L'United States Secret Service est fier d'annoncer la mise en service de son nouveau Field Office.</p><p>Cette nouvelle implantation offre des infrastructures sécurisées et modernes, des espaces de travail optimisés pour les agents et les unités spécialisées, ainsi qu'une meilleure capacité de coordination opérationnelle.</p>" },
+  { id:2, category:"Recrutement", date:"1 Juin 2026", title:"Campagne de recrutement ouverte",
+    excerpt:"Le Bureau ouvre une nouvelle session de recrutement pour ses divisions de protection et d'investigation.",
+    body:"<p>L'USSS recherche de nouveaux agents motivés pour rejoindre ses divisions de protection rapprochée et d'investigation.</p><p>Les candidatures sont étudiées sur dossier puis entretien. Consultez la page Recrutement pour les conditions d'admission.</p>" }
+];
+
+function showPage(id){
+  exitRegistre(true);
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var pg=document.getElementById('page-'+id); if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(function(l){l.classList.remove('active');});
+  var nl=document.getElementById('nav-'+id); if(nl)nl.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function enterRegistre(){
+  document.getElementById('site-public').style.display='none';
+  document.getElementById('registre-app').style.display='block';
+  window.scrollTo(0,0);
+}
+function exitRegistre(silent){
+  var ra=document.getElementById('registre-app');
+  if(ra) ra.style.display='none';
+  var sp=document.getElementById('site-public');
+  if(sp) sp.style.display='block';
+  if(!silent) window.scrollTo(0,0);
+}
+
+function notify(msg){
+  var n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show');
+  setTimeout(function(){n.classList.remove('show');},3000);
+}
+
+// ── NEWS rendering ──
+function renderNews(){
+  var home=document.getElementById('home-news-grid');
+  if(home){
+    home.innerHTML=NEWS_DATA.slice(0,3).map(function(n){
+      return '<div class="news-card" onclick="openArticle('+n.id+')">'
+        +'<span class="nc-tag">'+n.category+'</span>'
+        +'<h3 class="nc-title">'+n.title+'</h3>'
+        +'<p class="nc-excerpt">'+n.excerpt+'</p>'
+        +'<div class="nc-date">'+n.date+'</div></div>';
+    }).join('');
+  }
+  var cats=['all'].concat(NEWS_DATA.map(function(n){return n.category;}).filter(function(v,i,a){return a.indexOf(v)===i;}));
+  var bar=document.getElementById('news-tabs-bar');
+  if(bar){
+    bar.innerHTML=cats.map(function(c,i){
+      var count=c==='all'?NEWS_DATA.length:NEWS_DATA.filter(function(n){return n.category===c;}).length;
+      return '<button class="news-tab'+(i===0?' active':'')+'" onclick="filterNews(\''+c+'\',this)">'+(c==='all'?'Toutes':c)+' <span class="tab-count">'+count+'</span></button>';
+    }).join('');
+  }
+  var grid=document.getElementById('news-cards-grid');
+  if(grid){
+    grid.innerHTML=NEWS_DATA.map(function(n){
+      return '<div class="news-card-full" data-category="'+n.category+'" onclick="openArticle('+n.id+')">'
+        +'<div class="ncf-thumb">USSS</div>'
+        +'<div class="ncf-body"><span class="nc-tag">'+n.category+'</span>'
+        +'<h3 class="ncf-title">'+n.title+'</h3>'
+        +'<p class="ncf-excerpt">'+n.excerpt+'</p>'
+        +'<div class="ncf-date">'+n.date+'</div></div></div>';
+    }).join('');
+  }
+}
+function filterNews(cat,btn){
+  document.querySelectorAll('.news-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var cards=document.querySelectorAll('.news-card-full'); var visible=0;
+  cards.forEach(function(card){
+    var match=cat==='all'||card.dataset.category===cat;
+    card.classList.toggle('hidden',!match); if(match)visible++;
+  });
+  var empty=document.getElementById('news-empty-cat'); if(empty)empty.style.display=visible===0?'block':'none';
+}
+function openArticle(id){
+  var art=NEWS_DATA.find(function(n){return n.id==id;}); if(!art)return;
+  document.getElementById('art-tag').textContent=art.category+' · '+art.date;
+  document.getElementById('art-title').textContent=art.title;
+  document.getElementById('art-body').innerHTML=art.body;
+  document.getElementById('news-list-view').style.display='none';
+  document.getElementById('news-article-view').style.display='block';
+  showPage('news');
+  document.getElementById('news-list-view').style.display='none';
+  document.getElementById('news-article-view').style.display='block';
+  window.scrollTo(0,0);
+}
+function closeArticle(){
+  document.getElementById('news-list-view').style.display='block';
+  document.getElementById('news-article-view').style.display='none';
+  showPage('news');
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  renderNews();
+  showPage('home');
+});
 </script>
 </body>
 </html>
