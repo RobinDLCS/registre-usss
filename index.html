@@ -38,6 +38,9 @@ input,select,textarea{font-family:inherit;}
 
 /* ── TOP UTILITY BAR ── */
 .top-bar{background:var(--blue-dark);padding:6px 0;}
+.gov-banner{background:#f0f0ec;border-bottom:1px solid var(--gray-light);font-size:12px;color:#3d3d3d;}
+.gov-banner-inner{max-width:1200px;margin:0 auto;padding:6px 24px;display:flex;align-items:center;gap:8px;}
+.gov-banner svg{flex-shrink:0;}
 .top-bar-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:flex-end;align-items:center;}
 .top-bar a{color:rgba(255,255,255,0.65);font-size:12px;text-decoration:none;cursor:pointer;margin-left:20px;}
 .top-bar a:hover{color:var(--white);}
@@ -239,6 +242,13 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
 <!-- ════════ SITE PUBLIC ════════ -->
 <div id="site-public">
 
+<div class="gov-banner">
+  <div class="gov-banner-inner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#005ea2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4l8-2 8 2v18"/><path d="M4 9h16"/><path d="M4 14h16"/></svg>
+    <span>Site officiel du <strong>United States Secret Service</strong> · State of San Andreas</span>
+  </div>
+</div>
+
 <div class="top-bar">
   <div class="top-bar-inner">
     <a onclick="enterRegistre()">Espace agents</a>
@@ -249,7 +259,7 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
 <nav>
   <div class="nav-inner">
     <div class="nav-brand" onclick="showPage('home')">
-      <img src="https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg" alt="USSS" onerror="this.style.visibility='hidden'">
+      <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg" alt="USSS" onerror="this.style.visibility='hidden'">
       <div class="nav-brand-text">
         <div class="name">United States Secret Service</div>
         <div class="sub">DEPARTMENT OF HOMELAND SECURITY</div>
@@ -371,41 +381,41 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
     <div class="container">
 
       <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://www.noelshack.com/2026-24-7-1781400148-hammer.png" alt="HAMMER" onerror="this.remove()"><span>HAM</span></div><div class="div-body"><div class="div-name">HAMMER</div><div class="div-full">Hazardous Agent Mitigation &amp; Medical Emergency Response</div><p class="div-desc">Gestion des agents dangereux et réponse médicale d'urgence sur les opérations.</p></div></div>
+        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/Hammer.png" alt="HAMMER" onerror="this.remove()"><span>HAM</span></div><div class="div-body"><div class="div-name">HAMMER</div><div class="div-full">Hazardous Agent Mitigation &amp; Medical Emergency Response</div><p class="div-desc">Gestion des agents dangereux et réponse médicale d'urgence sur les opérations.</p></div></div>
         <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://www.noelshack.com/2026-24-7-1781400148-k9.png" alt="K-9" onerror="this.remove()"><div><div class="sub-abbr">K-9</div><div class="sub-full">Canine Team — équipe cynophile de détection</div></div></div>
+          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/K9.png" alt="K-9" onerror="this.remove()"><div><div class="sub-abbr">K-9</div><div class="sub-full">Canine Team — équipe cynophile de détection</div></div></div>
         </div>
       </div>
 
       <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://www.noelshack.com/2026-24-7-1781400149-ud.png" alt="UD" onerror="this.remove()"><span>UD</span></div><div class="div-body"><div class="div-name">UD</div><div class="div-full">Uniformed Division</div><p class="div-desc">Sécurisation en uniforme des périmètres, points de contrôle et infrastructures.</p></div></div>
+        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/UD.png" alt="UD" onerror="this.remove()"><span>UD</span></div><div class="div-body"><div class="div-name">UD</div><div class="div-full">Uniformed Division</div><p class="div-desc">Sécurisation en uniforme des périmètres, points de contrôle et infrastructures.</p></div></div>
         <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://www.noelshack.com/2026-24-7-1781400148-cpo.png" alt="CPO" onerror="this.remove()"><div><div class="sub-abbr">CPO</div><div class="sub-full">Close Protection Operation — protection rapprochée</div></div></div>
-          <div class="sub-card"><img class="sub-logo" src="https://www.noelshack.com/2026-24-7-1781400148-affc.png" alt="AFFC" onerror="this.remove()"><div><div class="sub-abbr">AFFC</div><div class="sub-full">Airlift Frequent Fliers Club — soutien et transport aérien</div></div></div>
+          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CPO.png" alt="CPO" onerror="this.remove()"><div><div class="sub-abbr">CPO</div><div class="sub-full">Close Protection Operation — protection rapprochée</div></div></div>
+          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/AFFC.png" alt="AFFC" onerror="this.remove()"><div><div class="sub-abbr">AFFC</div><div class="sub-full">Airlift Frequent Fliers Club — soutien et transport aérien</div></div></div>
         </div>
       </div>
 
       <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://www.noelshack.com/2026-24-7-1781400148-cid.png" alt="CID" onerror="this.remove()"><span>CID</span></div><div class="div-body"><div class="div-name">CID</div><div class="div-full">Criminal Investigations Division</div><p class="div-desc">Enquêtes criminelles, fraude et menaces visant les institutions.</p></div></div>
+        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CID.png" alt="CID" onerror="this.remove()"><span>CID</span></div><div class="div-body"><div class="div-name">CID</div><div class="div-full">Criminal Investigations Division</div><p class="div-desc">Enquêtes criminelles, fraude et menaces visant les institutions.</p></div></div>
         <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://www.noelshack.com/2026-24-7-1781400148-irss.png" alt="IRS" onerror="this.remove()"><div><div class="sub-abbr">IRS</div><div class="sub-full">Internal Revenue Service — investigations fiscales et financières</div></div></div>
-          <div class="sub-card"><img class="sub-logo" src="https://www.noelshack.com/2026-24-7-1781400149-olia.png" alt="OLIA" onerror="this.remove()"><div><div class="sub-abbr">OLIA</div><div class="sub-full">Office of Legal &amp; Internals Affairs — affaires juridiques et internes</div></div></div>
+          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/irss.png" alt="IRS" onerror="this.remove()"><div><div class="sub-abbr">IRS</div><div class="sub-full">Internal Revenue Service — investigations fiscales et financières</div></div></div>
+          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/OLIA.png" alt="OLIA" onerror="this.remove()"><div><div class="sub-abbr">OLIA</div><div class="sub-full">Office of Legal &amp; Internals Affairs — affaires juridiques et internes</div></div></div>
         </div>
       </div>
 
       <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://www.noelshack.com/2026-24-7-1781400148-cat.png" alt="CAT" onerror="this.remove()"><span>CAT</span></div><div class="div-body"><div class="div-name">CAT</div><div class="div-full">Counter Assault Team</div><p class="div-desc">Unité tactique d'intervention déployée en cas de menace armée.</p></div></div>
+        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CAT.png" alt="CAT" onerror="this.remove()"><span>CAT</span></div><div class="div-body"><div class="div-name">CAT</div><div class="div-full">Counter Assault Team</div><p class="div-desc">Unité tactique d'intervention déployée en cas de menace armée.</p></div></div>
         <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://www.noelshack.com/2026-24-7-1781400148-cst.png" alt="CST" onerror="this.remove()"><div><div class="sub-abbr">CST</div><div class="sub-full">Counter Sniper Team — appui et couverture sniper</div></div></div>
+          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CST.png" alt="CST" onerror="this.remove()"><div><div class="sub-abbr">CST</div><div class="sub-full">Counter Sniper Team — appui et couverture sniper</div></div></div>
         </div>
       </div>
 
       <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://www.noelshack.com/2026-24-7-1781400149-ocmr.png" alt="OCMR" onerror="this.remove()"><span>OCMR</span></div><div class="div-body"><div class="div-name">OCMR</div><div class="div-full">Office Of Communication &amp; Media Relation</div><p class="div-desc">Communication officielle, relations médias et recrutement de l'agence.</p></div></div>
+        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/OCMR.png" alt="OCMR" onerror="this.remove()"><span>OCMR</span></div><div class="div-body"><div class="div-name">OCMR</div><div class="div-full">Office Of Communication &amp; Media Relation</div><p class="div-desc">Communication officielle, relations médias et recrutement de l'agence.</p></div></div>
       </div>
 
       <div class="div-group">
-        <div class="div-card div-standalone"><div class="div-badge"><img src="https://www.noelshack.com/2026-24-7-1781400149-td.png" alt="TD" onerror="this.remove()"><span>TD</span></div><div class="div-body"><div class="div-name" style="color:var(--gold)">TD</div><div class="div-full">Training Division</div><p class="div-desc">Formation, recrutement et perfectionnement des agents.</p></div></div>
+        <div class="div-card div-standalone"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/TD.png" alt="TD" onerror="this.remove()"><span>TD</span></div><div class="div-body"><div class="div-name" style="color:var(--gold)">TD</div><div class="div-full">Training Division</div><p class="div-desc">Formation, recrutement et perfectionnement des agents.</p></div></div>
       </div>
 
     </div>
@@ -490,7 +500,7 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
-      <img src="https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg" alt="USSS" onerror="this.style.display='none'">
+      <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg" alt="USSS" onerror="this.style.display='none'">
       <p>L'United States Secret Service est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.</p>
     </div>
     <div class="footer-col">
@@ -524,7 +534,7 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
 <div id="registre-app">
   <div class="reg-topbar">
     <div class="reg-brand">
-      <img src="https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg" alt="USSS">
+      <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg" alt="USSS">
       <span class="reg-title">Espace agents &amp; supervision</span>
     </div>
     <button class="reg-back" onclick="exitRegistre()">← Retour au site public</button>
@@ -542,8 +552,8 @@ const { useState, useEffect, useRef } = React;
 // ════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec";
 
-const LOGO_USSS = "https://m.media-amazon.com/images/I/51infu-qnaL._AC_UF1000,1000_QL80_.jpg";
-const LOGO_DOC  = "https://content.govdelivery.com/attachments/fancy_images/USDHSSS/2025/02/11097308/govdelivery-suite-2025-002-original_original.png";
+const LOGO_USSS = "https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg";
+const LOGO_DOC  = "https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png";
 
 // ─── Palette institutionnelle ───
 const C = {
