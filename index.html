@@ -800,6 +800,181 @@ function SectionTitle({ children }) {
     letterSpacing:"0.08em", color:C.navy, margin:"14px 0 8px" }}>{children}</h3>;
 }
 
+// ─── Documents Training Division (manuels CPO & Convoi) ───
+function DocsTD() {
+  const [manuel, setManuel] = useState("cpo");
+  const [open, setOpen] = useState({});
+  const toggle = (k) => setOpen(o => ({ ...o, [k]: !o[k] }));
+
+  const MANUELS = {
+    cpo: {
+      titre: "Manuel C.P.O.",
+      sousTitre: "Protection rapprochée — l'essentiel à connaître.",
+      sections: [
+        { t: "Déontologie & cadre légal", b: [
+          { li: ["Professionnalisme permanent et discrétion","Respect de la vie privée du VIP — devoir d'amnésie et confidentialité absolue","Vigilance constante, calme et sang-froid","Respect strict des procédures et de la chaîne de commandement"] },
+          "L'USSS agit avant tout de manière préventive, pour empêcher toute menace avant qu'elle n'atteigne l'autorité protégée.",
+          { h: "Lois fédérales", li: ["Autorité protégée sur propriété privée : la zone devient temporairement fédérale (une zone publique peut l'être sur ordre du C.O.)","Pouvoirs liés à la mission : contrôle d'identité, palpation, fouille préventive, ordre de circuler, détention temporaire en cas de menace","Mesures toujours proportionnées, légales et liées à la protection immédiate du VIP"] },
+        ] },
+        { t: "Le Close Protection Officer", b: [
+          "Le CPO est la dernière ligne de défense et l'agent le plus proche du VIP.",
+          { h: "Missions", li: ["Assurer l'intégrité physique du VIP","Anticiper les menaces et réagir immédiatement","Couvrir, déplacer et extraire le VIP","Maintenir l'intégrité du 1er cercle et la surveillance 360°"] },
+          "Le CPO protège : il n'enquête pas et n'interpelle pas. Toute suspicion est transmise à un Static Agent.",
+        ] },
+        { t: "Le Lead CPO", b: [
+          { li: ["Dirige l'opération et le positionnement des agents","Attribue les rôles et les cercles de sécurité","Commande le 1er cercle, organise le 2e, coordonne le 3e","Décide des déplacements et évacuations, donne les consignes radio"] },
+        ] },
+        { t: "Autorités protégées", b: [
+          { h: "Branche exécutive (prioritaire USSS)", li: ["Gouverneur, Lieutenant Gouverneur, Secrétaires d'État — VIP primaire","Secrétaires d'État annexes, Trésorier d'État — VIP intermédiaire"] },
+          { h: "Branche judiciaire (prioritaire SAB)", li: ["Haut Juge, Procureur Général — VIP secondaire"] },
+          { h: "Effectifs de protection", li: ["VIP secondaire : 1 agent max","VIP intermédiaire : 2 agents max","VIP primaire : 2 à 6 agents"] },
+          "La famille proche d'un VIP primaire est traitée en VIP secondaire. Les VIP secondaires peuvent renoncer temporairement à la protection ; les primaires non.",
+        ] },
+        { t: "Les trois cercles de protection", b: [
+          { h: "1er cercle — Close Protection Officers", li: ["Protection rapprochée immédiate, contact permanent, 360°","Couvrir, déplacer, extraire ; réaction instantanée"] },
+          { h: "2e cercle — Static Agents", li: ["Contrôle des accès et filtrage, levées de doute","Sweep et sécurisation des zones sensibles","Peut, sur ordre, opérer en civil"] },
+          { h: "3e cercle — forces alliées / CAT", li: ["Sécurisation extérieure, gestion des foules et de la circulation","Contention des menaces éloignées","Capable de rejoindre le VIP en moins de 15 secondes"] },
+        ] },
+        { t: "Rôles spécifiques", b: [
+          { h: "GunMan (1er cercle)", li: ["Arme au poing, peu visible — ouvre la marche"] },
+          { h: "Valise (1er cercle)", li: ["Porte la valise près de l'autorité, la déploie en cas de menace (protection contre projectiles et balles)"] },
+        ] },
+        { t: "Principes opérationnels", b: [
+          "Priorité absolue : la survie du VIP. Séquence : COUVRIR – DÉPLACER – EXTRAIRE.",
+          { h: "Vigilance & communication", li: ["Lecture continue de l'environnement, identification des anomalies","Messages radio courts, clairs, sans ambiguïté","Signalement immédiat du moindre doute"] },
+        ] },
+        { t: "Sécurisation & formations", b: [
+          { h: "Préparation", li: ["Analyse de l'environnement, reconnaissance des accès et itinéraires","Plusieurs routes d'extraction prévues"] },
+          { h: "Formations de protection", li: ["Diamant : 4 agents","Triangle : 3 agents","Pointe : 2 agents"] },
+          { h: "Advance Team (1 à 2 agents)", li: ["Reconnaissance et validation du dispositif avant l'arrivée du VIP, puis rejoint le 2e cercle","Le LSPD/LSSD peut être mandaté en soutien"] },
+        ] },
+        { t: "Droits en zone fédérale", b: [
+          { li: ["Restreindre les entrées ; palpation obligatoire ; fouille (même sexe)","Refus d'obtempérer ou intrusion : neutralisation possible par la force — vérifier l'identité réelle des FDO/SAMS sur le MDT (risque d'usurpation)"] },
+          { h: "Dérogations (entrée & palpation)", li: ["Membres du gouvernement, agents du Secret Service, juge, procureur"] },
+          "Port d'arme prohibé en institution publique, sauf forces de l'ordre.",
+        ] },
+        { t: "Alerte, extraction & engagement", b: [
+          { h: "En cas d'alerte", li: ["1er cercle couvre et extrait ; CAT neutralise ; Static Agents verrouillent les accès ; 3e cercle sécurise l'extérieur"] },
+          { h: "Priorités", li: ["1. Couvrir — 2. Déplacer — 3. Extraire — 4. Neutraliser / contenir"] },
+          { h: "Règles d'engagement", li: ["Force en dernier recours, proportionnée, cadre légal respecté","3 sommations verbales avant ouverture du feu — sauf menace létale immédiate"] },
+        ] },
+        { t: "Plan CONTINUITY & codes", b: [
+          "Activé en cas de défaillance de la chaîne gouvernementale : sécurisation des successeurs, escortes renforcées, dispersion vers plusieurs sites, convois distincts.",
+          { h: "Ligne de succession", li: ["Lieutenant Gouverneur → Secrétaire d'État → Sécurité Intérieure → Trésor → Haut Juge → Procureur Général"] },
+          { h: "Appellations codifiées", li: ["Capitol = gouvernement de San Andreas","Goutte = résidence des secrétaires d'État"] },
+        ] },
+      ],
+    },
+    convoi: {
+      titre: "Manuel de Convoi",
+      sousTitre: "Déplacement sécurisé des autorités — l'essentiel.",
+      sections: [
+        { t: "Objectif & attitude", b: [
+          { h: "Objectifs", li: ["Déplacement sécurisé des autorités","Maintenir la capacité opérationnelle, éviter embuscade et désorganisation","Garantir l'arrivée sécurisée à destination"] },
+          { h: "Attitude de l'agent", li: ["Concentration, anticipation, vigilance constante","Respect des ordres radio ; connaître son rôle et vérifier son équipement"] },
+        ] },
+        { t: "Rôles lors du convoi", b: [
+          { h: "Motorcade Leader (Lead Convoi)", li: ["Dirige depuis le 1er véhicule : itinéraire, formations, départs / arrêts / reprises","Donne les consignes radio et signale les menaces"] },
+          { h: "Conducteur Beast / Flag", li: ["Maintient le véhicule en mouvement, conduite évasive","En cas d'attaque : quitter la zone vers un point sécurisé"] },
+          { h: "Passager", li: ["Répond au « check » radio, surveille, signale, sécurise la sortie des autorités"] },
+          { h: "CAT", li: ["Réponse armée, couvre le véhicule principal, crée une fenêtre d'extraction"] },
+          { h: "HAMMER / Hazard", li: ["Risques NRBC, premiers soins, décontamination ; informe immédiatement le Lead"] },
+          { h: "Lead CPO", li: ["Dirige les unités à l'arrêt ; annonce le Top Sécu puis le Top VIP"] },
+        ] },
+        { t: "Top Sécu / Top VIP", b: [
+          "Top Sécu : tous les agents pied à terre (sauf conducteurs VIP), clarifient les menaces et se regroupent autour du véhicule VIP.",
+          "Top VIP : le VIP sort, la mission CPO débute.",
+        ] },
+        { t: "Rappels primordiaux", b: [
+          { li: ["Véhicules lourds et blindés : rester à l'intérieur, ne sortir qu'en dernier recours","Le convoi ne doit jamais être à l'arrêt","Jamais le même trajet ni une route prévisible","Au besoin, le véhicule peut faire bélier sur un véhicule léger gênant"] },
+        ] },
+        { t: "Les véhicules", b: [
+          { h: "Watch Tower (V1)", li: ["Ouvreur, abrite le Lead Convoi, brouillage (appels, IED) — type Secrétaire d'État"] },
+          { h: "Beast / OneBeast", li: ["Transport principal du Gouverneur, protection renforcée, Lead CPO en passager"] },
+          { h: "Flag", li: ["Lieutenant-Gouverneur et autorités de moyenne importance"] },
+          { h: "SUV", li: ["Polyvalent : ouvreur secondaire, renfort, secrétaires d'État"] },
+          { h: "Road Runner", li: ["Brouillage de signaux et relais radio crypté"] },
+          { h: "CAT", li: ["Protection armée, généralement en fin de convoi"] },
+          { h: "Halfback (Lightbar)", li: ["CAT mobile, placement libre selon la menace"] },
+          { h: "Hazard (HAMMER)", li: ["NRBC, soutien médical (sang O−), ferme le convoi"] },
+        ] },
+        { t: "Types de convois", b: [
+          { h: "Officiel", li: ["Watch Tower, SUV, Beast/Flag, Halfback CAT, Road Runner, CAT, Hazard (V1 → V8)"] },
+          { h: "Officiel réduit", li: ["Watch Tower, Beast/Flag, + SUV ou Halfback ou Road Runner"] },
+          { h: "Discret", li: ["1 à 2 SUV — priorité à la discrétion et la mobilité"] },
+        ] },
+        { t: "Formations & communications", b: [
+          { li: ["Linéaire (½ voiture d'écart) ; Quinconce 1 ou 2 voies (1 voiture) ; option resserrée","Codes 2 ; vitesses indicatives : 80 km/h en ville, 110 km/h sur autoroute","Avant départ : check des véhicules (V1, V2…) puis annonce de la destination"] },
+        ] },
+        { t: "Manœuvres", b: [
+          { h: "Arrêt d'urgence & demi-tour", li: ["Obstacle infranchissable : arrêt, marche arrière, demi-tour sur ordre","Resserrement en linéaire du bon côté, puis repositionnement 1 à 1 par la gauche"] },
+          { h: "Bulle de protection", li: ["Beast hors service : transfert du VIP vers le véhicule latéral (porte déjà ouverte)","Le VIP sort côté véhicule récepteur ; échange une fois la situation maîtrisée"] },
+        ] },
+      ],
+    },
+  };
+
+  const cur = MANUELS[manuel];
+
+  const renderBlock = (b, i) => {
+    if (typeof b === "string")
+      return <p key={i} style={{ fontSize:13, color:C.ink, lineHeight:1.65, margin:"8px 0" }}>{b}</p>;
+    return (
+      <div key={i} style={{ margin:"10px 0" }}>
+        {b.h && <div style={{ fontSize:11, fontWeight:700, color:C.blue, textTransform:"uppercase",
+          letterSpacing:"0.06em", marginBottom:5 }}>{b.h}</div>}
+        <ul style={{ margin:0, paddingLeft:18 }}>
+          {b.li.map((x, j) => <li key={j} style={{ fontSize:13, color:C.ink, lineHeight:1.6, marginBottom:3 }}>{x}</li>)}
+        </ul>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
+        <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+          letterSpacing:"0.08em", color:C.navy }}>Documents — Training Division</h2>
+        <span style={{ fontSize:11, color:C.grey }}>Référentiel opérationnel</span>
+      </div>
+
+      <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        {[["cpo","Manuel C.P.O."],["convoi","Manuel de Convoi"]].map(([id,label]) => (
+          <button key={id} onClick={() => setManuel(id)}
+            style={{ padding:"8px 16px", borderRadius:6, fontSize:13, fontWeight:600,
+              border:`1px solid ${manuel===id ? C.navy : C.line}`,
+              background: manuel===id ? C.navy : "#fff", color: manuel===id ? "#fff" : C.ink }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background:C.blueSoft, border:`1px solid ${C.line}`, borderRadius:8,
+        padding:"12px 16px", fontSize:13, color:C.navy }}>
+        <strong>{cur.titre}</strong> — {cur.sousTitre}
+      </div>
+
+      {cur.sections.map((s, i) => {
+        const k = manuel + "-" + i;
+        const isOpen = !!open[k];
+        return (
+          <div key={k} style={{ background:"#fff", border:`1px solid ${C.line}`,
+            borderRadius:8, overflow:"hidden" }}>
+            <button onClick={() => toggle(k)}
+              style={{ width:"100%", textAlign:"left", padding:"12px 16px", cursor:"pointer",
+                background: isOpen ? C.blueSoft : "#fff", border:"none",
+                display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <span style={{ fontSize:13, fontWeight:700, color:C.navy }}>{s.t}</span>
+              <span style={{ fontSize:18, color:C.blue, lineHeight:1 }}>{isOpen ? "−" : "+"}</span>
+            </button>
+            {isOpen && <div style={{ padding:"2px 16px 14px" }}>{s.b.map(renderBlock)}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Application ───
 function App() {
   const [members, setMembers] = useState(null);
@@ -856,7 +1031,7 @@ function App() {
   const editor = session !== null;
   const agentLogged = agentSession !== null;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
-  const PAGES_AGENT = ["pointeuse", "rapports"];
+  const PAGES_AGENT = ["pointeuse", "rapports", "documents"];
   const pageEffective = (agentLogged && !editor)
     ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
     : page;
@@ -1417,8 +1592,8 @@ function App() {
             {(editor || agentLogged) && (
               <nav style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                 {(editor
-                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["rapports","Rapports"],["journal","Journal"]]
-                  : [["pointeuse","Pointeuse"],["rapports","Rapports"]]
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["rapports","Rapports"],["documents","Documents TD"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["documents","Documents TD"]]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
@@ -2098,6 +2273,8 @@ function App() {
             </div>
           );
         })()}
+
+        {pageEffective === "documents" && <DocsTD />}
 
         {pageEffective === "journal" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
