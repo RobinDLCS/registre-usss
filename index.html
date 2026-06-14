@@ -551,6 +551,9 @@ const GRADES = [
 const STATUTS = ["Présent", "Absent", "Mis à pied"];
 const STATUT_COLOR = { "Présent": C.green, "Absent": C.amber, "Mis à pied": C.red };
 
+const PRIORITES = ["Prioritaire", "Normal", "Bas"];
+const PRIORITE_COLOR = { "Prioritaire": C.red, "Normal": C.blue, "Bas": C.grey };
+
 const BOOL_FIELDS = {
   ppa: [["ppa1","PPA I"],["ppa2","PPA II"],["ppa3","PPA III"],["ppa4","PPA IV"],["ppa5","PPA V"]],
   qualif: [["sams","SAMS"],["rq","RQ"]],
@@ -705,6 +708,12 @@ async function apiLoginAgent(matricule, password) {
 async function apiAddPointage(session, pointage) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "add_pointage", session, pointage }) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+}
+async function apiSaveAutorites(session, autorites) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "save_autorites", session, autorites }) });
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 }
@@ -1011,6 +1020,10 @@ function App() {
   });
   const [pointageError, setPointageError] = useState("");
   const [pointageBusy, setPointageBusy] = useState(false);
+
+  // Autorités protégées
+  const [autorites, setAutorites] = useState([]);
+  const [autoriteError, setAutoriteError] = useState("");
   const [filtreMat, setFiltreMat] = useState("");
   const [lundiSelect, setLundiSelect] = useState(lundiDeLaSemaine(todayISO));
 
@@ -1031,7 +1044,7 @@ function App() {
   const editor = session !== null;
   const agentLogged = agentSession !== null;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
-  const PAGES_AGENT = ["pointeuse", "rapports", "documents"];
+  const PAGES_AGENT = ["pointeuse", "rapports", "documents", "autorites"];
   const pageEffective = (agentLogged && !editor)
     ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
     : page;
@@ -1053,6 +1066,7 @@ function App() {
         setLogs(data.logs || []);
         setPointages(data.pointages || []);
         setRapports(data.rapports || []);
+        setAutorites(data.autorites || []);
       } catch (e) {
         setLoadError("Connexion au registre impossible : " + e.message +
           " — vérifie API_URL et le déploiement Apps Script.");
@@ -1511,6 +1525,27 @@ function App() {
     setFormError("");
   };
 
+  // ── Gestion des autorités protégées (éditeur) ───
+  const persistAutorites = async (list) => {
+    setAutorites(list);
+    setAutoriteError("");
+    try {
+      await apiSaveAutorites(session.token, list);
+    } catch (e) {
+      setAutoriteError("Sauvegarde impossible : " + e.message);
+      if (String(e.message).includes("Session")) doLogout();
+    }
+  };
+  const addAutorite = () => {
+    const a = { id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      nom: "", fonction: "", priorite: "Normal", note: "" };
+    persistAutorites([...autorites, a]);
+  };
+  const updateAutorite = (id, field, value) =>
+    persistAutorites(autorites.map(a => a.id === id ? { ...a, [field]: value } : a));
+  const removeAutorite = (id) =>
+    persistAutorites(autorites.filter(a => a.id !== id));
+
   const addRapport = () => {
     const texte = rapportTexte.trim();
     if (!texte || !fiche) return;
@@ -1592,8 +1627,8 @@ function App() {
             {(editor || agentLogged) && (
               <nav style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                 {(editor
-                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["rapports","Rapports"],["documents","Documents TD"],["journal","Journal"]]
-                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["documents","Documents TD"]]
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"]]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
@@ -2275,6 +2310,125 @@ function App() {
         })()}
 
         {pageEffective === "documents" && <DocsTD />}
+
+        {pageEffective === "autorites" && (() => {
+          const ordre = { "Prioritaire": 0, "Normal": 1, "Bas": 2 };
+          const liste = [...autorites].sort((a, b) =>
+            (ordre[a.priorite] - ordre[b.priorite]) || (a.nom || "").localeCompare(b.nom || ""));
+          const compte = (p) => autorites.filter(a => a.priorite === p).length;
+          return (
+            <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+                flexWrap:"wrap", gap:12 }}>
+                <div>
+                  <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+                    letterSpacing:"0.08em", color:C.navy }}>Autorités protégées</h2>
+                  <div style={{ fontSize:11, color:C.grey, marginTop:2 }}>
+                    Gestion et ordre de priorité de protection</div>
+                </div>
+                {editor && (
+                  <button onClick={addAutorite}
+                    style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
+                      color:"#fff", background:C.green }}>+ Ajouter une autorité</button>
+                )}
+              </div>
+
+              {autoriteError && (
+                <div style={{ background:"#FDECEC", border:`1px solid ${C.red}`, color:C.red,
+                  padding:"10px 14px", borderRadius:8, fontSize:13 }}>{autoriteError}</div>
+              )}
+
+              <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+                {PRIORITES.map(p => (
+                  <div key={p} style={{ flex:"1 1 120px", background:"#fff",
+                    border:`1px solid ${C.line}`, borderRadius:8, padding:"10px 14px" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <span style={{ width:10, height:10, borderRadius:"50%",
+                        background:PRIORITE_COLOR[p] }} />
+                      <span style={{ fontSize:11, textTransform:"uppercase",
+                        letterSpacing:"0.06em", color:C.grey }}>{p}</span>
+                    </div>
+                    <div style={{ fontSize:22, fontWeight:700, color:C.navy, marginTop:2 }}>
+                      {compte(p)}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ background:"#fff", borderRadius:8, overflowX:"auto",
+                border:`1px solid ${C.line}` }}>
+                <table style={{ width:"100%", fontSize:13 }}>
+                  <thead>
+                    <tr style={{ background:C.navy }}>
+                      {["Autorité","Fonction","Priorité","Note", ...(editor ? [""] : [])].map((h, i) => (
+                        <th key={i} style={{ padding:"8px 12px", textAlign:"left", fontSize:11,
+                          textTransform:"uppercase", letterSpacing:"0.05em", color:"#fff",
+                          whiteSpace:"nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {liste.length === 0 && (
+                      <tr><td colSpan={editor ? 5 : 4}
+                        style={{ padding:"24px", textAlign:"center", color:C.grey }}>
+                        Aucune autorité enregistrée{editor ? " — clique sur « + Ajouter une autorité »." : "."}
+                      </td></tr>
+                    )}
+                    {liste.map((a, idx) => (
+                      <tr key={a.id} style={{ borderTop:`1px solid ${C.line}`,
+                        background: idx % 2 ? "#FAFBFD" : "#fff" }}>
+                        <td style={{ padding:8 }}>
+                          {editor
+                            ? <input style={inputStyle} defaultValue={a.nom} placeholder="Nom / titre"
+                                onBlur={e => { if (e.target.value !== a.nom) updateAutorite(a.id, "nom", e.target.value); }} />
+                            : <span style={{ fontWeight:600, color:C.ink }}>{a.nom || "—"}</span>}
+                        </td>
+                        <td style={{ padding:8 }}>
+                          {editor
+                            ? <input style={inputStyle} defaultValue={a.fonction} placeholder="Fonction"
+                                onBlur={e => { if (e.target.value !== a.fonction) updateAutorite(a.id, "fonction", e.target.value); }} />
+                            : <span style={{ color:C.ink }}>{a.fonction || "—"}</span>}
+                        </td>
+                        <td style={{ padding:8 }}>
+                          {editor ? (
+                            <select value={a.priorite}
+                              onChange={e => updateAutorite(a.id, "priorite", e.target.value)}
+                              style={{ ...inputStyle, fontWeight:600 }}>
+                              {PRIORITES.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                          ) : (
+                            <span style={{ display:"inline-block", padding:"3px 10px", borderRadius:99,
+                              fontSize:11, fontWeight:700, color:"#fff",
+                              background:PRIORITE_COLOR[a.priorite] || C.grey }}>{a.priorite}</span>
+                          )}
+                        </td>
+                        <td style={{ padding:8 }}>
+                          {editor
+                            ? <input style={inputStyle} defaultValue={a.note} placeholder="Note (effectifs, lieu…)"
+                                onBlur={e => { if (e.target.value !== a.note) updateAutorite(a.id, "note", e.target.value); }} />
+                            : <span style={{ color: a.note ? C.ink : C.grey }}>{a.note || "—"}</span>}
+                        </td>
+                        {editor && (
+                          <td style={{ padding:8, textAlign:"right" }}>
+                            <button onClick={() => removeAutorite(a.id)} title="Supprimer"
+                              style={{ width:28, height:28, borderRadius:6, fontWeight:700,
+                                color:"#fff", background:C.red }}>×</button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ fontSize:11, color:C.grey, lineHeight:1.6 }}>
+                Niveaux — <strong style={{ color:C.red }}>Prioritaire</strong> : protection maximale ·
+                <strong style={{ color:C.blue }}> Normal</strong> : dispositif standard ·
+                <strong style={{ color:C.grey }}> Bas</strong> : protection allégée.
+                {!editor && " (Lecture seule — la gestion se fait en supervision.)"}
+              </div>
+            </div>
+          );
+        })()}
 
         {pageEffective === "journal" && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
