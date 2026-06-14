@@ -134,6 +134,12 @@ nav{background:var(--white);border-bottom:1px solid var(--gray-light);position:s
 .div-desc{font-size:13px;color:var(--gray-mid);line-height:1.7;}
 .div-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
 .tag{font-size:11px;background:var(--blue-light);color:var(--blue-mid);padding:3px 10px;font-weight:600;border-radius:4px;}
+.div-group{margin-bottom:22px;}
+.div-subs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0 0 22px;padding-left:22px;border-left:2px dashed var(--gray-light);}
+.sub-card{background:var(--off-white);border:1px solid var(--gray-light);border-radius:8px;padding:14px 16px;border-left:3px solid var(--blue);}
+.sub-abbr{font-weight:700;color:var(--blue-dark);font-size:14px;letter-spacing:1px;}
+.sub-full{font-size:12px;color:var(--gray-mid);margin-top:3px;line-height:1.5;}
+.div-standalone{border:2px solid var(--gold);}
 
 /* ── CHIEFS HERO CARDS ── */
 .chief-card-hero{background:var(--blue-mid);padding:36px;display:grid;grid-template-columns:90px 1fr;gap:28px;align-items:center;border-radius:10px;transition:background .2s;}
@@ -251,8 +257,8 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
       <div class="nav-item"><div class="nav-link" id="nav-home"      onclick="showPage('home')">Accueil</div></div>
       <div class="nav-item"><div class="nav-link" id="nav-divisions" onclick="showPage('divisions')">Divisions</div></div>
       <div class="nav-item"><div class="nav-link" id="nav-chiefs"    onclick="showPage('chiefs')">Chief's Office</div></div>
-      <div class="nav-item"><div class="nav-link" id="nav-news"      onclick="showPage('news')">Actualités</div></div>
       <div class="nav-item"><div class="nav-link" id="nav-recruit"   onclick="showPage('recruit')">Recrutement</div></div>
+      <div class="nav-item"><a class="nav-link" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&amp;ouid=116928453372376996711" target="_blank" rel="noopener" style="text-decoration:none">Candidater</a></div>
       <div class="nav-item"><div class="nav-link cta" onclick="enterRegistre()">Connexion</div></div>
     </div>
   </div>
@@ -288,10 +294,10 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
         <h3>Chief's Office</h3>
         <p>Le commandement du Field Office et son état-major.</p>
       </div>
-      <div class="feature-card" onclick="showPage('news')">
-        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
-        <h3>Actualités</h3>
-        <p>Communiqués officiels et annonces du Bureau.</p>
+      <div class="feature-card" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711','_blank')">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+        <h3>Candidater</h3>
+        <p>Déposez votre dossier de candidature en ligne.</p>
       </div>
       <div class="feature-card" onclick="showPage('recruit')">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
@@ -333,20 +339,6 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
     </div>
   </section>
 
-  <section class="section-wrap gray">
-    <div class="container">
-      <div class="section-head row">
-        <div>
-          <h2>Actualités</h2>
-          <p class="lead">Les derniers communiqués de l'USSS.</p>
-          <div class="rule"></div>
-        </div>
-        <button class="btn-outline" onclick="showPage('news')">Toutes les actualités →</button>
-      </div>
-      <div class="news-grid" id="home-news-grid"></div>
-    </div>
-  </section>
-
   <section class="section-wrap">
     <div class="container">
       <div class="section-head">
@@ -375,16 +367,45 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
   </div>
   <section class="section-wrap">
     <div class="container">
-      <div class="div-grid">
-        <div class="div-card"><div class="div-badge">PPD</div><div class="div-body"><div class="div-name">PPD</div><div class="div-full">Presidential Protective Division</div><p class="div-desc">Protection rapprochée permanente des plus hautes autorités de l'État lors de leurs fonctions et déplacements.</p><div class="div-tags"><span class="tag">Protection</span><span class="tag">Rapprochée</span></div></div></div>
-        <div class="div-card"><div class="div-badge">DPD</div><div class="div-body"><div class="div-name">DPD</div><div class="div-full">Dignitary Protection Division</div><p class="div-desc">Protection des personnalités, dignitaires et hôtes officiels lors des événements et apparitions publiques.</p><div class="div-tags"><span class="tag">Escorte</span><span class="tag">Événements</span></div></div></div>
-        <div class="div-card"><div class="div-badge">CAT</div><div class="div-body"><div class="div-name">CAT</div><div class="div-full">Counter Assault Team</div><p class="div-desc">Unité tactique d'intervention déployée en cas de menace armée contre une personne protégée.</p><div class="div-tags"><span class="tag">Tactique</span><span class="tag">Haute menace</span></div></div></div>
-        <div class="div-card"><div class="div-badge">INV</div><div class="div-body"><div class="div-name">INV</div><div class="div-full">Investigations Division</div><p class="div-desc">Enquêtes sur la contrefaçon, la fraude financière et les menaces visant les institutions.</p><div class="div-tags"><span class="tag">Investigation</span><span class="tag">Financier</span></div></div></div>
-        <div class="div-card"><div class="div-badge">ASD</div><div class="div-body"><div class="div-name">ASD</div><div class="div-full">Air Support Division</div><p class="div-desc">Transport aérien des autorités, surveillance et soutien aérien lors des opérations.</p><div class="div-tags"><span class="tag">Aérien</span><span class="tag">Surveillance</span></div></div></div>
-        <div class="div-card"><div class="div-badge">K9</div><div class="div-body"><div class="div-name">K9</div><div class="div-full">K9 Unit</div><p class="div-desc">Détection d'explosifs et d'éléments dangereux, appui aux opérations de protection.</p><div class="div-tags"><span class="tag">Cynophile</span><span class="tag">Détection</span></div></div></div>
-        <div class="div-card"><div class="div-badge">UD</div><div class="div-body"><div class="div-name">UD</div><div class="div-full">Uniformed Division</div><p class="div-desc">Sécurisation des périmètres, points de contrôle et infrastructures sensibles.</p><div class="div-tags"><span class="tag">Périmètre</span><span class="tag">Sécurisation</span></div></div></div>
-        <div class="div-card"><div class="div-badge">COM</div><div class="div-body"><div class="div-name">COM</div><div class="div-full">Communications Division</div><p class="div-desc">Communication officielle, recrutement et relations publiques de l'agence.</p><div class="div-tags"><span class="tag">Communication</span><span class="tag">Recrutement</span></div></div></div>
+
+      <div class="div-group">
+        <div class="div-card"><div class="div-badge">HAM</div><div class="div-body"><div class="div-name">HAMMER</div><div class="div-full">Hazardous Agent Mitigation &amp; Medical Emergency Response</div><p class="div-desc">Gestion des agents dangereux et réponse médicale d'urgence sur les opérations.</p></div></div>
+        <div class="div-subs">
+          <div class="sub-card"><div class="sub-abbr">K-9</div><div class="sub-full">Canine Team — équipe cynophile de détection</div></div>
+        </div>
       </div>
+
+      <div class="div-group">
+        <div class="div-card"><div class="div-badge">UD</div><div class="div-body"><div class="div-name">UD</div><div class="div-full">Uniformed Division</div><p class="div-desc">Sécurisation en uniforme des périmètres, points de contrôle et infrastructures.</p></div></div>
+        <div class="div-subs">
+          <div class="sub-card"><div class="sub-abbr">CPO</div><div class="sub-full">Close Protection Operation — protection rapprochée</div></div>
+          <div class="sub-card"><div class="sub-abbr">AFFC</div><div class="sub-full">Airlift Frequent Fliers Club — soutien et transport aérien</div></div>
+        </div>
+      </div>
+
+      <div class="div-group">
+        <div class="div-card"><div class="div-badge">CID</div><div class="div-body"><div class="div-name">CID</div><div class="div-full">Criminal Investigations Division</div><p class="div-desc">Enquêtes criminelles, fraude et menaces visant les institutions.</p></div></div>
+        <div class="div-subs">
+          <div class="sub-card"><div class="sub-abbr">IRS</div><div class="sub-full">Internal Revenue Service — investigations fiscales et financières</div></div>
+          <div class="sub-card"><div class="sub-abbr">OLIA</div><div class="sub-full">Office of Legal &amp; Internals Affairs — affaires juridiques et internes</div></div>
+        </div>
+      </div>
+
+      <div class="div-group">
+        <div class="div-card"><div class="div-badge">CAT</div><div class="div-body"><div class="div-name">CAT</div><div class="div-full">Counter Assault Team</div><p class="div-desc">Unité tactique d'intervention déployée en cas de menace armée.</p></div></div>
+        <div class="div-subs">
+          <div class="sub-card"><div class="sub-abbr">CST</div><div class="sub-full">Counter Sniper Team — appui et couverture sniper</div></div>
+        </div>
+      </div>
+
+      <div class="div-group">
+        <div class="div-card"><div class="div-badge">OCMR</div><div class="div-body"><div class="div-name">OCMR</div><div class="div-full">Office Of Communication &amp; Media Relation</div><p class="div-desc">Communication officielle, relations médias et recrutement de l'agence.</p></div></div>
+      </div>
+
+      <div class="div-group">
+        <div class="div-card div-standalone"><div class="div-badge" style="background:var(--gold)">TD</div><div class="div-body"><div class="div-name" style="color:var(--gold)">TD</div><div class="div-full">Training Division</div><p class="div-desc">Formation, recrutement et perfectionnement des agents.</p></div></div>
+      </div>
+
     </div>
   </section>
 </div>
@@ -414,34 +435,6 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
         <div class="chief-card"><div class="chief-init">SS</div><div class="chief-role">Senior Supervisor</div><div class="chief-name">— à définir —</div></div>
         <div class="chief-card"><div class="chief-init">DS</div><div class="chief-role">Deputy Supervisor</div><div class="chief-name">— à définir —</div></div>
         <div class="chief-card"><div class="chief-init">DS</div><div class="chief-role">Deputy Supervisor</div><div class="chief-name">— à définir —</div></div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- PAGE: ACTUALITÉS -->
-<div class="page" id="page-news">
-  <div class="page-header">
-    <div class="container">
-      <div class="breadcrumb"><span onclick="closeArticle()">Accueil</span> › <span onclick="closeArticle()">Actualités</span></div>
-      <h1>Actualités</h1>
-      <p>Les derniers communiqués et actualités de l'USSS.</p>
-    </div>
-  </div>
-  <section class="section-wrap gray">
-    <div class="container">
-      <div id="news-list-view">
-        <div class="news-tabs-bar" id="news-tabs-bar"></div>
-        <div class="news-cards-grid" id="news-cards-grid"></div>
-        <div id="news-empty-cat" style="display:none;text-align:center;padding:60px 0;color:var(--gray-mid)">Aucune actualité dans cette catégorie.</div>
-      </div>
-      <div id="news-article-view" style="display:none">
-        <button onclick="closeArticle()" class="btn-outline" style="margin-bottom:24px">← Retour aux actualités</button>
-        <div class="news-main-article">
-          <span class="nma-tag" id="art-tag"></span>
-          <h2 class="nma-title" id="art-title"></h2>
-          <div class="nma-body" id="art-body"></div>
-        </div>
       </div>
     </div>
   </section>
@@ -509,8 +502,8 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
         <li><span onclick="showPage('home')">Accueil</span></li>
         <li><span onclick="showPage('divisions')">Divisions</span></li>
         <li><span onclick="showPage('chiefs')">Chief's Office</span></li>
-        <li><span onclick="showPage('news')">Actualités</span></li>
         <li><span onclick="showPage('recruit')">Recrutement</span></li>
+        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&amp;ouid=116928453372376996711" target="_blank" rel="noopener" style="text-decoration:none">Candidater</a></li>
         <li><span onclick="enterRegistre()">Connexion</span></li>
       </ul>
     </div>
@@ -759,7 +752,7 @@ async function apiDeleteRapport(session, rapportId) {
 function BadgeMatricule({ value, onClick }) {
   return <button onClick={onClick} title="Ouvrir la fiche agent"
     style={{ display:"inline-block", fontFamily:"monospace", fontWeight:700,
-    fontSize:13, padding:"2px 8px", borderRadius:2, background:C.navy, color:"#fff",
+    fontSize:13, padding:"2px 8px", borderRadius:6, background:C.navy, color:"#fff",
     borderLeft:`3px solid ${C.gold}`, letterSpacing:"0.05em",
     cursor: onClick ? "pointer" : "default" }}>{value}</button>;
 }
@@ -767,7 +760,7 @@ function BadgeMatricule({ value, onClick }) {
 function BoolCell({ value, onToggle, readonly }) {
   return <button onClick={readonly ? undefined : onToggle}
     title={readonly ? "Lecture seule — connecte-toi pour modifier" : "Cliquer pour basculer"}
-    style={{ width:28, height:28, borderRadius:2, fontWeight:700, fontSize:13,
+    style={{ width:28, height:28, borderRadius:6, fontWeight:700, fontSize:13,
       background: value ? "#E3F0E8" : "#F7E8E8", color: value ? C.green : C.red,
       border:`1px solid ${value ? "#BCD9C7" : "#E5C5C5"}`,
       cursor: readonly ? "default" : "pointer", opacity: readonly ? 0.8 : 1 }}>
@@ -786,7 +779,7 @@ function StatutPill({ statut, onCycle, readonly }) {
 }
 
 function ApteBadge({ ok, label }) {
-  return <span style={{ display:"inline-block", padding:"3px 8px", borderRadius:2,
+  return <span style={{ display:"inline-block", padding:"3px 8px", borderRadius:6,
     fontSize:11, fontWeight:600, whiteSpace:"nowrap",
     background: ok ? "#E3F0E8" : "#F6F7F9",
     color: ok ? C.green : C.grey,
@@ -806,7 +799,7 @@ function CoverageBar({ label, count, total }) {
   const pct = total ? Math.round((count / total) * 100) : 0;
   return <div style={{ display:"flex", alignItems:"center", gap:12 }}>
     <span style={{ fontSize:13, width:140, flexShrink:0, color:C.ink }}>{label}</span>
-    <div style={{ flex:1, height:12, borderRadius:2, overflow:"hidden", background:C.blueSoft }}>
+    <div style={{ flex:1, height:12, borderRadius:6, overflow:"hidden", background:C.blueSoft }}>
       <div style={{ height:"100%", width:pct+"%", background:C.blue }} />
     </div>
     <span style={{ fontSize:11, fontFamily:"monospace", width:70, textAlign:"right", color:C.grey }}>
@@ -1187,21 +1180,8 @@ function App() {
 
   // ── Écran de choix d'accès si personne n'est connecté ──
   if (!editor && !agentLogged) {
-    return <div style={{ minHeight:"100vh", background:C.paper,
+    return <div style={{ minHeight:"100%", background:C.paper,
       display:"flex", flexDirection:"column" }}>
-      <header style={{ background:C.navy, borderBottom:`3px solid ${C.gold}`, padding:"16px 20px" }}>
-        <div style={{ maxWidth:1120, margin:"0 auto", display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ background:"#fff", borderRadius:6, padding:"5px 9px",
-            display:"flex", alignItems:"center", border:`1px solid ${C.gold}` }}>
-            <img src={LOGO_USSS} alt="United States Secret Service"
-              style={{ height:34, width:"auto", display:"block" }} />
-          </div>
-          <div>
-            <div style={{ fontSize:11, letterSpacing:"0.08em", color:"#9FB2CC" }}>
-              Registre des effectifs &amp; pointeuse</div>
-          </div>
-        </div>
-      </header>
       <main style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
         <div style={{ background:"#fff", borderRadius:8, padding:"36px 32px",
           maxWidth:560, width:"100%", textAlign:"center",
@@ -1213,7 +1193,7 @@ function App() {
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))",
             gap:14, marginBottom:20 }}>
             <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
-              style={{ padding:"22px 14px", borderRadius:4, background:"#fff",
+              style={{ padding:"22px 14px", borderRadius:8, background:"#fff",
                 border:`1px solid ${C.line}`, borderTop:`3px solid ${C.blue}`,
                 display:"flex", flexDirection:"column", gap:6, textAlign:"center" }}>
               <div style={{ fontSize:30 }}>👮</div>
@@ -1223,7 +1203,7 @@ function App() {
                 Pointer un service, consulter mes propres heures</div>
             </button>
             <button onClick={() => { setShowLogin(true); setLoginError(""); }}
-              style={{ padding:"22px 14px", borderRadius:4, background:"#fff",
+              style={{ padding:"22px 14px", borderRadius:8, background:"#fff",
                 border:`1px solid ${C.line}`, borderTop:`3px solid ${C.gold}`,
                 display:"flex", flexDirection:"column", gap:6, textAlign:"center" }}>
               <div style={{ fontSize:30 }}>🔑</div>
@@ -1266,10 +1246,10 @@ function App() {
             {loginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{loginError}</p>}
             <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
               <button onClick={() => setShowLogin(false)}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                   border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
               <button onClick={doLogin} disabled={loginBusy}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                   color:"#fff", background: loginBusy ? "#7A93B5" : C.blue }}>
                 {loginBusy ? "Vérification…" : "Se connecter"}</button>
             </div>
@@ -1304,10 +1284,10 @@ function App() {
             {agentLoginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{agentLoginError}</p>}
             <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
               <button onClick={() => setShowAgentLogin(false)}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                   border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
               <button onClick={doLoginAgent} disabled={agentLoginBusy}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                   color:"#fff", background: agentLoginBusy ? "#7A93B5" : C.blue }}>
                 {agentLoginBusy ? "Vérification…" : "Pointer entrée"}</button>
             </div>
@@ -1405,20 +1385,23 @@ function App() {
   const ficheLogs = fiche ? logs.filter(l => l.action.includes(fiche.matricule)) : [];
 
   return (
-    <div style={{ minHeight:"100vh", background:C.paper, color:C.ink }}>
-      {/* ── Bandeau ── */}
-      <header style={{ background:C.navy, borderBottom:`3px solid ${C.gold}` }}>
-        <div style={{ maxWidth:1120, margin:"0 auto", padding:"16px 20px",
+    <div style={{ minHeight:"100%", background:C.paper, color:C.ink }}>
+      {/* ── Bandeau (style site public) ── */}
+      <header style={{ background:"#fff", borderBottom:`1px solid ${C.line}`,
+        boxShadow:"0 2px 8px rgba(0,0,0,0.06)" }}>
+        <div style={{ maxWidth:1120, margin:"0 auto", padding:"14px 20px",
           display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <div style={{ background:"#fff", borderRadius:6, padding:"5px 9px",
-              display:"flex", alignItems:"center", border:`1px solid ${C.gold}` }}>
+            <div style={{ background:"#fff", borderRadius:8, padding:"4px 8px",
+              display:"flex", alignItems:"center", border:`1px solid ${C.line}` }}>
               <img src={LOGO_USSS} alt="United States Secret Service"
-                style={{ height:34, width:"auto", display:"block" }} />
+                style={{ height:32, width:"auto", display:"block" }} />
             </div>
             <div>
-              <div style={{ fontSize:11, letterSpacing:"0.08em", color:"#9FB2CC" }}>
-                Registre des effectifs &amp; formations</div>
+              <div style={{ fontSize:14, fontWeight:700, color:C.navy, lineHeight:1.2 }}>
+                United States Secret Service</div>
+              <div style={{ fontSize:11, letterSpacing:"0.08em", color:C.grey, textTransform:"uppercase" }}>
+                Registre des effectifs</div>
             </div>
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
@@ -1426,36 +1409,36 @@ function App() {
               background:SAVE_BADGE.bg, color:SAVE_BADGE.fg }}>{SAVE_BADGE.txt}</span>
             {editor && (
               <span style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <span style={{ fontSize:11, color:"#C8D4E5" }}>
+                <span style={{ fontSize:11, color:C.grey }}>
                   ✎ {session.login}</span>
                 <button onClick={doLogout}
-                  style={{ padding:"4px 10px", fontSize:11, borderRadius:2,
-                    background:"transparent", color:"#C8D4E5",
-                    border:"1px solid #2C456B" }}>Déconnexion</button>
+                  style={{ padding:"5px 12px", fontSize:11, borderRadius:6, fontWeight:600,
+                    background:"transparent", color:C.blue,
+                    border:`1px solid ${C.line}` }}>Déconnexion</button>
               </span>
             )}
             {agentLogged && (
               <span style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <span style={{ fontSize:11, color:"#C8D4E5" }}>
+                <span style={{ fontSize:11, color:C.grey }}>
                   👮 {agentSession.matricule}</span>
                 <button onClick={doLogoutAgent}
-                  style={{ padding:"4px 10px", fontSize:11, borderRadius:2,
-                    background:"transparent", color:"#C8D4E5",
-                    border:"1px solid #2C456B" }}>Pointer sortie</button>
+                  style={{ padding:"5px 12px", fontSize:11, borderRadius:6, fontWeight:600,
+                    background:"transparent", color:C.blue,
+                    border:`1px solid ${C.line}` }}>Pointer sortie</button>
               </span>
             )}
             {(editor || agentLogged) && (
-              <nav style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+              <nav style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                 {(editor
                   ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["rapports","Rapports"],["journal","Journal"]]
                   : [["pointeuse","Pointeuse"],["rapports","Rapports"]]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
-                    style={{ padding:"6px 16px", borderRadius:2, fontSize:13, fontWeight:600,
+                    style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
                       textTransform:"uppercase", letterSpacing:"0.05em",
                       ...(pageEffective === id
-                        ? { background:C.gold, color:C.navyDeep }
-                        : { background:"transparent", color:"#C8D4E5", border:"1px solid #2C456B" }) }}>
+                        ? { background:C.navy, color:"#fff", border:`1px solid ${C.navy}` }
+                        : { background:"#fff", color:C.ink, border:`1px solid ${C.line}` }) }}>
                     {label}
                   </button>
                 ))}
@@ -1523,7 +1506,7 @@ function App() {
                       color: n > 0 ? C.ink : C.grey }}>
                       <span style={{ fontWeight:500 }}>{g}</span>
                       <span style={{ fontFamily:"monospace", fontWeight:700,
-                        minWidth:24, textAlign:"center", borderRadius:2, padding:"1px 6px",
+                        minWidth:24, textAlign:"center", borderRadius:6, padding:"1px 6px",
                         background: n > 0 ? C.blue : "#E2E6EC",
                         color: n > 0 ? "#fff" : C.grey }}>{n}</span>
                     </div>
@@ -1562,7 +1545,7 @@ function App() {
               <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
                 {Object.entries(VUES).map(([id, v]) => (
                   <button key={id} onClick={() => setVue(id)}
-                    style={{ padding:"6px 12px", fontSize:13, borderRadius:2, fontWeight:600,
+                    style={{ padding:"6px 12px", fontSize:13, borderRadius:6, fontWeight:600,
                       ...(vue === id
                         ? { background:C.blue, color:"#fff" }
                         : { background:"#fff", color:C.blue, border:`1px solid ${C.line}` }) }}>
@@ -1572,7 +1555,7 @@ function App() {
               </div>
               {editor && (
                 <button onClick={() => { setShowAdd(true); setFormError(""); }}
-                  style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                     color:"#fff", background:C.green }}>+ Recruter un membre</button>
               )}
             </div>
@@ -1648,23 +1631,23 @@ function App() {
                             <button onClick={() => promote(m.matricule, -1)}
                               disabled={GRADES.indexOf(m.grade) === 0}
                               title="Monter en grade"
-                              style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                              style={{ width:28, height:28, borderRadius:6, fontWeight:700,
                                 background:C.blueSoft, color:C.blue,
                                 opacity: GRADES.indexOf(m.grade) === 0 ? 0.25 : 1 }}>▲</button>
                             <button onClick={() => promote(m.matricule, 1)}
                               disabled={GRADES.indexOf(m.grade) === GRADES.length - 1}
                               title="Descendre en grade"
-                              style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                              style={{ width:28, height:28, borderRadius:6, fontWeight:700,
                                 background:C.blueSoft, color:C.blue,
                                 opacity: GRADES.indexOf(m.grade) === GRADES.length - 1 ? 0.25 : 1 }}>▼</button>
                             {confirmDelete === m.matricule ? (
                               <button onClick={() => removeMember(m.matricule)}
-                                style={{ padding:"0 8px", height:28, borderRadius:2, fontSize:11,
+                                style={{ padding:"0 8px", height:28, borderRadius:6, fontSize:11,
                                   fontWeight:700, color:"#fff", background:C.red }}>Confirmer ?</button>
                             ) : (
                               <button onClick={() => setConfirmDelete(m.matricule)}
                                 title="Retirer du registre"
-                                style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                                style={{ width:28, height:28, borderRadius:6, fontWeight:700,
                                   background:"#F7E8E8", color:C.red }}>✕</button>
                             )}
                           </div>
@@ -1715,12 +1698,12 @@ function App() {
 
                 {!agentLogged ? (
                   <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
-                    gap:12, padding:"12px 14px", background:C.blueSoft, borderRadius:4, flexWrap:"wrap" }}>
+                    gap:12, padding:"12px 14px", background:C.blueSoft, borderRadius:8, flexWrap:"wrap" }}>
                     <span style={{ fontSize:13, color:C.ink }}>
                       Connecte-toi en tant qu'agent pour enregistrer un service.
                     </span>
                     <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
-                      style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:2,
+                      style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:6,
                         color:"#fff", background:C.blue }}>👮 Connexion agent</button>
                   </div>
                 ) : (
@@ -1788,7 +1771,7 @@ function App() {
                     )}
                     <div style={{ display:"flex", justifyContent:"flex-end" }}>
                       <button onClick={submitPointage} disabled={pointageBusy}
-                        style={{ padding:"7px 18px", fontSize:13, fontWeight:600, borderRadius:2,
+                        style={{ padding:"7px 18px", fontSize:13, fontWeight:600, borderRadius:6,
                           color:"#fff", background: pointageBusy ? "#7A93B5" : C.green }}>
                         {pointageBusy ? "Enregistrement…" : "Valider le pointage"}
                       </button>
@@ -1863,13 +1846,13 @@ function App() {
                                 : `${formatDateFR(p.date)} · ${p.heureDebut} → ${p.heureFin}`}
                             </span>
                             <span style={{ fontSize:11, fontWeight:700, padding:"2px 8px",
-                              borderRadius:2, background:C.gold, color:C.navyDeep }}>
+                              borderRadius:6, background:C.gold, color:C.navyDeep }}>
                               {formatDuree(dureeMin)}
                             </span>
                             {peutSupprimer && (
                               <button onClick={() => removePointage(p.id)}
                                 title="Supprimer ce pointage"
-                                style={{ width:24, height:24, borderRadius:2, fontWeight:700,
+                                style={{ width:24, height:24, borderRadius:6, fontWeight:700,
                                   background:"#F7E8E8", color:C.red, fontSize:12 }}>✕</button>
                             )}
                           </div>
@@ -1919,7 +1902,7 @@ function App() {
                 justifyContent:"space-between", gap:12, flexWrap:"wrap" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <button onClick={() => setLundiSelect(decaleSemaine(lundiSelect, -1))}
-                    style={{ width:32, height:32, borderRadius:2, fontWeight:700,
+                    style={{ width:32, height:32, borderRadius:6, fontWeight:700,
                       background:C.blueSoft, color:C.blue, border:`1px solid ${C.line}` }}>◀</button>
                   <div style={{ minWidth:220, textAlign:"center" }}>
                     <div style={{ fontSize:11, textTransform:"uppercase",
@@ -1930,13 +1913,13 @@ function App() {
                     </div>
                   </div>
                   <button onClick={() => setLundiSelect(decaleSemaine(lundiSelect, 1))}
-                    style={{ width:32, height:32, borderRadius:2, fontWeight:700,
+                    style={{ width:32, height:32, borderRadius:6, fontWeight:700,
                       background:C.blueSoft, color:C.blue, border:`1px solid ${C.line}` }}>▶</button>
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                   {!semaineCourante && (
                     <button onClick={() => setLundiSelect(lundiDeLaSemaine(todayISO))}
-                      style={{ padding:"6px 12px", fontSize:12, borderRadius:2, fontWeight:600,
+                      style={{ padding:"6px 12px", fontSize:12, borderRadius:6, fontWeight:600,
                         background:"#fff", color:C.blue, border:`1px solid ${C.line}` }}>
                       Semaine actuelle</button>
                   )}
@@ -2038,7 +2021,7 @@ function App() {
                   )}
                   {agentLogged && (
                     <button onClick={nouveauRapport}
-                      style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                      style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                         fontWeight:600, color:"#fff", background:C.green }}>
                       + Nouveau rapport</button>
                   )}
@@ -2071,7 +2054,7 @@ function App() {
                       <div style={{ display:"flex", alignItems:"center", gap:10,
                         flexWrap:"wrap", marginBottom:6 }}>
                         <span style={{ fontSize:11, fontWeight:700, padding:"2px 8px",
-                          borderRadius:2, color:"#fff",
+                          borderRadius:6, color:"#fff",
                           background: estBrouillon ? C.amber : C.green,
                           textTransform:"uppercase", letterSpacing:"0.05em" }}>
                           {estBrouillon ? "Brouillon" : r.numero}
@@ -2090,25 +2073,25 @@ function App() {
                       <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                         {estBrouillon && agentLogged && (
                           <button onClick={() => { setRapportEdit(r); setRapportError(""); }}
-                            style={{ padding:"4px 12px", fontSize:11, borderRadius:2,
+                            style={{ padding:"4px 12px", fontSize:11, borderRadius:6,
                               fontWeight:600, background:C.blueSoft, color:C.blue,
                               border:`1px solid ${C.line}` }}>✎ Continuer</button>
                         )}
                         {!estBrouillon && (
                           <button onClick={() => setRapportView(r)}
-                            style={{ padding:"4px 12px", fontSize:11, borderRadius:2,
+                            style={{ padding:"4px 12px", fontSize:11, borderRadius:6,
                               fontWeight:600, background:C.navy, color:"#fff" }}>
                             👁 Consulter</button>
                         )}
                         {(estBrouillon || editor) && (
                           confirmDeleteRap === r.id ? (
                             <button onClick={() => supprimerRapport(r.id)}
-                              style={{ padding:"4px 10px", fontSize:11, borderRadius:2,
+                              style={{ padding:"4px 10px", fontSize:11, borderRadius:6,
                                 fontWeight:700, color:"#fff", background:C.red }}>
                               Confirmer ?</button>
                           ) : (
                             <button onClick={() => setConfirmDeleteRap(r.id)}
-                              style={{ padding:"4px 10px", fontSize:11, borderRadius:2,
+                              style={{ padding:"4px 10px", fontSize:11, borderRadius:6,
                                 fontWeight:600, background:"#F7E8E8", color:C.red }}>
                               ✕ Supprimer</button>
                           )
@@ -2137,7 +2120,7 @@ function App() {
                 letterSpacing:"0.08em", color:C.navy }}>Journal des opérations ({logs.length})</h2>
               {editor && logs.length > 0 && (
                 <button onClick={() => restoreFrom(logs[0])}
-                  style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                  style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                     color:"#fff", background:C.blue }}>↩ Annuler la dernière action</button>
               )}
             </div>
@@ -2158,7 +2141,7 @@ function App() {
                       whiteSpace:"nowrap", color:C.grey }}>{entry.date}</span>
                     {entry.auteur && (
                       <span style={{ fontSize:11, fontWeight:600, padding:"1px 6px",
-                        borderRadius:2, background:C.blueSoft, color:C.blue }}>{entry.auteur}</span>
+                        borderRadius:6, background:C.blueSoft, color:C.blue }}>{entry.auteur}</span>
                     )}
                     <span style={{ fontSize:13, fontWeight:500,
                       color: entry.action.startsWith("↩") ? C.blue : C.ink }}>{entry.action}</span>
@@ -2166,7 +2149,7 @@ function App() {
                   {editor && (
                     <button onClick={() => restoreFrom(entry)}
                       title="Restaurer le registre tel qu'il était AVANT cette action"
-                      style={{ padding:"4px 12px", fontSize:11, borderRadius:2, fontWeight:600,
+                      style={{ padding:"4px 12px", fontSize:11, borderRadius:6, fontWeight:600,
                         whiteSpace:"nowrap", background:C.blueSoft, color:C.blue,
                         border:`1px solid ${C.line}` }}>Revenir avant</button>
                   )}
@@ -2206,7 +2189,7 @@ function App() {
                 <StatutPill statut={fiche.statut} readonly={!editor}
                   onCycle={() => cycleStatut(fiche.matricule)} />
                 <button onClick={() => setFicheMat(null)}
-                  style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                  style={{ width:28, height:28, borderRadius:6, fontWeight:700,
                     background:"#F6F7F9", color:C.grey, border:`1px solid ${C.line}` }}>✕</button>
               </div>
             </div>
@@ -2255,7 +2238,7 @@ function App() {
                   style={{ ...inputStyle, resize:"vertical" }} />
                 <button onClick={addRapport} disabled={!rapportTexte.trim()}
                   style={{ alignSelf:"flex-end", padding:"5px 14px", fontSize:12,
-                    borderRadius:2, fontWeight:600, color:"#fff",
+                    borderRadius:6, fontWeight:600, color:"#fff",
                     background: rapportTexte.trim() ? C.red : "#D5DAE1" }}>
                   Déposer le rapport</button>
               </div>
@@ -2323,10 +2306,10 @@ function App() {
             {loginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{loginError}</p>}
             <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
               <button onClick={() => setShowLogin(false)}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                   border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
               <button onClick={doLogin} disabled={loginBusy}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                   color:"#fff", background: loginBusy ? "#7A93B5" : C.blue }}>
                 {loginBusy ? "Vérification…" : "Se connecter"}</button>
             </div>
@@ -2363,10 +2346,10 @@ function App() {
             {agentLoginError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{agentLoginError}</p>}
             <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
               <button onClick={() => setShowAgentLogin(false)}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                   border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
               <button onClick={doLoginAgent} disabled={agentLoginBusy}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                   color:"#fff", background: agentLoginBusy ? "#7A93B5" : C.blue }}>
                 {agentLoginBusy ? "Vérification…" : "Pointer entrée"}</button>
             </div>
@@ -2394,7 +2377,7 @@ function App() {
                   letterSpacing:"0.08em", color:C.navy }}>
                   Rédaction d'un rapport — Brouillon</h2>
                 <button onClick={() => { setRapportEdit(null); setRapportError(""); }}
-                  style={{ width:28, height:28, borderRadius:2, fontWeight:700,
+                  style={{ width:28, height:28, borderRadius:6, fontWeight:700,
                     background:"#F6F7F9", color:C.grey,
                     border:`1px solid ${C.line}` }}>✕</button>
               </div>
@@ -2499,17 +2482,17 @@ function App() {
                 flexWrap:"wrap", paddingTop:8, borderTop:`1px solid ${C.line}` }}>
                 <button onClick={() => { setRapportEdit(null); setRapportError(""); }}
                   disabled={rapportBusy}
-                  style={{ padding:"7px 16px", fontSize:13, borderRadius:2,
+                  style={{ padding:"7px 16px", fontSize:13, borderRadius:6,
                     border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>
                   Fermer sans sauvegarder</button>
                 <div style={{ display:"flex", gap:8 }}>
                   <button onClick={saveBrouillon} disabled={rapportBusy}
-                    style={{ padding:"7px 16px", fontSize:13, fontWeight:600, borderRadius:2,
+                    style={{ padding:"7px 16px", fontSize:13, fontWeight:600, borderRadius:6,
                       background:C.blueSoft, color:C.blue,
                       border:`1px solid ${C.line}` }}>
                     {rapportBusy ? "…" : "💾 Sauver brouillon"}</button>
                   <button onClick={() => setConfirmSubmit(true)} disabled={rapportBusy}
-                    style={{ padding:"7px 16px", fontSize:13, fontWeight:600, borderRadius:2,
+                    style={{ padding:"7px 16px", fontSize:13, fontWeight:600, borderRadius:6,
                       color:"#fff", background: rapportBusy ? "#7A93B5" : C.red }}>
                     📤 Soumettre</button>
                 </div>
@@ -2536,11 +2519,11 @@ function App() {
             </p>
             <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
               <button onClick={() => setConfirmSubmit(false)}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                   border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>
                 Continuer le brouillon</button>
               <button onClick={soumettreRapport} disabled={rapportBusy}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                   color:"#fff", background: rapportBusy ? "#7A93B5" : C.red }}>
                 {rapportBusy ? "Soumission…" : "Confirmer la soumission"}</button>
             </div>
@@ -2556,7 +2539,7 @@ function App() {
         const aCible = !!r.cibleAgentMat;
         const aCitoyen = !!(r.cibleCitoyenPrenom || r.cibleCitoyenNom);
         const Box = ({ children }) => (
-          <div style={{ border:"1px solid #1A2A4A", borderRadius:2, overflow:"hidden",
+          <div style={{ border:"1px solid #1A2A4A", borderRadius:6, overflow:"hidden",
             margin:"8px 0" }}>{children}</div>
         );
         const Th = ({ children }) => (
@@ -2580,18 +2563,18 @@ function App() {
               flexDirection:"column", gap:10 }}
               onClick={e => e.stopPropagation()}>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
-                gap:8, flexWrap:"wrap", background:C.navy, padding:"10px 14px", borderRadius:4 }}>
+                gap:8, flexWrap:"wrap", background:C.navy, padding:"10px 14px", borderRadius:8 }}>
                 <span style={{ color:"#fff", fontWeight:700, fontSize:13 }}>
                   {r.numero || "Brouillon"}</span>
                 <div style={{ display:"flex", gap:8 }}>
                   <button onClick={() => exportRapport("png")}
-                    style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:2,
+                    style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:6,
                       background:C.gold, color:C.navyDeep }}>📷 PNG</button>
                   <button onClick={() => exportRapport("pdf")}
-                    style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:2,
+                    style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:6,
                       background:"#fff", color:C.navy }}>📄 PDF</button>
                   <button onClick={() => setRapportView(null)}
-                    style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:2,
+                    style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:6,
                       background:"transparent", color:"#fff",
                       border:"1px solid #2C456B" }}>Fermer</button>
                 </div>
@@ -2748,10 +2731,10 @@ function App() {
             {formError && <p style={{ fontSize:11, fontWeight:600, color:C.red }}>{formError}</p>}
             <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:4 }}>
               <button onClick={() => setShowAdd(false)}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6,
                   border:`1px solid ${C.line}`, background:"#fff", color:C.grey }}>Annuler</button>
               <button onClick={addMember}
-                style={{ padding:"6px 16px", fontSize:13, borderRadius:2, fontWeight:600,
+                style={{ padding:"6px 16px", fontSize:13, borderRadius:6, fontWeight:600,
                   color:"#fff", background:C.green }}>Recruter</button>
             </div>
           </div>
@@ -2767,16 +2750,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 <!-- JS site vitrine -->
 <script>
-// ── NEWS (statique) ──
-var NEWS_DATA = [
-  { id:1, category:"Communiqué", date:"8 Juin 2026", title:"Mise en service du nouveau Field Office",
-    excerpt:"L'USSS annonce l'ouverture de son nouveau Field Office, doté d'infrastructures modernisées au service des opérations.",
-    body:"<p>L'United States Secret Service est fier d'annoncer la mise en service de son nouveau Field Office.</p><p>Cette nouvelle implantation offre des infrastructures sécurisées et modernes, des espaces de travail optimisés pour les agents et les unités spécialisées, ainsi qu'une meilleure capacité de coordination opérationnelle.</p>" },
-  { id:2, category:"Recrutement", date:"1 Juin 2026", title:"Campagne de recrutement ouverte",
-    excerpt:"Le Bureau ouvre une nouvelle session de recrutement pour ses divisions de protection et d'investigation.",
-    body:"<p>L'USSS recherche de nouveaux agents motivés pour rejoindre ses divisions de protection rapprochée et d'investigation.</p><p>Les candidatures sont étudiées sur dossier puis entretien. Consultez la page Recrutement pour les conditions d'admission.</p>" }
-];
-
 function showPage(id){
   exitRegistre(true);
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -2804,68 +2777,7 @@ function notify(msg){
   setTimeout(function(){n.classList.remove('show');},3000);
 }
 
-// ── NEWS rendering ──
-function renderNews(){
-  var home=document.getElementById('home-news-grid');
-  if(home){
-    home.innerHTML=NEWS_DATA.slice(0,3).map(function(n){
-      return '<div class="news-card" onclick="openArticle('+n.id+')">'
-        +'<span class="nc-tag">'+n.category+'</span>'
-        +'<h3 class="nc-title">'+n.title+'</h3>'
-        +'<p class="nc-excerpt">'+n.excerpt+'</p>'
-        +'<div class="nc-date">'+n.date+'</div></div>';
-    }).join('');
-  }
-  var cats=['all'].concat(NEWS_DATA.map(function(n){return n.category;}).filter(function(v,i,a){return a.indexOf(v)===i;}));
-  var bar=document.getElementById('news-tabs-bar');
-  if(bar){
-    bar.innerHTML=cats.map(function(c,i){
-      var count=c==='all'?NEWS_DATA.length:NEWS_DATA.filter(function(n){return n.category===c;}).length;
-      return '<button class="news-tab'+(i===0?' active':'')+'" onclick="filterNews(\''+c+'\',this)">'+(c==='all'?'Toutes':c)+' <span class="tab-count">'+count+'</span></button>';
-    }).join('');
-  }
-  var grid=document.getElementById('news-cards-grid');
-  if(grid){
-    grid.innerHTML=NEWS_DATA.map(function(n){
-      return '<div class="news-card-full" data-category="'+n.category+'" onclick="openArticle('+n.id+')">'
-        +'<div class="ncf-thumb">USSS</div>'
-        +'<div class="ncf-body"><span class="nc-tag">'+n.category+'</span>'
-        +'<h3 class="ncf-title">'+n.title+'</h3>'
-        +'<p class="ncf-excerpt">'+n.excerpt+'</p>'
-        +'<div class="ncf-date">'+n.date+'</div></div></div>';
-    }).join('');
-  }
-}
-function filterNews(cat,btn){
-  document.querySelectorAll('.news-tab').forEach(function(t){t.classList.remove('active');});
-  btn.classList.add('active');
-  var cards=document.querySelectorAll('.news-card-full'); var visible=0;
-  cards.forEach(function(card){
-    var match=cat==='all'||card.dataset.category===cat;
-    card.classList.toggle('hidden',!match); if(match)visible++;
-  });
-  var empty=document.getElementById('news-empty-cat'); if(empty)empty.style.display=visible===0?'block':'none';
-}
-function openArticle(id){
-  var art=NEWS_DATA.find(function(n){return n.id==id;}); if(!art)return;
-  document.getElementById('art-tag').textContent=art.category+' · '+art.date;
-  document.getElementById('art-title').textContent=art.title;
-  document.getElementById('art-body').innerHTML=art.body;
-  document.getElementById('news-list-view').style.display='none';
-  document.getElementById('news-article-view').style.display='block';
-  showPage('news');
-  document.getElementById('news-list-view').style.display='none';
-  document.getElementById('news-article-view').style.display='block';
-  window.scrollTo(0,0);
-}
-function closeArticle(){
-  document.getElementById('news-list-view').style.display='block';
-  document.getElementById('news-article-view').style.display='none';
-  showPage('news');
-}
-
 document.addEventListener('DOMContentLoaded',function(){
-  renderNews();
   showPage('home');
 });
 </script>
