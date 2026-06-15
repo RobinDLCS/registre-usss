@@ -261,6 +261,7 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
     <div class="nav-links">
       <div class="nav-item"><div class="nav-link" id="nav-home"      onclick="showPage('home')">Accueil</div></div>
       <div class="nav-item"><div class="nav-link" id="nav-divisions" onclick="showPage('divisions')">Divisions</div></div>
+      <div class="nav-item"><div class="nav-link" id="nav-formations" onclick="showPage('formations')">Formations</div></div>
       <div class="nav-item"><div class="nav-link" id="nav-chiefs"    onclick="showPage('chiefs')">Chief's Office</div></div>
       <div class="nav-item"><div class="nav-link" id="nav-recruit"   onclick="showPage('recruit')">Recrutement</div></div>
       <div class="nav-item"><a class="nav-link" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&amp;ouid=116928453372376996711" target="_blank" rel="noopener" style="text-decoration:none">Candidater</a></div>
@@ -411,6 +412,61 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
         <div class="div-card div-standalone"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/TD.png" alt="TD" onerror="this.remove()"><span>TD</span></div><div class="div-body"><div class="div-name" style="color:var(--gold)">TD</div><div class="div-full">Training Division</div><p class="div-desc">Formation, recrutement et perfectionnement des agents.</p></div></div>
       </div>
 
+    </div>
+  </section>
+</div>
+
+<!-- PAGE: FORMATIONS -->
+<div class="page" id="page-formations">
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Formations</div>
+      <h1>Formations</h1>
+      <p>Le parcours de formation de la Training Division, de la recrue à l'agent spécialisé.</p>
+    </div>
+  </div>
+  <section class="section-wrap gray">
+    <div class="container">
+      <div style="display:grid;gap:16px;">
+
+        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--blue);border-radius:10px;padding:20px 22px;">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">1</div>
+          <div>
+            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Formation initiale</h3>
+            <p style="color:var(--gray-mid);line-height:1.7;">Intégration de la recrue : déontologie, cadre légal, codes radio et fondamentaux de la protection. Obligatoire dès l'entrée en service.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--blue);border-radius:10px;padding:20px 22px;">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">2</div>
+          <div>
+            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Formation C.P.O. — Protection rapprochée</h3>
+            <p style="color:var(--gray-mid);line-height:1.7;">Les trois cercles de protection, les formations de marche (Diamant, Triangle, Pointe), la surveillance 360° et les procédures d'extraction.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--blue);border-radius:10px;padding:20px 22px;">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">3</div>
+          <div>
+            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Formation Convoi</h3>
+            <p style="color:var(--gray-mid);line-height:1.7;">Le déplacement sécurisé des autorités : rôles du convoi, véhicules spécialisés, formations de roulage et manœuvres d'urgence.</p>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--gold);border-radius:10px;padding:20px 22px;">
+          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">★</div>
+          <div>
+            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Spécialisations &amp; commandement</h3>
+            <p style="color:var(--gray-mid);line-height:1.7;">Pour les agents confirmés : qualifications de lead (Lead C.P.O., Motorcade Leading, Operation Leading) et accès aux fonctions d'encadrement.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="text-align:center;margin-top:32px;">
+        <p style="color:var(--gray-mid);margin-bottom:16px;">Le contenu détaillé des formations est encadré par la Training Division en interne.</p>
+        <button class="btn-hero-primary" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711','_blank')">Rejoindre l'USSS</button>
+      </div>
     </div>
   </section>
 </div>
@@ -930,6 +986,11 @@ function DocsTD() {
   };
 
   const cur = MANUELS[manuel];
+  const MANUEL_LINKS = {
+    cpo: "https://docs.google.com/document/d/1F5vHOCx1WiwZkGVpBTKOhKWBHDKuhADZacgcPFstEw0",
+    convoi: "https://docs.google.com/document/d/1yzkxjhm88XyC6bLA7ewMbooGc2sazKlYQz8ThVN3YCE",
+  };
+  const docBase = MANUEL_LINKS[manuel];
 
   const renderBlock = (b, i) => {
     if (typeof b === "string")
@@ -965,8 +1026,19 @@ function DocsTD() {
       </div>
 
       <div style={{ background:C.blueSoft, border:`1px solid ${C.line}`, borderRadius:8,
-        padding:"12px 16px", fontSize:13, color:C.navy }}>
-        <strong>{cur.titre}</strong> — {cur.sousTitre}
+        padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between",
+        flexWrap:"wrap", gap:10 }}>
+        <div style={{ fontSize:13, color:C.navy }}>
+          <strong>{cur.titre}</strong> — {cur.sousTitre}</div>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          <a href={docBase + "/edit?usp=sharing"} target="_blank" rel="noopener"
+            style={{ textDecoration:"none", padding:"7px 14px", borderRadius:6, fontSize:12,
+              fontWeight:600, background:C.navy, color:"#fff" }}>Ouvrir le manuel</a>
+          <a href={docBase + "/export?format=pdf"} target="_blank" rel="noopener"
+            style={{ textDecoration:"none", padding:"7px 14px", borderRadius:6, fontSize:12,
+              fontWeight:600, background:"#fff", color:C.blue, border:`1px solid ${C.line}` }}>
+            Télécharger en PDF</a>
+        </div>
       </div>
 
       {cur.sections.map((s, i) => {
@@ -986,6 +1058,173 @@ function DocsTD() {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─── Checklists de mission (CPO / Convoi) ───
+function ChecklistsMission() {
+  const [type, setType] = useState("cpo");
+  const [checked, setChecked] = useState({});
+  const LISTES = {
+    cpo: [
+      "Briefing reçu : itinéraire, menaces, rôles",
+      "Formation de protection choisie (Diamant / Triangle / Pointe)",
+      "Rôles attribués (Lead CPO, GunMan, Valise, flancs)",
+      "Équipement vérifié (radio, arme, valise pare-balles)",
+      "Advance Team / reconnaissance des lieux effectuée",
+      "Accès, issues et zones sensibles sécurisés (sweep)",
+      "Routes d'extraction définies (plan A et B)",
+      "Surveillance 360° répartie entre les agents",
+      "Liaison radio testée avec tous les cercles",
+      "Top Sécu prêt à être annoncé",
+      "Procédure d'urgence rappelée : Couvrir – Déplacer – Extraire",
+    ],
+    convoi: [
+      "Type de convoi défini (officiel / réduit / discret)",
+      "Composition et ordre des véhicules établis",
+      "Rôles attribués (Motorcade Leader, conducteurs, passagers, CAT, HAMMER)",
+      "Véhicules vérifiés (carburant, blindage, radio)",
+      "Itinéraire principal + itinéraire de secours définis",
+      "Check radio de départ effectué (V1, V2, V3…)",
+      "Codes 2 et vitesses rappelés (80 km/h ville · 110 km/h autoroute)",
+      "Formation annoncée (linéaire ½ voiture / quinconce 1 voiture)",
+      "Manœuvres rappelées (arrêt d'urgence, demi-tour, bulle de protection)",
+      "Hazard (NRBC) positionné en fin de convoi",
+      "Top Sécu / Top VIP prêts",
+    ],
+  };
+  const toggle = (k) => setChecked(c => ({ ...c, [k]: !c[k] }));
+  const reset = () => setChecked(c => {
+    const n = { ...c };
+    LISTES[type].forEach((_, i) => delete n[type + "-" + i]);
+    return n;
+  });
+  const items = LISTES[type];
+  const done = items.filter((_, i) => checked[type + "-" + i]).length;
+  const pct = Math.round((done / items.length) * 100);
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+        flexWrap:"wrap", gap:12 }}>
+        <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+          letterSpacing:"0.08em", color:C.navy }}>Checklists de mission</h2>
+        <button onClick={reset}
+          style={{ padding:"6px 14px", fontSize:12, borderRadius:6, fontWeight:600,
+            background:"#fff", color:C.blue, border:`1px solid ${C.line}` }}>Réinitialiser</button>
+      </div>
+
+      <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+        {[["cpo","Mission C.P.O."],["convoi","Convoi"]].map(([id,label]) => (
+          <button key={id} onClick={() => setType(id)}
+            style={{ padding:"8px 16px", borderRadius:6, fontSize:13, fontWeight:600,
+              border:`1px solid ${type===id ? C.navy : C.line}`,
+              background: type===id ? C.navy : "#fff", color: type===id ? "#fff" : C.ink }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background:"#fff", border:`1px solid ${C.line}`, borderRadius:8, padding:"14px 16px" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+          <span style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.06em", color:C.grey }}>
+            Progression</span>
+          <span style={{ fontSize:13, fontWeight:700, color: pct===100 ? C.green : C.navy }}>
+            {done} / {items.length} · {pct}%</span>
+        </div>
+        <div style={{ height:8, background:C.blueSoft, borderRadius:99, overflow:"hidden" }}>
+          <div style={{ height:"100%", width:pct+"%",
+            background: pct===100 ? C.green : C.blue, transition:"width .2s" }} />
+        </div>
+      </div>
+
+      <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+        {items.map((label, i) => {
+          const k = type + "-" + i;
+          const on = !!checked[k];
+          return (
+            <div key={k} onClick={() => toggle(k)}
+              style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer",
+                background:"#fff", border:`1px solid ${on ? C.green : C.line}`, borderRadius:8,
+                padding:"11px 14px" }}>
+              <span style={{ flexShrink:0, width:22, height:22, borderRadius:6,
+                border:`2px solid ${on ? C.green : "#c2cad6"}`, background: on ? C.green : "#fff",
+                color:"#fff", fontSize:14, fontWeight:700, display:"flex",
+                alignItems:"center", justifyContent:"center" }}>{on ? "✓" : ""}</span>
+              <span style={{ fontSize:13.5, color: on ? C.grey : C.ink,
+                textDecoration: on ? "line-through" : "none" }}>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontSize:11, color:C.grey }}>
+        Aide-mémoire de préparation — coche les points au fur et à mesure (non enregistré).
+      </div>
+    </div>
+  );
+}
+
+// ─── Progression de grade ───
+function ProgressionGrade() {
+  const TIERS = [
+    { tier: "Agents — terrain", color: C.blue, grades: [
+      { g: "Field Agent", sub: "Recrue", req: ["Formation initiale validée", "Contrat / règlement signé"] },
+      { g: "Senior Field Agent", req: ["≥ 2 semaines d'ancienneté", "Formations Convoi et CPO validées"] },
+      { g: "Special Agent", req: ["Sur proposition de la supervision", "Réussite d'une évaluation"] },
+      { g: "Senior Special Agent", req: ["Aucune sanction active", "Sur proposition de la supervision"] },
+    ] },
+    { tier: "Superviseurs", color: C.gold, grades: [
+      { g: "Deputy Supervisor", req: ["Première fonction d'encadrement", "Sur nomination de l'état-major"] },
+      { g: "Senior Supervisor", req: ["Encadrement confirmé (suivi des effectifs, missions)", "Sur nomination de l'état-major"] },
+      { g: "Chief Supervisor", req: ["Supervision transverse", "Sur nomination de l'état-major"] },
+    ] },
+    { tier: "État-major", color: C.navy, grades: [
+      { g: "Deputy Chief", req: ["Nomination discrétionnaire de l'état-major"] },
+      { g: "Assistant Chief", req: ["Nomination discrétionnaire de l'état-major"] },
+      { g: "Chief Operating", req: ["Direction de l'agence — nomination de l'état-major"] },
+    ] },
+  ];
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
+      <div>
+        <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+          letterSpacing:"0.08em", color:C.navy }}>Progression de grade</h2>
+        <div style={{ fontSize:11, color:C.grey, marginTop:2 }}>
+          Parcours et prérequis pour monter en grade au sein de l'USSS</div>
+      </div>
+
+      {TIERS.map((t, ti) => (
+        <div key={ti}>
+          <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase",
+            letterSpacing:"0.06em", color:t.color, marginBottom:10,
+            borderLeft:`3px solid ${t.color}`, paddingLeft:8 }}>{t.tier}</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+            {t.grades.map((gr, gi) => (
+              <div key={gi} style={{ background:"#fff", border:`1px solid ${C.line}`,
+                borderRadius:8, padding:"12px 16px", borderLeft:`3px solid ${t.color}` }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+                  <span style={{ fontSize:14, fontWeight:700, color:C.navy }}>{gr.g}</span>
+                  {gr.sub && <span style={{ fontSize:10.5, fontWeight:700, textTransform:"uppercase",
+                    letterSpacing:"0.05em", color:C.grey, background:C.blueSoft,
+                    padding:"2px 8px", borderRadius:99 }}>{gr.sub}</span>}
+                </div>
+                <ul style={{ margin:"8px 0 0", paddingLeft:18 }}>
+                  {gr.req.map((r, ri) => (
+                    <li key={ri} style={{ fontSize:13, color:C.ink, lineHeight:1.55, marginBottom:2 }}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style={{ fontSize:11, color:C.grey, lineHeight:1.6 }}>
+        Le passage de grade reste soumis à la décision de la hiérarchie. Les formations (initiale,
+        CPO, Convoi) sont suivies dans les effectifs ; les évaluations sont organisées par la Training Division.
+      </div>
     </div>
   );
 }
@@ -1051,7 +1290,7 @@ function App() {
   const editor = session !== null;
   const agentLogged = agentSession !== null;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
-  const PAGES_AGENT = ["pointeuse", "rapports", "documents", "autorites"];
+  const PAGES_AGENT = ["pointeuse", "rapports", "documents", "autorites", "checklists", "progression"];
   const pageEffective = (agentLogged && !editor)
     ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
     : page;
@@ -1634,8 +1873,8 @@ function App() {
             {(editor || agentLogged) && (
               <nav style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                 {(editor
-                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["journal","Journal"]]
-                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"]]
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"]]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
@@ -2099,6 +2338,21 @@ function App() {
             const hb = totauxParMat[normaliseMat(b.matricule)] || 0;
             return hb - ha;
           });
+          const actifsKeys = Object.keys(totauxParMat).filter(k => totauxParMat[k] > 0);
+          const nbActifs = actifsKeys.length;
+          const moyenneMin = nbActifs ? Math.round(totalGlobal / nbActifs) : 0;
+          let topMat = null, topMin = 0;
+          actifsKeys.forEach(k => { if (totauxParMat[k] > topMin) { topMin = totauxParMat[k]; topMat = k; } });
+          const nbCPO = members.filter(m => m.cpo).length;
+          const nbConvoi = members.filter(m => m.convoi).length;
+          const statCards = [
+            { label: "Heures (semaine)",      value: formatDuree(totalGlobal) },
+            { label: "Agents ayant pointé",   value: String(nbActifs) },
+            { label: "Moyenne / agent actif", value: formatDuree(moyenneMin) },
+            { label: "Top contributeur",      value: topMat ? `${topMat} · ${formatDuree(topMin)}` : "—" },
+            { label: "Formation CPO",         value: `${nbCPO} / ${members.length}` },
+            { label: "Formation Convoi",      value: `${nbConvoi} / ${members.length}` },
+          ];
           return (
             <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
               <section style={{ background:"#fff", borderRadius:6, padding:16,
@@ -2135,6 +2389,18 @@ function App() {
                   </div>
                 </div>
               </section>
+
+              <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+                {statCards.map((s, i) => (
+                  <div key={i} style={{ flex:"1 1 150px", background:"#fff",
+                    border:`1px solid ${C.line}`, borderRadius:8, padding:"12px 14px" }}>
+                    <div style={{ fontSize:10.5, textTransform:"uppercase",
+                      letterSpacing:"0.06em", color:C.grey }}>{s.label}</div>
+                    <div style={{ fontSize:18, fontWeight:700, color:C.navy, marginTop:3 }}>
+                      {s.value}</div>
+                  </div>
+                ))}
+              </div>
 
               <div style={{ background:"#fff", borderRadius:6, overflowX:"auto",
                 border:`1px solid ${C.line}` }}>
@@ -2317,6 +2583,10 @@ function App() {
         })()}
 
         {pageEffective === "documents" && <DocsTD />}
+
+        {pageEffective === "checklists" && <ChecklistsMission />}
+
+        {pageEffective === "progression" && <ProgressionGrade />}
 
         {pageEffective === "autorites" && (() => {
           const ordre = { "Rouge": 0, "Orange": 1, "Jaune": 2, "Vert": 3 };
