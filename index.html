@@ -1487,43 +1487,46 @@ function App() {
 
   // ── Écran de choix d'accès si personne n'est connecté ──
   if (!editor && !agentLogged) {
-    return <div style={{ minHeight:"100%", background:C.paper,
+    return <div style={{ minHeight:"100%", position:"relative", overflow:"hidden",
+      background:"radial-gradient(120% 90% at 75% 10%, #10456a 0%, #00314c 38%, #00263a 60%, #06121c 100%)",
       display:"flex", flexDirection:"column" }}>
-      <main style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
-        <div style={{ background:"#fff", borderRadius:8, padding:"36px 32px",
-          maxWidth:560, width:"100%", textAlign:"center",
-          border:`1px solid ${C.line}`, borderTop:`4px solid ${C.gold}` }}>
-          <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.15em",
-            color:C.grey, marginBottom:8 }}>Sélectionne ton mode d'accès</div>
-          <h1 style={{ fontSize:22, fontWeight:700, color:C.navy, marginBottom:24 }}>
-            Authentification requise</h1>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))",
-            gap:14, marginBottom:20 }}>
-            <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
-              style={{ padding:"22px 14px", borderRadius:8, background:"#fff",
-                border:`1px solid ${C.line}`, borderTop:`3px solid ${C.blue}`,
-                display:"flex", flexDirection:"column", gap:6, textAlign:"center" }}>
-              <div style={{ fontSize:30 }}>👮</div>
-              <div style={{ fontWeight:700, color:C.navy, textTransform:"uppercase",
-                letterSpacing:"0.08em", fontSize:13 }}>Agent</div>
-              <div style={{ fontSize:11, color:C.grey, lineHeight:1.4 }}>
-                Pointer un service, consulter mes propres heures</div>
-            </button>
-            <button onClick={() => { setShowLogin(true); setLoginError(""); }}
-              style={{ padding:"22px 14px", borderRadius:8, background:"#fff",
-                border:`1px solid ${C.line}`, borderTop:`3px solid ${C.gold}`,
-                display:"flex", flexDirection:"column", gap:6, textAlign:"center" }}>
-              <div style={{ fontSize:30 }}>🔑</div>
-              <div style={{ fontWeight:700, color:C.navy, textTransform:"uppercase",
-                letterSpacing:"0.08em", fontSize:13 }}>Supervision</div>
-              <div style={{ fontSize:11, color:C.grey, lineHeight:1.4 }}>
-                Gestion complète : effectifs, formations, pointages, récap hebdo</div>
-            </button>
-          </div>
-          <p style={{ fontSize:11, color:C.grey }}>
-            Contacte l'administration pour obtenir tes identifiants.
-          </p>
+      <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png"
+        alt="" onError={e => { e.target.style.display = "none"; }}
+        style={{ position:"absolute", right:"-6%", top:"50%", transform:"translateY(-50%)",
+          width:"min(60vw,640px)", opacity:0.06, filter:"grayscale(1) brightness(3)", pointerEvents:"none" }} />
+      <main style={{ position:"relative", zIndex:2, flex:1, display:"flex", flexDirection:"column",
+        alignItems:"center", justifyContent:"center", padding:"48px 24px", textAlign:"center" }}>
+        <div style={{ fontFamily:"'Oswald',sans-serif", textTransform:"uppercase", letterSpacing:"0.3em",
+          fontSize:12, color:C.gold, marginBottom:14 }}>Espace sécurisé</div>
+        <h1 style={{ fontFamily:"'Oswald',sans-serif", textTransform:"uppercase", color:"#fff",
+          fontWeight:700, fontSize:"clamp(34px,6vw,60px)", lineHeight:1, letterSpacing:"0.02em", margin:0 }}>
+          Registre <span style={{ color:C.gold }}>USSS</span></h1>
+        <p style={{ color:"rgba(255,255,255,0.8)", maxWidth:450, margin:"16px 0 38px",
+          lineHeight:1.6, fontSize:15 }}>
+          Espace agents &amp; supervision. Sélectionne ton mode d'accès pour continuer.</p>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))",
+          gap:16, width:"100%", maxWidth:580 }}>
+          <button onClick={() => { setShowAgentLogin(true); setAgentLoginError(""); }}
+            style={{ padding:"26px 22px", borderRadius:6, cursor:"pointer", textAlign:"left",
+              background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.12)",
+              borderLeft:`3px solid ${C.gold}`, color:"#fff", transition:"background .2s" }}>
+            <div style={{ fontFamily:"'Oswald',sans-serif", textTransform:"uppercase",
+              letterSpacing:"0.06em", fontSize:21, fontWeight:600 }}>Agent</div>
+            <div style={{ fontSize:13, color:"rgba(255,255,255,0.7)", lineHeight:1.5, marginTop:6 }}>
+              Pointer un service, consulter mes heures et accéder aux documents.</div>
+          </button>
+          <button onClick={() => { setShowLogin(true); setLoginError(""); }}
+            style={{ padding:"26px 22px", borderRadius:6, cursor:"pointer", textAlign:"left",
+              background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.12)",
+              borderLeft:`3px solid ${C.blue}`, color:"#fff", transition:"background .2s" }}>
+            <div style={{ fontFamily:"'Oswald',sans-serif", textTransform:"uppercase",
+              letterSpacing:"0.06em", fontSize:21, fontWeight:600 }}>Supervision</div>
+            <div style={{ fontSize:13, color:"rgba(255,255,255,0.7)", lineHeight:1.5, marginTop:6 }}>
+              Gestion complète : effectifs, formations, pointages, récap, autorités.</div>
+          </button>
         </div>
+        <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", marginTop:30 }}>
+          Contacte l'administration pour obtenir tes identifiants.</p>
       </main>
       {/* Modales de connexion */}
       {showLogin && (
@@ -1715,8 +1718,8 @@ function App() {
   return (
     <div style={{ minHeight:"100%", background:C.paper, color:C.ink }}>
       {/* ── Bandeau (style site public) ── */}
-      <header style={{ background:"#fff", borderBottom:`1px solid ${C.line}`,
-        boxShadow:"0 2px 8px rgba(0,0,0,0.06)" }}>
+      <header style={{ background:"linear-gradient(180deg,#00314c,#00263a)",
+        borderBottom:`3px solid ${C.gold}`, boxShadow:"0 2px 14px rgba(0,0,0,0.28)" }}>
         <div style={{ maxWidth:1120, margin:"0 auto", padding:"14px 20px",
           display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:12 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
@@ -1726,9 +1729,10 @@ function App() {
                 style={{ height:32, width:"auto", display:"block" }} />
             </div>
             <div>
-              <div style={{ fontSize:14, fontWeight:700, color:C.navy, lineHeight:1.2 }}>
+              <div style={{ fontFamily:"'Oswald',sans-serif", fontSize:15, fontWeight:600,
+                color:"#fff", lineHeight:1.2, letterSpacing:"0.04em", textTransform:"uppercase" }}>
                 United States Secret Service</div>
-              <div style={{ fontSize:11, letterSpacing:"0.08em", color:C.grey, textTransform:"uppercase" }}>
+              <div style={{ fontSize:11, letterSpacing:"0.12em", color:C.gold, textTransform:"uppercase" }}>
                 Registre des effectifs</div>
             </div>
           </div>
@@ -1737,22 +1741,22 @@ function App() {
               background:SAVE_BADGE.bg, color:SAVE_BADGE.fg }}>{SAVE_BADGE.txt}</span>
             {editor && (
               <span style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <span style={{ fontSize:11, color:C.grey }}>
+                <span style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>
                   ✎ {session.login}</span>
                 <button onClick={doLogout}
                   style={{ padding:"5px 12px", fontSize:11, borderRadius:6, fontWeight:600,
-                    background:"transparent", color:C.blue,
-                    border:`1px solid ${C.line}` }}>Déconnexion</button>
+                    background:"transparent", color:"#fff",
+                    border:"1px solid rgba(255,255,255,0.4)" }}>Déconnexion</button>
               </span>
             )}
             {agentLogged && (
               <span style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <span style={{ fontSize:11, color:C.grey }}>
+                <span style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>
                   👮 {agentSession.matricule}</span>
                 <button onClick={doLogoutAgent}
                   style={{ padding:"5px 12px", fontSize:11, borderRadius:6, fontWeight:600,
-                    background:"transparent", color:C.blue,
-                    border:`1px solid ${C.line}` }}>Pointer sortie</button>
+                    background:"transparent", color:"#fff",
+                    border:"1px solid rgba(255,255,255,0.4)" }}>Pointer sortie</button>
               </span>
             )}
             {(editor || agentLogged) && (
@@ -1763,10 +1767,11 @@ function App() {
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
-                      textTransform:"uppercase", letterSpacing:"0.05em",
+                      fontFamily:"'Oswald',sans-serif", textTransform:"uppercase", letterSpacing:"0.06em",
+                      cursor:"pointer",
                       ...(pageEffective === id
-                        ? { background:C.navy, color:"#fff", border:`1px solid ${C.navy}` }
-                        : { background:"#fff", color:C.ink, border:`1px solid ${C.line}` }) }}>
+                        ? { background:C.gold, color:C.navy, border:`1px solid ${C.gold}` }
+                        : { background:"rgba(255,255,255,0.06)", color:"rgba(255,255,255,0.82)", border:"1px solid rgba(255,255,255,0.16)" }) }}>
                     {label}
                   </button>
                 ))}
