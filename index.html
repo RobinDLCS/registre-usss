@@ -9,232 +9,204 @@
 <meta property="og:description" content="L'USSS (United States Secret Service) est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.">
 <meta name="theme-color"        content="#00263a">
 <meta name="description"        content="L'USSS (United States Secret Service) est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --blue-dark:#00263a;
-  --blue-mid:#003f6b;
-  --blue:#005ea2;
-  --blue-light:#d9e8f6;
-  --gold:#b69435;
+  --ink:#06121c; --navy:#00263a; --navy2:#0d3550; --blue:#1e6fb0; --blue-dark:#00263a;
+  --gold:#c8a24a; --gold2:#b69435; --white:#ffffff; --off-white:#f4f6f8; --paper:#f4f6f8;
+  --gray:#6b7785; --gray-mid:#6b7785; --line:#e3e7ec; --gray-light:#e3e7ec; --text:#16202b;
   --red:#b22234;
-  --white:#ffffff;
-  --off-white:#f5f5f0;
-  --gray-light:#e8e8e4;
-  --gray-mid:#71717a;
-  --text:#1b1b1b;
-  --font:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --head:'Oswald',Impact,Haettenschweiler,sans-serif; --body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
-body{font-family:var(--font);font-weight:400;background:var(--white);color:var(--text);min-height:100vh;}
-h1,h2,h3,h4,h5,h6{font-family:var(--font);font-weight:700;}
-button{cursor:pointer;font-family:inherit;border:none;}
-input,select,textarea{font-family:inherit;}
-
-/* ── TOP UTILITY BAR ── */
-.top-bar{background:var(--blue-dark);padding:6px 0;}
-.gov-banner{background:#f0f0ec;border-bottom:1px solid var(--gray-light);font-size:12px;color:#3d3d3d;}
-.gov-banner-inner{max-width:1200px;margin:0 auto;padding:6px 24px;display:flex;align-items:center;gap:8px;}
-.gov-banner svg{flex-shrink:0;}
-.top-bar-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;justify-content:flex-end;align-items:center;}
-.top-bar a{color:rgba(255,255,255,0.65);font-size:12px;text-decoration:none;cursor:pointer;margin-left:20px;}
-.top-bar a:hover{color:var(--white);}
-
-/* ── MAIN NAV ── */
-nav{background:var(--white);border-bottom:1px solid var(--gray-light);position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
-.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:stretch;justify-content:space-between;}
-.nav-brand{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:pointer;}
-.nav-brand img{height:52px;width:52px;object-fit:contain;}
-.nav-brand-text .name{font-size:16px;font-weight:700;color:var(--blue-dark);line-height:1.2;}
-.nav-brand-text .sub{font-size:11px;color:var(--gray-mid);letter-spacing:1px;text-transform:uppercase;}
-.nav-links{display:flex;align-items:stretch;}
-.nav-item{position:relative;display:flex;align-items:center;}
-.nav-link{padding:0 16px;font-size:14px;font-weight:600;color:var(--blue-dark);cursor:pointer;display:flex;align-items:center;gap:5px;height:100%;border-bottom:3px solid transparent;transition:border-color .2s,color .2s;white-space:nowrap;}
-.nav-link:hover,.nav-link.active{border-bottom-color:var(--blue);color:var(--blue);}
-.nav-link.cta{background:var(--blue-dark);color:#fff;margin:12px 0 12px 8px;border-radius:6px;border-bottom:none;}
-.nav-link.cta:hover{background:var(--blue);color:#fff;}
-
-/* ── PAGES ── */
-.page{display:none;flex-direction:column;min-height:calc(100vh - 73px);}
-.page.active{display:flex;}
-
-/* ── HERO ── */
-.hero{position:relative;background:var(--blue-dark);overflow:hidden;min-height:520px;}
-.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(1200px 400px at 80% -10%,rgba(0,94,162,0.45),transparent 60%);}
-.hero-content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px 24px;display:flex;align-items:center;}
-.hero-text{max-width:620px;}
-.hero-text .eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#a8c5e0;margin-bottom:16px;font-weight:600;}
-.hero-text h1{font-size:46px;color:var(--white);line-height:1.2;font-weight:700;margin-bottom:20px;}
-.hero-text p{font-size:18px;color:rgba(255,255,255,0.8);line-height:1.7;margin-bottom:32px;font-weight:300;}
-.hero-buttons{display:flex;gap:14px;flex-wrap:wrap;}
-.btn-hero-primary{background:var(--blue);color:var(--white);padding:14px 32px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:background .2s;border-radius:6px;}
-.btn-hero-primary:hover{background:#004a82;}
-.btn-hero-outline{background:transparent;color:var(--white);padding:13px 32px;font-size:15px;font-weight:600;border:2px solid rgba(255,255,255,0.5);cursor:pointer;transition:border-color .2s;border-radius:6px;}
-.btn-hero-outline:hover{border-color:var(--white);}
-
-/* ── FEATURE CARDS ── */
-.features{background:var(--off-white);}
-.features-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);}
-.feature-card{background:var(--white);border-right:1px solid var(--gray-light);padding:32px 24px;cursor:pointer;transition:background .2s;position:relative;overflow:hidden;}
-.feature-card:last-child{border-right:none;}
-.feature-card::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:var(--blue);transform:scaleX(0);transition:transform .3s;}
-.feature-card:hover::after{transform:scaleX(1);}
-.feature-card:hover{background:#fafaf8;}
-.feature-card h3{font-size:18px;color:var(--blue-dark);margin-bottom:10px;font-weight:700;}
-.feature-card p{font-size:14px;color:var(--gray-mid);line-height:1.6;}
-.feature-icon{width:48px;height:48px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin-bottom:16px;border-radius:10px;}
-
-/* ── SECTIONS ── */
-.section-wrap{padding:64px 0;}
-.section-wrap.gray{background:var(--off-white);}
-.section-wrap.dark{background:var(--blue-dark);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--body);color:var(--text);background:var(--white);-webkit-font-smoothing:antialiased;}
+img{max-width:100%;display:block;}
+a{text-decoration:none;color:inherit;}
 .container{max-width:1200px;margin:0 auto;padding:0 24px;}
-.section-head{margin-bottom:40px;}
-.section-head h2{font-size:30px;color:var(--blue-dark);font-weight:700;margin-bottom:8px;}
-.section-wrap.dark .section-head h2{color:var(--white);}
-.section-head .lead{font-size:16px;color:var(--gray-mid);line-height:1.6;}
-.section-head .rule{width:48px;height:3px;background:var(--blue);margin-top:14px;border-radius:2px;}
-.section-head.row{display:flex;justify-content:space-between;align-items:flex-end;}
+#site-public section{scroll-margin-top:120px;}
+.eyebrow{font-family:var(--head);text-transform:uppercase;letter-spacing:.3em;font-size:12px;font-weight:600;color:var(--gold2);margin-bottom:14px;}
+.h-sec{font-family:var(--head);text-transform:uppercase;font-weight:700;line-height:1.03;letter-spacing:.01em;color:var(--navy);font-size:clamp(30px,5vw,52px);}
+.lead{font-size:17px;line-height:1.75;color:var(--gray);}
+.btn{display:inline-block;font-family:var(--head);text-transform:uppercase;letter-spacing:.12em;font-weight:600;font-size:14px;padding:14px 30px;border-radius:2px;cursor:pointer;border:2px solid var(--gold2);transition:all .2s;background:none;}
+.btn--gold{background:var(--gold2);color:var(--navy);}
+.btn--gold:hover{background:transparent;color:var(--gold2);}
+.btn--ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.55);}
+.btn--ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn--dark{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn--dark:hover{background:transparent;color:var(--navy);}
 
-/* ── NEWS CARDS ── */
-.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
-.news-card{background:var(--white);padding:28px 24px;cursor:pointer;transition:background .2s;border-top:3px solid var(--blue-light);position:relative;border-radius:10px;}
-.news-card:hover{background:#f8fbff;}
-.nc-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:10px;display:block;}
-.nc-title{font-size:17px;color:var(--blue-dark);line-height:1.4;margin-bottom:10px;font-weight:700;}
-.nc-excerpt{font-size:14px;color:var(--gray-mid);line-height:1.6;}
-.nc-date{font-size:12px;color:var(--gray-mid);margin-top:14px;}
+/* Header */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;align-items:center;justify-content:space-between;padding:18px 28px;transition:all .3s;}
+.site-header.scrolled{background:var(--navy);box-shadow:0 2px 18px rgba(0,0,0,.3);padding:10px 28px;}
+.site-header__brand{display:flex;align-items:center;gap:13px;}
+.site-header__brand img{height:44px;width:auto;background:#fff;border-radius:6px;padding:3px 5px;}
+.site-header__brand b{color:#fff;font-family:var(--head);text-transform:uppercase;letter-spacing:.13em;font-size:14px;line-height:1.1;display:block;}
+.site-header__brand span{display:block;color:var(--gold);font-size:10px;letter-spacing:.22em;text-transform:uppercase;margin-top:2px;}
+.site-header__login{font-family:var(--head);text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.5);padding:10px 20px;border-radius:2px;cursor:pointer;background:none;transition:all .2s;}
+.site-header__login:hover{background:var(--gold2);border-color:var(--gold2);color:var(--navy);}
 
-/* ── ADMIN PEOPLE / CHIEFS ── */
-.admin-people{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-.person-card{background:var(--white);padding:28px 20px;text-align:center;border-top:3px solid transparent;transition:all .2s;border-radius:10px;border:1px solid var(--gray-light);}
-.person-card:hover{background:#f0f6ff;border-top-color:var(--blue);}
-.person-avatar{width:90px;height:90px;border-radius:50%;background:var(--blue-light);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--blue-dark);font-weight:700;border:3px solid var(--gray-light);}
-.person-role{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:6px;}
-.person-name{font-size:15px;color:var(--blue-dark);font-weight:700;}
+/* Hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;background:radial-gradient(120% 90% at 75% 15%,#10456a 0%,#00314c 38%,#00263a 60%,#06121c 100%);overflow:hidden;}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,18,28,.35),rgba(6,18,28,0) 30%,rgba(6,18,28,.6));pointer-events:none;}
+.hero__seal{position:absolute;right:-8%;top:50%;transform:translateY(-50%);width:min(64vw,760px);opacity:.07;filter:grayscale(1) brightness(3);pointer-events:none;z-index:1;}
+.hero__inner{position:relative;z-index:3;padding:140px 0 90px;}
+.hero__inner .eyebrow{color:var(--gold);}
+.hero h1{font-family:var(--head);text-transform:uppercase;color:#fff;font-weight:700;line-height:.9;font-size:clamp(54px,11vw,148px);letter-spacing:.005em;}
+.hero h1 .gold{color:var(--gold);display:block;}
+.hero__sub{margin-top:22px;font-size:clamp(15px,2vw,20px);color:rgba(255,255,255,.85);max-width:580px;line-height:1.65;}
+.hero__cta{margin-top:38px;display:flex;gap:14px;flex-wrap:wrap;}
+.hero__scroll{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.55);font-size:11px;letter-spacing:.25em;text-transform:uppercase;z-index:3;font-family:var(--head);}
 
-/* ── PAGE HEADER ── */
-.page-header{background:var(--blue-dark);padding:56px 0 36px;border-bottom:4px solid var(--blue);}
-.page-header .breadcrumb{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px;}
-.page-header .breadcrumb span{color:var(--white);cursor:pointer;}
-.page-header .breadcrumb span:hover{text-decoration:underline;}
-.page-header h1{font-size:38px;color:var(--white);font-weight:700;}
-.page-header p{font-size:16px;color:rgba(255,255,255,0.7);margin-top:10px;max-width:640px;line-height:1.7;}
+/* Intro + stats */
+.intro{padding:110px 0;background:var(--white);}
+.intro__grid{display:grid;grid-template-columns:1.1fr .9fr;gap:64px;align-items:center;}
+.intro__txt p.lead{margin:18px 0 34px;}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:34px 40px;}
+.stat__num{font-family:var(--head);font-size:clamp(40px,5vw,58px);font-weight:700;color:var(--navy);line-height:1;}
+.stat__num b{color:var(--gold2);}
+.stat__lab{font-size:12.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--gray);margin-top:8px;font-weight:600;}
+.intro__side{background:linear-gradient(160deg,#0d3550,#00263a);border-radius:6px;min-height:400px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);}
+.intro__side:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(200,162,74,.18),transparent 60%);}
+.intro__side img{width:60%;position:relative;z-index:2;filter:drop-shadow(0 10px 30px rgba(0,0,0,.4));border-radius:10px;}
 
-/* ── DIVISIONS ── */
-.div-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
-.div-card{background:var(--white);display:grid;grid-template-columns:96px 1fr;overflow:hidden;border:1px solid var(--gray-light);transition:all .2s;border-radius:10px;}
-.div-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,94,162,0.1);}
-.div-badge{position:relative;background:var(--blue-dark);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;letter-spacing:1px;overflow:hidden;}
-.div-badge img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12px;}
-.div-body{padding:22px 24px 20px;}
-.div-name{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:4px;}
-.div-full{font-size:17px;color:var(--blue-dark);font-weight:700;margin-bottom:10px;line-height:1.3;}
-.div-desc{font-size:13px;color:var(--gray-mid);line-height:1.7;}
-.div-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
-.tag{font-size:11px;background:var(--blue-light);color:var(--blue-mid);padding:3px 10px;font-weight:600;border-radius:4px;}
-.div-group{margin-bottom:22px;}
-.div-subs{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:12px 0 0 22px;padding-left:22px;border-left:2px dashed var(--gray-light);}
-.sub-card{background:var(--off-white);border:1px solid var(--gray-light);border-radius:8px;padding:12px 14px;border-left:3px solid var(--blue);display:flex;align-items:center;gap:12px;}
-.sub-logo{width:46px;height:46px;object-fit:contain;flex-shrink:0;}
-.sub-abbr{font-weight:700;color:var(--blue-dark);font-size:14px;letter-spacing:1px;}
-.sub-full{font-size:12px;color:var(--gray-mid);margin-top:3px;line-height:1.5;}
-.div-standalone{border:2px solid var(--gold);}
+/* Jump nav */
+.jumpnav{position:sticky;top:60px;z-index:250;background:var(--navy);border-top:3px solid var(--gold2);border-bottom:1px solid rgba(255,255,255,.06);}
+.jumpnav__inner{display:flex;align-items:center;gap:4px;overflow-x:auto;max-width:1200px;margin:0 auto;padding:0 16px;-ms-overflow-style:none;scrollbar-width:none;}
+.jumpnav__inner::-webkit-scrollbar{display:none;}
+.jumpnav a{font-family:var(--head);text-transform:uppercase;letter-spacing:.13em;font-size:13px;color:rgba(255,255,255,.65);padding:17px 16px;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;}
+.jumpnav a:hover{color:#fff;}
+.jumpnav a.active{color:var(--gold);border-bottom-color:var(--gold);}
+.jumpnav__cta{margin-left:auto;padding:8px 0;}
+.jumpnav__cta a{color:var(--navy)!important;background:var(--gold2);border-radius:2px;padding:10px 20px;border-bottom:none!important;}
+.jumpnav__cta a:hover{background:var(--gold);}
 
-/* ── CHIEFS HERO CARDS ── */
-.chief-card-hero{background:var(--blue-mid);padding:36px;display:grid;grid-template-columns:90px 1fr;gap:28px;align-items:center;border-radius:10px;transition:background .2s;}
-.chief-card-hero:hover{background:var(--blue);}
-.chief-card-hero .chief-init{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;border:3px solid rgba(255,255,255,0.3);flex-shrink:0;}
-.chief-card-hero .chief-role{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:8px;}
-.chief-card-hero .chief-name{font-size:18px;color:var(--white);font-weight:700;margin-bottom:8px;}
-.chief-card-hero .chief-desc{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.7;}
-.chief-card{background:var(--white);padding:30px 26px;border-top:3px solid var(--gray-light);transition:all .2s;border-radius:10px;border:1px solid var(--gray-light);}
-.chief-card:hover{border-top-color:var(--blue);background:#f8fbff;}
-.chief-card .chief-init{width:64px;height:64px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:16px;border:2px solid var(--blue);}
-.chief-card .chief-role{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:6px;}
-.chief-card .chief-name{font-size:17px;color:var(--blue-dark);font-weight:700;margin-bottom:10px;}
-.chief-card .chief-desc{font-size:14px;color:var(--gray-mid);line-height:1.7;}
+/* Divisions */
+.divisions{padding:110px 0;background:var(--off-white);}
+.div-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;margin-top:44px;}
+.div-card{background:var(--navy);border-radius:6px;overflow:hidden;color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.06);transition:transform .2s,box-shadow .2s;}
+.div-card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(0,38,58,.25);}
+.div-card__head{display:flex;align-items:center;gap:16px;padding:22px;}
+.div-card__head img{height:56px;width:56px;object-fit:contain;background:#fff;border-radius:9px;padding:6px;flex-shrink:0;}
+.div-card__head h3{font-family:var(--head);text-transform:uppercase;font-size:22px;letter-spacing:.04em;line-height:1;}
+.div-card__head small{display:block;color:var(--gold);font-size:10.5px;letter-spacing:.12em;margin-top:5px;text-transform:uppercase;}
+.div-card__toggle{margin-left:auto;font-size:26px;color:var(--gold);transition:transform .25s;line-height:1;flex-shrink:0;}
+.div-card.open .div-card__toggle{transform:rotate(45deg);}
+.div-card__body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.div-card__body p{padding:0 22px 24px;color:rgba(255,255,255,.78);line-height:1.65;font-size:14px;}
+.div-card.open .div-card__body{max-height:320px;}
 
-/* ── RECRUIT ── */
-.recruit-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:48px 0;}
-.recruit-sidebar h2{font-size:22px;color:var(--blue-dark);margin-bottom:6px;font-weight:700;}
-.recruit-sidebar .rule{width:48px;height:3px;background:var(--blue);margin:10px 0 24px;border-radius:2px;}
-.req-list{list-style:none;}
-.req-list li{padding:12px 0;border-bottom:1px solid var(--gray-light);font-size:14px;color:var(--text);line-height:1.6;padding-left:20px;position:relative;}
-.req-list li::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);position:absolute;left:0;top:8px;}
-.req-list.benefits li::before{background:#198754;}
-.form-box{background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
-.form-box-head{background:var(--blue-dark);padding:28px 32px;}
-.form-box-head h3{font-size:20px;color:var(--white);font-weight:700;}
-.form-box-head p{font-size:14px;color:rgba(255,255,255,0.65);margin-top:6px;}
-.form-box-body{padding:32px;text-align:center;}
-.lock-ico{font-size:0;margin-bottom:12px;display:block;opacity:0.2;}
-.lock-msg{font-size:13px;color:var(--gray-mid);margin-bottom:24px;line-height:1.6;}
-.discord-btn{background:var(--blue-dark);color:var(--white);border:none;width:100%;padding:16px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:background .2s;border-radius:6px;}
-.discord-btn:hover{background:var(--blue);}
+/* Banner strip */
+.banner-strip{position:relative;background:linear-gradient(135deg,#06121c,#00314c);color:#fff;text-align:center;padding:96px 24px;overflow:hidden;}
+.banner-strip__seal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;max-width:80%;opacity:.06;filter:grayscale(1) brightness(3);}
+.banner-strip h2{position:relative;z-index:2;font-family:var(--head);text-transform:uppercase;font-size:clamp(34px,7vw,82px);font-weight:700;line-height:.96;letter-spacing:.02em;}
+.banner-strip h2 .gold{color:var(--gold);}
 
-/* ── NEWS FULL ── */
-.news-tabs-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:24px;border-bottom:2px solid var(--gray-light);}
-.news-tab{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--gray-mid);cursor:pointer;transition:color .2s,border-color .2s;display:flex;align-items:center;gap:6px;}
-.news-tab:hover{color:var(--blue);}
-.news-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
-.tab-count{font-size:11px;background:var(--blue-light);color:var(--blue);padding:1px 7px;border-radius:10px;font-weight:700;}
-.news-tab.active .tab-count{background:var(--blue);color:var(--white);}
-.news-cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-.news-card-full{background:var(--white);border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--gray-light);transition:all .2s;display:flex;flex-direction:column;}
-.news-card-full:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,94,162,0.1);transform:translateY(-2px);}
-.news-card-full.hidden{display:none;}
-.ncf-thumb{height:150px;background:linear-gradient(135deg,var(--blue-light),var(--blue-mid));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;letter-spacing:2px;}
-.ncf-body{padding:20px;flex:1;display:flex;flex-direction:column;}
-.ncf-title{font-size:16px;font-weight:700;color:var(--blue-dark);line-height:1.4;margin:8px 0 10px;}
-.ncf-excerpt{font-size:13px;color:var(--gray-mid);line-height:1.6;flex:1;}
-.ncf-date{font-size:11px;color:var(--gray-mid);margin-top:12px;}
-.news-main-article{background:var(--white);padding:40px;border-radius:10px;border:1px solid var(--gray-light);}
-.nma-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:700;margin-bottom:12px;display:block;}
-.nma-title{font-size:26px;color:var(--blue-dark);line-height:1.35;font-weight:700;margin-bottom:18px;}
-.nma-body p{font-size:15px;color:var(--text);line-height:1.8;margin-bottom:1rem;}
-.btn-outline{background:transparent;border:2px solid var(--blue);color:var(--blue);padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border-radius:6px;}
-.btn-outline:hover{background:var(--blue);color:var(--white);}
+/* Values */
+.values{padding:110px 0;background:var(--navy);color:#fff;}
+.values .h-sec{color:#fff;}
+.values .eyebrow{color:var(--gold);}
+.val-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:18px;margin-top:44px;}
+.val-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid var(--gold2);border-radius:4px;padding:28px;transition:background .2s;}
+.val-card:hover{background:rgba(255,255,255,.07);}
+.val-card h3{font-family:var(--head);text-transform:uppercase;font-size:18px;letter-spacing:.04em;margin-bottom:10px;}
+.val-card p{color:rgba(255,255,255,.72);font-size:14px;line-height:1.65;}
 
-/* ── FOOTER ── */
-footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px 0 0;}
-.footer-grid{max-width:1200px;margin:0 auto;padding:0 24px 40px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;}
-.footer-brand img{height:60px;width:60px;object-fit:contain;background:#fff;border-radius:10px;padding:6px;margin-bottom:16px;}
-.footer-brand p{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;}
-.footer-col h4{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);font-weight:700;margin-bottom:16px;}
-.footer-col ul{list-style:none;}
-.footer-col ul li{margin-bottom:10px;}
-.footer-col ul li a,.footer-col ul li span{color:rgba(255,255,255,0.65);font-size:14px;text-decoration:none;cursor:pointer;transition:color .2s;}
-.footer-col ul li a:hover,.footer-col ul li span:hover{color:var(--white);}
-.footer-bottom{max-width:1200px;margin:0 auto;padding:20px 24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,0.35);flex-wrap:wrap;gap:8px;}
+/* FAQ */
+.faq{padding:110px 0;background:var(--white);}
+.faq__grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+.faq-list{margin-top:8px;border-top:1px solid var(--line);}
+.faq-item{border-bottom:1px solid var(--line);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 2px;cursor:pointer;font-family:var(--head);text-transform:uppercase;letter-spacing:.03em;font-size:17px;color:var(--navy);}
+.faq-q .ic{color:var(--gold2);font-size:24px;transition:transform .2s;flex-shrink:0;line-height:1;}
+.faq-item.open .faq-q .ic{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s;}
+.faq-a p{padding:0 2px 22px;color:var(--gray);line-height:1.7;font-size:15px;}
+.faq-item.open .faq-a{max-height:340px;}
+.faq__aside{background:linear-gradient(160deg,#0d3550,#00263a);border-radius:6px;padding:46px 38px;color:#fff;position:sticky;top:90px;}
+.faq__aside h3{font-family:var(--head);text-transform:uppercase;font-size:26px;letter-spacing:.03em;line-height:1.05;}
+.faq__aside p{color:rgba(255,255,255,.8);margin:14px 0 26px;line-height:1.65;font-size:15px;}
 
-/* ── NOTIF ── */
-.notif{position:fixed;top:80px;right:24px;background:var(--blue-dark);color:var(--white);border-left:4px solid var(--blue);padding:14px 20px;font-size:13px;z-index:500;transform:translateX(140%);transition:transform .3s;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.2);border-radius:8px;}
+/* Timeline */
+.timeline{padding:110px 0;background:var(--off-white);}
+.tl-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:54px;}
+.tl-step{position:relative;padding:0 12px;text-align:center;}
+.tl-step__num{width:56px;height:56px;border-radius:50%;background:var(--navy);color:var(--gold);font-family:var(--head);font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative;z-index:2;border:3px solid var(--gold2);}
+.tl-step h4{font-family:var(--head);text-transform:uppercase;font-size:15px;color:var(--navy);letter-spacing:.04em;line-height:1.1;}
+.tl-step p{font-size:12.5px;color:var(--gray);margin-top:7px;line-height:1.5;}
+.tl-step:not(:last-child):before{content:"";position:absolute;top:27px;left:50%;width:100%;height:3px;background:var(--line);z-index:1;}
+
+/* CTA */
+.cta{position:relative;background:linear-gradient(135deg,#00263a,#0d3550);color:#fff;text-align:center;padding:96px 24px;overflow:hidden;}
+.cta__seal{position:absolute;right:-4%;bottom:-30%;width:420px;opacity:.06;filter:grayscale(1) brightness(3);}
+.cta h2{position:relative;z-index:2;font-family:var(--head);text-transform:uppercase;font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:.02em;}
+.cta p{position:relative;z-index:2;color:rgba(255,255,255,.82);margin:16px auto 32px;max-width:540px;line-height:1.65;}
+
+/* Footer */
+.site-footer{background:#06121c;color:rgba(255,255,255,.7);padding:54px 24px 30px;}
+.site-footer__inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:26px;flex-wrap:wrap;}
+.site-footer__brand{display:flex;align-items:center;gap:14px;}
+.site-footer__brand img{height:48px;background:#fff;border-radius:6px;padding:4px;}
+.site-footer__brand b{color:#fff;font-family:var(--head);text-transform:uppercase;letter-spacing:.12em;font-size:14px;}
+.site-footer__brand span{display:block;font-size:11px;letter-spacing:.15em;color:var(--gold);margin-top:3px;text-transform:uppercase;}
+.site-footer a.dc{color:var(--navy);background:var(--gold2);font-family:var(--head);text-transform:uppercase;letter-spacing:.1em;font-size:13px;padding:13px 26px;border-radius:2px;transition:background .2s;}
+.site-footer a.dc:hover{background:var(--gold);}
+.site-footer__bottom{max-width:1200px;margin:26px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;text-align:center;letter-spacing:.04em;color:rgba(255,255,255,.5);}
+
+/* Notif + registre (préservé) */
+.notif{position:fixed;top:80px;right:24px;background:var(--blue-dark);color:var(--white);border-left:4px solid var(--gold2);padding:14px 20px;font-size:13px;z-index:500;transform:translateX(140%);transition:transform .3s;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,0.2);border-radius:8px;}
 .notif.show{transform:translateX(0);}
-
-/* ── ESPACE REGISTRE (CONNEXION) ── */
 #registre-app{display:none;min-height:100vh;background:var(--off-white);}
-.reg-topbar{position:sticky;top:0;z-index:400;background:var(--blue-dark);border-bottom:3px solid var(--gold);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;gap:12px;flex-wrap:wrap;}
+.reg-topbar{position:sticky;top:0;z-index:400;background:var(--blue-dark);border-bottom:3px solid var(--gold2);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;gap:12px;flex-wrap:wrap;}
 .reg-brand{display:flex;align-items:center;gap:12px;}
 .reg-brand img{height:34px;width:auto;background:#fff;border-radius:6px;padding:3px 6px;}
 .reg-title{color:#fff;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
 .reg-back{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;}
 .reg-back:hover{background:rgba(255,255,255,.1);}
 
-@media(max-width:880px){
-  .features-grid{grid-template-columns:repeat(2,1fr);}
-  .news-grid,.news-cards-grid{grid-template-columns:1fr;}
-  .admin-people{grid-template-columns:repeat(2,1fr);}
-  .div-grid,.recruit-layout{grid-template-columns:1fr;}
-  .chiefs-row-2,.chiefs-row-3{grid-template-columns:1fr !important;}
-  .footer-grid{grid-template-columns:1fr;gap:28px;}
-  .hero-text h1{font-size:34px;}
+/* Emplacements d'images (à remplacer) */
+.imgslot{position:relative;background:linear-gradient(160deg,#0d3550,#00263a);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.imgslot:before{content:attr(data-label);position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:1;color:rgba(255,255,255,.45);font-family:var(--head);text-transform:uppercase;letter-spacing:.18em;font-size:12px;text-align:center;padding:12px;line-height:1.5;}
+.imgslot:after{content:"";position:absolute;inset:10px;border:1px dashed rgba(255,255,255,.18);z-index:1;pointer-events:none;}
+.imgslot img{position:relative;z-index:2;width:100%;height:100%;object-fit:cover;display:block;}
+.hero__bg{position:absolute;inset:0;z-index:0;background:none;}
+.hero__bg:after{display:none;}
+.hero__bg:before{top:auto;bottom:18px;transform:none;font-size:11px;opacity:.6;}
+.hero:after{z-index:1;}
+.hero__seal{z-index:1;}
+.div-card__media{height:158px;}
+.div-card__media:after{inset:8px;}
+.banner-strip__bg,.cta__bg{position:absolute;inset:0;z-index:0;background:none;opacity:.4;}
+.banner-strip__bg:after,.cta__bg:after{display:none;}
+.banner-strip h2,.cta h2,.cta p,.cta .btn{position:relative;z-index:2;}
+
+/* Registre — alignement style (police d'affichage + bandeau) */
+.reg-topbar{border-bottom-width:3px;}
+.reg-title{font-family:var(--head);letter-spacing:2px;}
+#registre-app h1,#registre-app h2,#registre-app h3,#registre-app h4{font-family:var(--head);letter-spacing:.02em;}
+
+/* Responsive */
+@media(max-width:900px){
+  .intro__grid{grid-template-columns:1fr;gap:44px;}
+  .faq__grid{grid-template-columns:1fr;gap:36px;}
+  .faq__aside{position:static;}
+  .tl-grid{grid-template-columns:repeat(2,1fr);gap:36px 0;}
+  .tl-step:not(:last-child):before{display:none;}
+  .site-header__brand span{display:none;}
 }
+@media(max-width:560px){
+  .tl-grid{grid-template-columns:1fr;}
+  .site-header__brand b{font-size:12px;}
+  .hero__cta .btn{padding:12px 22px;font-size:13px;}
+}
+
 </style>
 </head>
 <body>
@@ -242,327 +214,240 @@ footer{background:var(--blue-dark);border-top:4px solid var(--blue);padding:48px
 <!-- ════════ SITE PUBLIC ════════ -->
 <div id="site-public">
 
-<div class="gov-banner">
-  <div class="gov-banner-inner">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#005ea2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4l8-2 8 2v18"/><path d="M4 9h16"/><path d="M4 14h16"/></svg>
-    <span>Site officiel du <strong>United States Secret Service</strong> · State of San Andreas</span>
-  </div>
-</div>
-
-<nav>
-  <div class="nav-inner">
-    <div class="nav-brand" onclick="showPage('home')">
-      <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg" alt="USSS" onerror="this.style.visibility='hidden'">
-      <div class="nav-brand-text">
-        <div class="name">United States Secret Service</div>
-        <div class="sub">DEPARTMENT OF HOMELAND SECURITY</div>
-      </div>
-    </div>
-    <div class="nav-links">
-      <div class="nav-item"><div class="nav-link" id="nav-home"      onclick="showPage('home')">Accueil</div></div>
-      <div class="nav-item"><div class="nav-link" id="nav-divisions" onclick="showPage('divisions')">Divisions</div></div>
-      <div class="nav-item"><div class="nav-link" id="nav-formations" onclick="showPage('formations')">Formations</div></div>
-      <div class="nav-item"><div class="nav-link" id="nav-chiefs"    onclick="showPage('chiefs')">Chief's Office</div></div>
-      <div class="nav-item"><div class="nav-link" id="nav-recruit"   onclick="showPage('recruit')">Recrutement</div></div>
-      <div class="nav-item"><a class="nav-link" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&amp;ouid=116928453372376996711" target="_blank" rel="noopener" style="text-decoration:none">Candidater</a></div>
-      <div class="nav-item"><div class="nav-link cta" onclick="enterRegistre()">Connexion</div></div>
-    </div>
-  </div>
-</nav>
-
-<div class="notif" id="notif"></div>
-
-<!-- PAGE: HOME -->
-<div class="page" id="page-home">
-  <div class="hero">
-    <div class="hero-content">
-      <div class="hero-text">
-        <div class="eyebrow">Agence Fédérale · DEPARTMENT OF HOMELAND SECURITY</div>
-        <h1>United States Secret Service</h1>
-        <p>L'USSS est l'agence fédérale chargée de la protection des hautes personnalités de l'État et de la lutte contre la criminalité financière et les menaces visant les institutions.</p>
-        <div class="hero-buttons">
-          <button class="btn-hero-primary" onclick="showPage('recruit')">Nous rejoindre</button>
-          <button class="btn-hero-outline" onclick="enterRegistre()">Espace agents &amp; supervision</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="features">
-    <div class="features-grid">
-      <div class="feature-card" onclick="showPage('divisions')">
-        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Divisions</h3>
-        <p>Des unités spécialisées dans la protection rapprochée et l'investigation.</p>
-      </div>
-      <div class="feature-card" onclick="showPage('chiefs')">
-        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <h3>Chief's Office</h3>
-        <p>Le commandement du Field Office et son état-major.</p>
-      </div>
-      <div class="feature-card" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711','_blank')">
-        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
-        <h3>Candidater</h3>
-        <p>Déposez votre dossier de candidature en ligne.</p>
-      </div>
-      <div class="feature-card" onclick="showPage('recruit')">
-        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <h3>Recrutement</h3>
-        <p>Rejoignez l'élite de la protection fédérale.</p>
-      </div>
-    </div>
-  </div>
-
-  <section class="section-wrap dark">
-    <div class="container">
-      <div class="section-head">
-        <h2>Nos Missions</h2>
-        <p class="lead" style="color:rgba(255,255,255,0.6)">L'USSS opère sur quatre axes stratégiques au service de la sécurité de l'État.</p>
-        <div class="rule"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;">
-        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
-          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">01 · PROTECTION</div>
-          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Protection des Hautes Personnalités</h3>
-          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Assurer la sécurité rapprochée des plus hautes autorités de l'État et de leurs familles.</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
-          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">02 · CONVOIS</div>
-          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Escorte &amp; Motorcade</h3>
-          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Planifier et sécuriser les déplacements officiels et les convois à haut risque.</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
-          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">03 · INVESTIGATION</div>
-          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Criminalité Financière</h3>
-          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Enquêter sur la contrefaçon, la fraude et les atteintes au système financier.</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.06);padding:32px 28px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0">
-          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7db8e8;font-weight:700;margin-bottom:10px;">04 · MENACES</div>
-          <h3 style="font-size:17px;color:white;margin-bottom:10px;font-weight:700;">Neutralisation des Menaces</h3>
-          <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;">Identifier, analyser et neutraliser toute menace visant les personnes protégées.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-wrap">
-    <div class="container">
-      <div class="section-head">
-        <h2>Chief's Office</h2>
-        <p class="lead">Le commandement du Field Office.</p>
-        <div class="rule"></div>
-      </div>
-      <div class="admin-people">
-        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">CO</div><div class="person-role">Chief Operating</div><div class="person-name">— à définir —</div></div>
-        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">AC</div><div class="person-role">Assistant Chief</div><div class="person-name">— à définir —</div></div>
-        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">DC</div><div class="person-role">Deputy Chief</div><div class="person-name">— à définir —</div></div>
-        <div class="person-card" onclick="showPage('chiefs')"><div class="person-avatar">CS</div><div class="person-role">Chief Supervisor</div><div class="person-name">— à définir —</div></div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- PAGE: DIVISIONS -->
-<div class="page" id="page-divisions">
-  <div class="page-header">
-    <div class="container">
-      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Divisions</div>
-      <h1>Divisions</h1>
-      <p>Des unités spécialisées au service de la protection et de l'investigation fédérale.</p>
-    </div>
-  </div>
-  <section class="section-wrap">
-    <div class="container">
-
-      <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/Hammer.png" alt="HAMMER" onerror="this.remove()"><span>HAM</span></div><div class="div-body"><div class="div-name">HAMMER</div><div class="div-full">Hazardous Agent Mitigation &amp; Medical Emergency Response</div><p class="div-desc">Gestion des agents dangereux et réponse médicale d'urgence sur les opérations.</p></div></div>
-        <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/K9.png" alt="K-9" onerror="this.remove()"><div><div class="sub-abbr">K-9</div><div class="sub-full">Canine Team — équipe cynophile de détection</div></div></div>
-        </div>
-      </div>
-
-      <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/UD.png" alt="UD" onerror="this.remove()"><span>UD</span></div><div class="div-body"><div class="div-name">UD</div><div class="div-full">Uniformed Division</div><p class="div-desc">Sécurisation en uniforme des périmètres, points de contrôle et infrastructures.</p></div></div>
-        <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CPO.png" alt="CPO" onerror="this.remove()"><div><div class="sub-abbr">CPO</div><div class="sub-full">Close Protection Operation — protection rapprochée</div></div></div>
-          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/AFFC.png" alt="AFFC" onerror="this.remove()"><div><div class="sub-abbr">AFFC</div><div class="sub-full">Airlift Frequent Fliers Club — soutien et transport aérien</div></div></div>
-        </div>
-      </div>
-
-      <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CID.png" alt="CID" onerror="this.remove()"><span>CID</span></div><div class="div-body"><div class="div-name">CID</div><div class="div-full">Criminal Investigations Division</div><p class="div-desc">Enquêtes criminelles, fraude et menaces visant les institutions.</p></div></div>
-        <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/irss.png" alt="IRS" onerror="this.remove()"><div><div class="sub-abbr">IRS</div><div class="sub-full">Internal Revenue Service — investigations fiscales et financières</div></div></div>
-          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/OLIA.png" alt="OLIA" onerror="this.remove()"><div><div class="sub-abbr">OLIA</div><div class="sub-full">Office of Legal &amp; Internals Affairs — affaires juridiques et internes</div></div></div>
-        </div>
-      </div>
-
-      <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CAT.png" alt="CAT" onerror="this.remove()"><span>CAT</span></div><div class="div-body"><div class="div-name">CAT</div><div class="div-full">Counter Assault Team</div><p class="div-desc">Unité tactique d'intervention déployée en cas de menace armée.</p></div></div>
-        <div class="div-subs">
-          <div class="sub-card"><img class="sub-logo" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CST.png" alt="CST" onerror="this.remove()"><div><div class="sub-abbr">CST</div><div class="sub-full">Counter Sniper Team — appui et couverture sniper</div></div></div>
-        </div>
-      </div>
-
-      <div class="div-group">
-        <div class="div-card"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/OCMR.png" alt="OCMR" onerror="this.remove()"><span>OCMR</span></div><div class="div-body"><div class="div-name">OCMR</div><div class="div-full">Office Of Communication &amp; Media Relation</div><p class="div-desc">Communication officielle, relations médias et recrutement de l'agence.</p></div></div>
-      </div>
-
-      <div class="div-group">
-        <div class="div-card div-standalone"><div class="div-badge"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/TD.png" alt="TD" onerror="this.remove()"><span>TD</span></div><div class="div-body"><div class="div-name" style="color:var(--gold)">TD</div><div class="div-full">Training Division</div><p class="div-desc">Formation, recrutement et perfectionnement des agents.</p></div></div>
-      </div>
-
-    </div>
-  </section>
-</div>
-
-<!-- PAGE: FORMATIONS -->
-<div class="page" id="page-formations">
-  <div class="page-header">
-    <div class="container">
-      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Formations</div>
-      <h1>Formations</h1>
-      <p>Le parcours de formation de la Training Division, de la recrue à l'agent spécialisé.</p>
-    </div>
-  </div>
-  <section class="section-wrap gray">
-    <div class="container">
-      <div style="display:grid;gap:16px;">
-
-        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--blue);border-radius:10px;padding:20px 22px;">
-          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">1</div>
-          <div>
-            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Formation initiale</h3>
-            <p style="color:var(--gray-mid);line-height:1.7;">Intégration de la recrue : déontologie, cadre légal, codes radio et fondamentaux de la protection. Obligatoire dès l'entrée en service.</p>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--blue);border-radius:10px;padding:20px 22px;">
-          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">2</div>
-          <div>
-            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Formation C.P.O. — Protection rapprochée</h3>
-            <p style="color:var(--gray-mid);line-height:1.7;">Les trois cercles de protection, les formations de marche (Diamant, Triangle, Pointe), la surveillance 360° et les procédures d'extraction.</p>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--blue);border-radius:10px;padding:20px 22px;">
-          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">3</div>
-          <div>
-            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Formation Convoi</h3>
-            <p style="color:var(--gray-mid);line-height:1.7;">Le déplacement sécurisé des autorités : rôles du convoi, véhicules spécialisés, formations de roulage et manœuvres d'urgence.</p>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--gray-light);border-left:4px solid var(--gold);border-radius:10px;padding:20px 22px;">
-          <div style="flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--gold);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;">★</div>
-          <div>
-            <h3 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">Spécialisations &amp; commandement</h3>
-            <p style="color:var(--gray-mid);line-height:1.7;">Pour les agents confirmés : qualifications de lead (Lead C.P.O., Motorcade Leading, Operation Leading) et accès aux fonctions d'encadrement.</p>
-          </div>
-        </div>
-
-      </div>
-
-      <div style="text-align:center;margin-top:32px;">
-        <p style="color:var(--gray-mid);margin-bottom:16px;">Le contenu détaillé des formations est encadré par la Training Division en interne.</p>
-        <button class="btn-hero-primary" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711','_blank')">Rejoindre l'USSS</button>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- PAGE: CHIEF'S OFFICE -->
-<div class="page" id="page-chiefs">
-  <div class="page-header">
-    <div class="container">
-      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Chief's Office</div>
-      <h1>Chief's Office</h1>
-      <p>Le commandement du Field Office et son état-major.</p>
-    </div>
-  </div>
-  <section class="section-wrap">
-    <div class="container">
-      <div style="text-align:center;padding:60px 24px;">
-        <div style="margin:0 auto 24px;width:96px;height:96px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V9l7-5 7 5v11"/><path d="M9 20v-6h6v6"/><path d="M3 9l9-6 9 6"/></svg>
-        </div>
-        <h2 style="font-size:28px;color:var(--blue-dark);font-weight:700;margin-bottom:10px;">Page en travaux</h2>
-        <p style="font-size:15px;color:var(--gray-mid);max-width:520px;margin:0 auto 28px;line-height:1.7;">
-          Cette section est en cours de construction. Le contenu du Chief's Office sera disponible prochainement.
-        </p>
-        <button class="btn-hero-primary" onclick="showPage('home')">Retour à l'accueil</button>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- PAGE: RECRUTEMENT -->
-<div class="page" id="page-recruit">
-  <div class="page-header">
-    <div class="container">
-      <div class="breadcrumb"><span onclick="showPage('home')">Accueil</span> › Recrutement</div>
-      <h1>Rejoindre l'USSS</h1>
-      <p>Rejoignez l'élite de la protection fédérale.</p>
-    </div>
-  </div>
-  <section class="section-wrap gray">
-    <div class="container">
-      <div class="recruit-layout" style="grid-template-columns:1fr;">
-        <div class="recruit-sidebar">
-          <h2>Conditions d'Admission</h2>
-          <div class="rule"></div>
-          <ul class="req-list">
-            <li>Présenter un casier judiciaire exempt de toute condamnation incompatible avec les fonctions exercées.</li>
-            <li>Être titulaire de la nationalité américaine.</li>
-            <li>Avoir atteint l'âge légal de la majorité à la date du recrutement.</li>
-            <li>Disponibilité régulière fortement recommandée dans le cadre des nécessités de service.</li>
-            <li>Une expérience préalable au sein d'une institution fédérale constitue un atout.</li>
-          </ul>
-          <h2 style="margin-top:32px;">Avantages</h2>
-          <div class="rule"></div>
-          <ul class="req-list benefits">
-            <li>Programme de formation continue et d'entraînement spécialisé.</li>
-            <li>Primes d'activité et d'implication selon les critères du service.</li>
-            <li>Équipement et matériel de dernière génération.</li>
-            <li>Couverture assurance et mutuelle prise en charge par le Bureau.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-grid">
-    <div class="footer-brand">
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="site-header__brand">
       <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg" alt="USSS" onerror="this.style.display='none'">
-      <p>L'United States Secret Service est l'agence fédérale chargée de la protection des hautes personnalités et de la lutte contre la criminalité financière.</p>
+      <div>
+        <b>United States Secret Service</b>
+        <span>State of San Andreas</span>
+      </div>
     </div>
-    <div class="footer-col">
-      <h4>Navigation</h4>
-      <ul>
-        <li><span onclick="showPage('home')">Accueil</span></li>
-        <li><span onclick="showPage('divisions')">Divisions</span></li>
-        <li><span onclick="showPage('chiefs')">Chief's Office</span></li>
-        <li><span onclick="showPage('recruit')">Recrutement</span></li>
-        <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&amp;ouid=116928453372376996711" target="_blank" rel="noopener" style="text-decoration:none">Candidater</a></li>
-        <li><span onclick="enterRegistre()">Connexion</span></li>
-      </ul>
+    <button class="site-header__login" onclick="enterRegistre()">Espace agents</button>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero__bg imgslot" data-label="Image / vidéo — Fond hero"><img src="" onerror="this.remove()"></div>
+    <img class="hero__seal" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png" alt="" onerror="this.style.display='none'">
+    <div class="container hero__inner">
+      <div class="eyebrow">U.S. Department of Homeland Security</div>
+      <h1>Secret<span class="gold">Service</span></h1>
+      <p class="hero__sub">L'agence fédérale chargée de la protection des hautes autorités de l'État de San Andreas et de la lutte contre la criminalité financière.</p>
+      <div class="hero__cta">
+        <a class="btn btn--gold" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711" target="_blank" rel="noopener">Rejoindre l'USSS</a>
+        <a class="btn btn--ghost" href="#divisions">Découvrir les divisions</a>
+      </div>
     </div>
-    <div class="footer-col">
-      <h4>Contact</h4>
-      <ul>
-        <li><a href="https://discord.gg/nRwSxPWJy" target="_blank" rel="noopener" style="line-height:1.7;">Field Office — United States Secret Service</a></li>
-        <li><a href="https://discord.gg/nRwSxPWJy" target="_blank" rel="noopener" style="line-height:1.7;">State of San Andreas</a></li>
-      </ul>
+    <div class="hero__scroll">Défiler ↓</div>
+  </section>
+
+  <!-- INTRO + STATS -->
+  <section class="intro" id="apropos">
+    <div class="container intro__grid">
+      <div class="intro__txt">
+        <div class="eyebrow">L'agence</div>
+        <h2 class="h-sec">Protéger l'État.<br>Servir la Nation.</h2>
+        <p class="lead">Le United States Secret Service assure la protection rapprochée des membres du gouvernement et la sécurisation des institutions de l'État de San Andreas. Discipline, discrétion et excellence opérationnelle définissent chacun de nos agents.</p>
+        <a class="btn btn--dark" href="#recrutement">Voir le parcours</a>
+      </div>
+      <div class="intro__side imgslot" data-label="Image — Présentation de l'agence"><img src="" onerror="this.remove()"></div>
     </div>
-  </div>
-  <div class="footer-bottom">
-    <div>© 2025-2026 United States Secret Service — Department of Homeland Security. Tous droits réservés.</div>
-    <div>Field Office — San Andreas</div>
-  </div>
-</footer>
+    <div class="container" style="margin-top:80px;">
+      <div class="stats">
+        <div class="stat"><div class="stat__num">6</div><div class="stat__lab">Divisions opérationnelles</div></div>
+        <div class="stat"><div class="stat__num">10</div><div class="stat__lab">Grades de carrière</div></div>
+        <div class="stat"><div class="stat__num">4</div><div class="stat__lab">Niveaux de protection</div></div>
+        <div class="stat"><div class="stat__num">24<b>/</b>7</div><div class="stat__lab">Disponibilité opérationnelle</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JUMP NAV -->
+  <nav class="jumpnav" id="jumpnav">
+    <div class="jumpnav__inner">
+      <a data-jump href="#divisions">Divisions</a>
+      <a data-jump href="#valeurs">Valeurs</a>
+      <a data-jump href="#faq">FAQ</a>
+      <a data-jump href="#recrutement">Recrutement</a>
+      <span class="jumpnav__cta"><a href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711" target="_blank" rel="noopener">Candidater</a></span>
+    </div>
+  </nav>
+
+  <!-- DIVISIONS -->
+  <section class="divisions" id="divisions">
+    <div class="container">
+      <div class="eyebrow">Organisation</div>
+      <h2 class="h-sec">Une force, plusieurs divisions</h2>
+      <div class="div-grid">
+
+        <div class="div-card" data-expand>
+          <div class="div-card__media imgslot" data-label="Image — HAMMER"><img src="" onerror="this.remove()"></div>
+          <div class="div-card__head">
+            <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/Hammer.png" alt="" onerror="this.style.visibility='hidden'">
+            <div><h3>HAMMER</h3><small>Risques &amp; secours</small></div>
+            <span class="div-card__toggle">+</span>
+          </div>
+          <div class="div-card__body"><p>Hazardous Agent Mitigation &amp; Medical Emergency Response : gestion des risques et réponse médicale d'urgence sur le terrain. Intègre l'unité cynophile K-9.</p></div>
+        </div>
+
+        <div class="div-card" data-expand>
+          <div class="div-card__media imgslot" data-label="Image — UD"><img src="" onerror="this.remove()"></div>
+          <div class="div-card__head">
+            <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/UD.png" alt="" onerror="this.style.visibility='hidden'">
+            <div><h3>UD</h3><small>Protection rapprochée</small></div>
+            <span class="div-card__toggle">+</span>
+          </div>
+          <div class="div-card__body"><p>Uniformed Division : protection rapprochée des autorités et sécurisation des sites officiels. Regroupe les qualifications C.P.O. et l'AFFC.</p></div>
+        </div>
+
+        <div class="div-card" data-expand>
+          <div class="div-card__media imgslot" data-label="Image — CID"><img src="" onerror="this.remove()"></div>
+          <div class="div-card__head">
+            <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CID.png" alt="" onerror="this.style.visibility='hidden'">
+            <div><h3>CID</h3><small>Investigations</small></div>
+            <span class="div-card__toggle">+</span>
+          </div>
+          <div class="div-card__body"><p>Criminal Investigations Division : enquêtes et lutte contre la criminalité financière. Intègre les bureaux IRS et OLIA.</p></div>
+        </div>
+
+        <div class="div-card" data-expand>
+          <div class="div-card__media imgslot" data-label="Image — CAT"><img src="" onerror="this.remove()"></div>
+          <div class="div-card__head">
+            <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/CAT.png" alt="" onerror="this.style.visibility='hidden'">
+            <div><h3>CAT</h3><small>Contre-assaut</small></div>
+            <span class="div-card__toggle">+</span>
+          </div>
+          <div class="div-card__body"><p>Counter Assault Team : équipe d'intervention et de contre-assaut déployée sur les situations à haut risque. Intègre la CST.</p></div>
+        </div>
+
+        <div class="div-card" data-expand>
+          <div class="div-card__media imgslot" data-label="Image — OCMR"><img src="" onerror="this.remove()"></div>
+          <div class="div-card__head">
+            <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/OCMR.png" alt="" onerror="this.style.visibility='hidden'">
+            <div><h3>OCMR</h3><small>Communication</small></div>
+            <span class="div-card__toggle">+</span>
+          </div>
+          <div class="div-card__body"><p>Office of Communication &amp; Media Relation : communication institutionnelle et relations avec les médias.</p></div>
+        </div>
+
+        <div class="div-card" data-expand>
+          <div class="div-card__media imgslot" data-label="Image — TD"><img src="" onerror="this.remove()"></div>
+          <div class="div-card__head">
+            <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/TD.png" alt="" onerror="this.style.visibility='hidden'">
+            <div><h3>TD</h3><small>Formation</small></div>
+            <span class="div-card__toggle">+</span>
+          </div>
+          <div class="div-card__body"><p>Training Division : formation initiale, modules C.P.O. et Convoi, et évaluation continue des agents.</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- BANNER STRIP -->
+  <section class="banner-strip">
+    <div class="banner-strip__bg imgslot" data-label="Image — Bannière"><img src="" onerror="this.remove()"></div>
+    <img class="banner-strip__seal" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png" alt="" onerror="this.style.display='none'">
+    <h2>Une force d'élite<br><span class="gold">au service de l'État</span></h2>
+  </section>
+
+  <!-- VALUES -->
+  <section class="values" id="valeurs">
+    <div class="container">
+      <div class="eyebrow">Ce qui nous définit</div>
+      <h2 class="h-sec">Rejoindre l'élite</h2>
+      <div class="val-grid">
+        <div class="val-card"><h3>Formation d'élite</h3><p>Un cursus complet encadré par la Training Division : fondamentaux, protection rapprochée et convois.</p></div>
+        <div class="val-card"><h3>Missions à responsabilité</h3><p>Protéger les plus hautes autorités de l'État et sécuriser les événements officiels.</p></div>
+        <div class="val-card"><h3>Esprit de corps</h3><p>Une unité soudée où la discipline et la confiance priment sur tout.</p></div>
+        <div class="val-card"><h3>Évolution de carrière</h3><p>Dix grades, des spécialisations et l'accès aux fonctions d'encadrement au mérite.</p></div>
+        <div class="val-card"><h3>Équipement spécialisé</h3><p>Véhicules, moyens de protection et dispositifs adaptés aux missions les plus exigeantes.</p></div>
+        <div class="val-card"><h3>Reconnaissance</h3><p>Servir sous l'autorité du gouvernement, au cœur des institutions de San Andreas.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="container faq__grid">
+      <div>
+        <div class="eyebrow">Questions fréquentes</div>
+        <h2 class="h-sec">Tout savoir avant de postuler</h2>
+        <div class="faq-list">
+          <div class="faq-item" data-faq>
+            <div class="faq-q">Comment rejoindre l'USSS ?<span class="ic">+</span></div>
+            <div class="faq-a"><p>Remplissez le formulaire de candidature en ligne. Les candidatures retenues sont convoquées à un entretien, puis à la formation initiale.</p></div>
+          </div>
+          <div class="faq-item" data-faq>
+            <div class="faq-q">Quels sont les prérequis ?<span class="ic">+</span></div>
+            <div class="faq-a"><p>Être sérieux, disponible et actif. Aucune expérience préalable n'est requise : tout est enseigné par la Training Division.</p></div>
+          </div>
+          <div class="faq-item" data-faq>
+            <div class="faq-q">En quoi consiste la formation ?<span class="ic">+</span></div>
+            <div class="faq-a"><p>Une formation initiale, puis les modules de protection rapprochée (C.P.O.) et de Convoi, encadrés par des formateurs qualifiés.</p></div>
+          </div>
+          <div class="faq-item" data-faq>
+            <div class="faq-q">Comment monter en grade ?<span class="ic">+</span></div>
+            <div class="faq-a"><p>Par l'ancienneté, la validation des formations et sur proposition de la supervision. Le parcours complet est détaillé en interne.</p></div>
+          </div>
+          <div class="faq-item" data-faq>
+            <div class="faq-q">Où poser mes questions ?<span class="ic">+</span></div>
+            <div class="faq-a"><p>Sur le Discord officiel de l'USSS, où l'équipe de recrutement vous répond.</p></div>
+          </div>
+        </div>
+      </div>
+      <aside class="faq__aside">
+        <h3>Prêt à passer à l'action ?</h3>
+        <p>Le recrutement est ouvert. Déposez votre candidature dès aujourd'hui et entamez votre parcours au sein du Secret Service.</p>
+        <a class="btn btn--gold" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711" target="_blank" rel="noopener">Candidater</a>
+      </aside>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="timeline" id="recrutement">
+    <div class="container">
+      <div class="eyebrow">Le parcours</div>
+      <h2 class="h-sec">De la candidature à la titularisation</h2>
+      <div class="tl-grid">
+        <div class="tl-step"><div class="tl-step__num">1</div><h4>Candidature</h4><p>Dépôt du formulaire en ligne.</p></div>
+        <div class="tl-step"><div class="tl-step__num">2</div><h4>Entretien</h4><p>Échange avec l'équipe de recrutement.</p></div>
+        <div class="tl-step"><div class="tl-step__num">3</div><h4>Formation initiale</h4><p>Fondamentaux et déontologie.</p></div>
+        <div class="tl-step"><div class="tl-step__num">4</div><h4>Formation C.P.O.</h4><p>Protection rapprochée.</p></div>
+        <div class="tl-step"><div class="tl-step__num">5</div><h4>Formation Convoi</h4><p>Déplacements sécurisés.</p></div>
+        <div class="tl-step"><div class="tl-step__num">6</div><h4>Titularisation</h4><p>Field Agent &amp; évolution.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta__bg imgslot" data-label="Image — Bannière finale"><img src="" onerror="this.remove()"></div>
+    <img class="cta__seal" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png" alt="" onerror="this.style.display='none'">
+    <h2>Répondez à l'appel</h2>
+    <p>Intégrez l'agence fédérale de protection de l'État de San Andreas.</p>
+    <a class="btn btn--gold" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711" target="_blank" rel="noopener">Déposer ma candidature</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div class="site-footer__brand">
+        <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg" alt="USSS" onerror="this.style.display='none'">
+        <div>
+          <b>United States Secret Service</b>
+          <span>Office of Protective Operations · San Andreas</span>
+        </div>
+      </div>
+      <a class="dc" href="https://discord.gg/nRwSxPWJy" target="_blank" rel="noopener">Rejoindre le Discord</a>
+    </div>
+    <div class="site-footer__bottom">
+      © 2026 United States Secret Service — State of San Andreas. Serveur GTA-RP. Tous droits réservés.
+    </div>
+  </footer>
+
+  <div id="notif" class="notif"></div>
 
 </div><!-- /#site-public -->
 
@@ -593,9 +478,9 @@ const LOGO_DOC  = "https://raw.githubusercontent.com/RobinDLCS/registre-usss/ref
 
 // ─── Palette institutionnelle ───
 const C = {
-  navy: "#00263a", navyDeep: "#001a29", blue: "#005ea2", blueSoft: "#d9e8f6",
-  gold: "#b69435", line: "#e8e8e4", ink: "#1b1b1b", grey: "#71717a",
-  green: "#198754", amber: "#b69435", red: "#b22234", paper: "#f5f5f0",
+  navy: "#00263a", navyDeep: "#06121c", blue: "#1e6fb0", blueSoft: "#e9f0f7",
+  gold: "#b69435", line: "#e3e7ec", ink: "#16202b", grey: "#6b7785",
+  green: "#198754", amber: "#b69435", red: "#b22234", paper: "#f4f6f8",
 };
 
 const GRADES = [
@@ -3371,35 +3256,64 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 <!-- JS site vitrine -->
 <script>
-function showPage(id){
-  exitRegistre(true);
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  var pg=document.getElementById('page-'+id); if(pg)pg.classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(function(l){l.classList.remove('active');});
-  var nl=document.getElementById('nav-'+id); if(nl)nl.classList.add('active');
-  window.scrollTo(0,0);
-}
-
 function enterRegistre(){
   document.getElementById('site-public').style.display='none';
   document.getElementById('registre-app').style.display='block';
   window.scrollTo(0,0);
 }
 function exitRegistre(silent){
-  var ra=document.getElementById('registre-app');
-  if(ra) ra.style.display='none';
-  var sp=document.getElementById('site-public');
-  if(sp) sp.style.display='block';
+  var ra=document.getElementById('registre-app'); if(ra) ra.style.display='none';
+  var sp=document.getElementById('site-public'); if(sp) sp.style.display='block';
   if(!silent) window.scrollTo(0,0);
 }
-
 function notify(msg){
-  var n=document.getElementById('notif'); n.textContent=msg; n.classList.add('show');
+  var n=document.getElementById('notif'); if(!n) return;
+  n.textContent=msg; n.classList.add('show');
   setTimeout(function(){n.classList.remove('show');},3000);
 }
 
 document.addEventListener('DOMContentLoaded',function(){
-  showPage('home');
+  // En-tête : fond plein au défilement
+  var header=document.getElementById('siteHeader');
+  function onScroll(){ if(!header) return; header.classList.toggle('scrolled', window.scrollY>40); }
+  window.addEventListener('scroll', onScroll); onScroll();
+
+  // Cartes divisions : dépliage
+  document.querySelectorAll('[data-expand]').forEach(function(card){
+    card.addEventListener('click', function(){ card.classList.toggle('open'); });
+  });
+
+  // FAQ : accordéon (un seul ouvert)
+  var faqs=document.querySelectorAll('[data-faq]');
+  faqs.forEach(function(item){
+    var q=item.querySelector('.faq-q');
+    if(!q) return;
+    q.addEventListener('click', function(){
+      var wasOpen=item.classList.contains('open');
+      faqs.forEach(function(o){o.classList.remove('open');});
+      if(!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Nav d'ancrage : surbrillance de la section active
+  var links=Array.prototype.slice.call(document.querySelectorAll('.jumpnav a[data-jump]'));
+  var map={};
+  links.forEach(function(a){
+    var id=a.getAttribute('href').slice(1);
+    var sec=document.getElementById(id);
+    if(sec) map[id]=a;
+  });
+  if('IntersectionObserver' in window){
+    var obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(l){l.classList.remove('active');});
+          var a=map[e.target.id]; if(a) a.classList.add('active');
+        }
+      });
+    },{rootMargin:'-45% 0px -50% 0px',threshold:0});
+    Object.keys(map).forEach(function(id){ obs.observe(document.getElementById(id)); });
+  }
 });
 </script>
 </body>
