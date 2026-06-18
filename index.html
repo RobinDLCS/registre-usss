@@ -187,6 +187,14 @@ a{text-decoration:none;color:inherit;}
 .banner-strip__bg:after,.cta__bg:after{display:none;}
 .banner-strip h2,.cta h2,.cta p,.cta .btn{position:relative;z-index:2;}
 
+/* Visuels propagande : affichage intégral (non rognés) */
+.intro__side img,.banner-strip__bg img,.cta__bg img{object-fit:contain;}
+.intro__side{padding:18px;min-height:440px;}
+.intro__side:before,.intro__side:after,
+.banner-strip__bg:before,.banner-strip__bg:after,
+.cta__bg:before,.cta__bg:after{display:none;}
+.banner-strip__bg,.cta__bg{opacity:.55;}
+
 /* Registre — alignement style (police d'affichage + bandeau) */
 .reg-topbar{border-bottom-width:3px;}
 .reg-title{font-family:var(--head);letter-spacing:2px;}
