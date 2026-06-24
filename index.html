@@ -1187,22 +1187,22 @@ function DivisionPanel({ members, divroles, onSave, editor, lockedDivision }) {
     upd(m => m.matricule === addMat ? { ...m, division: div } : m, `Division ${div} : ajout de ${addMat}`);
     setAddMat("");
   };
-  const removeMember = (mat) =>
-    upd(m => m.matricule === mat
-      ? { ...m, division:"", leadOf: m.leadOf === div ? "" : m.leadOf, customRoles: [] } : m,
-      `Division ${div} : retrait de ${mat}`);
+  const removeMember = (target) =>
+    onSave(members.map(m => m === target
+      ? { ...m, division:"", leadOf: m.leadOf === div ? "" : m.leadOf, customRoles: [] } : m),
+      divroles, `Division ${div} : retrait de ${target.matricule}`);
   const setLead = (mat) =>
     upd(m => {
       if (m.matricule === mat) return { ...m, leadOf: div, division: m.division || div };
       if (m.leadOf === div) return { ...m, leadOf: "" };
       return m;
     }, `Division ${div} : Lead → ${mat || "aucun"}`);
-  const toggleRole = (mat, roleId) =>
-    upd(m => {
-      if (m.matricule !== mat) return m;
+  const toggleRole = (target, roleId) =>
+    onSave(members.map(m => {
+      if (m !== target) return m;
       const cur = m.customRoles || [];
       return { ...m, customRoles: cur.includes(roleId) ? cur.filter(r => r !== roleId) : [...cur, roleId] };
-    }, `Division ${div} : rôle modifié pour ${mat}`);
+    }), divroles, `Division ${div} : rôle modifié pour ${target.matricule}`);
   const createRole = () => {
     if (!roleNom.trim()) return;
     const id = "r-" + Date.now().toString(36);
@@ -1218,11 +1218,12 @@ function DivisionPanel({ members, divroles, onSave, editor, lockedDivision }) {
   };
 
   const roleChip = (r, onClick, active) => (
-    <span key={r.id} onClick={onClick}
+    <span key={r.id} onClick={onClick} title={active ? "Retirer ce rôle" : "Attribuer ce rôle"}
       style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20,
-        fontSize:11, fontWeight:600, cursor:onClick?"pointer":"default", marginRight:6, marginBottom:6,
-        background: active ? r.couleur : "#fff", color: active ? "#fff" : C.ink, border:`1px solid ${r.couleur}` }}>
-      <span style={{ width:8, height:8, borderRadius:"50%", background: active ? "#fff" : r.couleur }}></span>
+        fontSize:11, fontWeight:600, cursor:onClick?"pointer":"default", marginRight:6, marginBottom:6, userSelect:"none",
+        background: active ? r.couleur : "transparent", color: active ? "#fff" : C.grey,
+        border: active ? `1px solid ${r.couleur}` : `1px dashed ${C.line}`, opacity: active ? 1 : .8 }}>
+      <span style={{ width:8, height:8, borderRadius:"50%", background: active ? "#fff" : r.couleur, opacity: active ? 1 : .55 }}></span>
       {r.nom}
     </span>
   );
@@ -1299,6 +1300,10 @@ function DivisionPanel({ members, divroles, onSave, editor, lockedDivision }) {
 
       <div style={card}>
         <h3 style={h}>Effectif de la division</h3>
+        {inDiv.length > 0 && roles.length > 0 && (
+          <div style={{ fontSize:12, color:C.grey, margin:"-6px 0 12px" }}>
+            Clique sur un rôle dans la ligne d'un agent pour le lui attribuer ou le retirer (chip plein = attribué).</div>
+        )}
         {inDiv.length === 0
           ? <div style={{ fontSize:13, color:C.grey }}>Aucun agent dans cette division pour l'instant.</div>
           : (
@@ -1320,10 +1325,10 @@ function DivisionPanel({ members, divroles, onSave, editor, lockedDivision }) {
                     <td style={{ padding:"8px 6px" }}><span style={{ color: STATUT_COLOR[m.statut]||C.grey, fontWeight:600 }}>{m.statut}</span></td>
                     <td style={{ padding:"8px 6px", maxWidth:300 }}>
                       {roles.length === 0 ? <span style={{ fontSize:11, color:C.grey }}>—</span>
-                        : roles.map(r => roleChip(r, ()=>toggleRole(m.matricule, r.id), (m.customRoles||[]).includes(r.id)))}
+                        : roles.map(r => roleChip(r, ()=>toggleRole(m, r.id), (m.customRoles||[]).includes(r.id)))}
                     </td>
                     <td style={{ padding:"8px 6px", textAlign:"right" }}>
-                      <button onClick={()=>removeMember(m.matricule)}
+                      <button onClick={()=>removeMember(m)}
                         style={{ padding:"5px 10px", borderRadius:6, border:`1px solid ${C.line}`, background:"#fff", color:C.red, fontSize:12, fontWeight:600, cursor:"pointer" }}>Retirer</button>
                     </td>
                   </tr>
@@ -1413,7 +1418,7 @@ function App() {
   const editor = session !== null;
   const agentLogged = agentSession !== null;
   // Contexte Lead : un agent dont le matricule a un leadOf accède au panneau de sa division
-  const myAgentMember = (agentLogged && members) ? members.find(m => m.matricule === agentSession.matricule) : null;
+  const myAgentMember = (agentLogged && members) ? members.find(m => normaliseMat(m.matricule) === normaliseMat(agentSession.matricule)) : null;
   const myLeadDiv = (myAgentMember && myAgentMember.leadOf) ? myAgentMember.leadOf : "";
   const isLeadAgent = !!myLeadDiv && !editor;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
