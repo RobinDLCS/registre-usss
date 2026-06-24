@@ -104,9 +104,9 @@ a{text-decoration:none;color:inherit;}
 .div-card.open .div-card__body{max-height:320px;}
 
 /* Banner strip */
-.banner-strip{position:relative;background:linear-gradient(135deg,#06121c,#00314c);color:#fff;text-align:center;padding:96px 24px;overflow:hidden;}
+.banner-strip{position:relative;background:linear-gradient(135deg,#06121c,#00314c);color:#fff;padding:76px 24px;overflow:hidden;}
 .banner-strip__seal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;max-width:80%;opacity:.06;filter:grayscale(1) brightness(3);}
-.banner-strip h2{position:relative;z-index:2;font-family:var(--head);text-transform:uppercase;font-size:clamp(34px,7vw,82px);font-weight:700;line-height:.96;letter-spacing:.02em;}
+.banner-strip h2{position:relative;z-index:2;font-family:var(--head);text-transform:uppercase;font-size:clamp(32px,5.5vw,68px);font-weight:700;line-height:.98;letter-spacing:.02em;}
 .banner-strip h2 .gold{color:var(--gold);}
 
 /* Values */
@@ -144,7 +144,7 @@ a{text-decoration:none;color:inherit;}
 .tl-step:not(:last-child):before{content:"";position:absolute;top:27px;left:50%;width:100%;height:3px;background:var(--line);z-index:1;}
 
 /* CTA */
-.cta{position:relative;background:linear-gradient(135deg,#00263a,#0d3550);color:#fff;text-align:center;padding:96px 24px;overflow:hidden;}
+.cta{position:relative;background:linear-gradient(135deg,#00263a,#0d3550);color:#fff;padding:76px 24px;overflow:hidden;}
 .cta__seal{position:absolute;right:-4%;bottom:-30%;width:420px;opacity:.06;filter:grayscale(1) brightness(3);}
 .cta h2{position:relative;z-index:2;font-family:var(--head);text-transform:uppercase;font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:.02em;}
 .cta p{position:relative;z-index:2;color:rgba(255,255,255,.82);margin:16px auto 32px;max-width:540px;line-height:1.65;}
@@ -183,17 +183,25 @@ a{text-decoration:none;color:inherit;}
 .hero__seal{z-index:1;}
 .div-card__media{height:158px;}
 .div-card__media:after{inset:8px;}
-.banner-strip__bg,.cta__bg{position:absolute;inset:0;z-index:0;background:none;opacity:.4;}
-.banner-strip__bg:after,.cta__bg:after{display:none;}
 .banner-strip h2,.cta h2,.cta p,.cta .btn{position:relative;z-index:2;}
 
-/* Visuels propagande : affichage intégral (non rognés) */
-.intro__side img,.banner-strip__bg img,.cta__bg img{object-fit:contain;}
+/* Présentation (intro) : visuel affiché en entier */
+.intro__side img{object-fit:contain;}
 .intro__side{padding:18px;min-height:440px;}
-.intro__side:before,.intro__side:after,
-.banner-strip__bg:before,.banner-strip__bg:after,
-.cta__bg:before,.cta__bg:after{display:none;}
-.banner-strip__bg,.cta__bg{opacity:.55;}
+
+/* Bandeaux impact & CTA : deux colonnes (texte + poster entier) */
+.banner-strip__inner,.cta__inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;display:grid;gap:48px;align-items:center;}
+.banner-strip__inner{grid-template-columns:1.15fr .85fr;}
+.cta__inner{grid-template-columns:.85fr 1.15fr;}
+.banner-strip__media,.cta__media{display:flex;justify-content:center;}
+.banner-strip__media img,.cta__media img{width:100%;max-width:400px;height:auto;border-radius:10px;border:1px solid rgba(255,255,255,.16);box-shadow:0 20px 55px rgba(0,0,0,.45);}
+.cta__text h2{font-family:var(--head);text-transform:uppercase;font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:.02em;}
+.cta__text p{color:rgba(255,255,255,.82);margin:16px 0 28px;max-width:520px;line-height:1.65;}
+@media(max-width:820px){
+  .banner-strip__inner,.cta__inner{grid-template-columns:1fr;gap:28px;text-align:center;}
+  .banner-strip__media,.cta__media{order:-1;}
+  .cta__text p{margin-left:auto;margin-right:auto;}
+}
 
 /* Registre — alignement style (police d'affichage + bandeau) */
 .reg-topbar{border-bottom-width:3px;}
@@ -271,7 +279,6 @@ a{text-decoration:none;color:inherit;}
     </div>
   </section>
 
-  
   <!-- JUMP NAV -->
   <nav class="jumpnav" id="jumpnav">
     <div class="jumpnav__inner">
@@ -356,9 +363,15 @@ a{text-decoration:none;color:inherit;}
 
   <!-- BANNER STRIP -->
   <section class="banner-strip">
-    <div class="banner-strip__bg imgslot" data-label="Image — Bannière"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/Propagande1.png" alt="" onerror="this.remove()"></div>
     <img class="banner-strip__seal" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png" alt="" onerror="this.style.display='none'">
-    <h2>Une force d'élite<br><span class="gold">au service de l'État</span></h2>
+    <div class="banner-strip__inner">
+      <div class="banner-strip__text">
+        <h2>Une force d'élite<br><span class="gold">au service de l'État</span></h2>
+      </div>
+      <div class="banner-strip__media">
+        <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/Propagande1.png" alt="Affiche de recrutement USSS" onerror="this.closest('.banner-strip__media').style.display='none'">
+      </div>
+    </div>
   </section>
 
   <!-- VALUES -->
@@ -432,11 +445,17 @@ a{text-decoration:none;color:inherit;}
 
   <!-- CTA -->
   <section class="cta">
-    <div class="cta__bg imgslot" data-label="Image — Bannière finale"><img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/propagande2.png" alt="" onerror="this.remove()"></div>
     <img class="cta__seal" src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png" alt="" onerror="this.style.display='none'">
-    <h2>Répondez à l'appel</h2>
-    <p>Intégrez l'agence fédérale de protection de l'État de San Andreas.</p>
-    <a class="btn btn--gold" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711" target="_blank" rel="noopener">Déposer ma candidature</a>
+    <div class="cta__inner">
+      <div class="cta__media">
+        <img src="https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/propagande2.png" alt="Affiche de recrutement USSS" onerror="this.closest('.cta__media').style.display='none'">
+      </div>
+      <div class="cta__text">
+        <h2>Répondez à l'appel</h2>
+        <p>Intégrez l'agence fédérale de protection de l'État de San Andreas.</p>
+        <a class="btn btn--gold" href="https://docs.google.com/forms/d/e/1FAIpQLSeVorcGF8koMY6uK_j1MbfMjTfAlXrxsvf4QkBvepEe81cl9A/viewform?usp=sharing&ouid=116928453372376996711" target="_blank" rel="noopener">Déposer ma candidature</a>
+      </div>
+    </div>
   </section>
 
   <!-- FOOTER -->
@@ -545,10 +564,24 @@ const APTITUDES = [
 
 function makeMember(matricule, grade, bools) {
   const m = { matricule, grade, statut: "Présent",
-    nom: "", prenom: "", dateEntree: "", iban: "", telephone: "", rapports: [] };
+    nom: "", prenom: "", dateEntree: "", iban: "", telephone: "", rapports: [],
+    division: "", leadOf: "", customRoles: [] };
   ALL_BOOL.forEach((f, i) => { m[f[0]] = bools[i] || false; });
   return m;
 }
+
+// ─── Divisions à Lead (gestion déléguée) ───
+const LEAD_DIVISIONS = [
+  ["AFFC", "Administration, Finances & Communication", "AFFC.png"],
+  ["CAT", "Counter Assault Team", "CAT.png"],
+  ["CID", "Criminal Investigation Division", "CID.png"],
+  ["HAMMER", "Unité d'intervention HAMMER", "Hammer.png"],
+  ["TD", "Training Division", "TD.png"],
+];
+const DIV_LABEL = Object.fromEntries(LEAD_DIVISIONS.map(d => [d[0], d[1]]));
+const DIV_EMBLEM = Object.fromEntries(LEAD_DIVISIONS.map(d => [d[0], d[2]]));
+const RAW_BASE = "https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/";
+const ROLE_COLORS = ["#b69435","#1e6fb0","#198754","#b22234","#6f42c1","#d9730d","#0d9488","#475569"];
 
 const T = true, F = false;
 const SEED = [
@@ -670,6 +703,12 @@ async function apiAddPointage(session, pointage) {
 async function apiSaveAutorites(session, autorites) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_autorites", session, autorites }) });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+}
+async function apiSaveDivision(session, members, divroles) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "save_division", session, members, divroles }) });
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 }
@@ -1123,6 +1162,195 @@ function ProgressionGrade() {
   );
 }
 
+// ─── Panneau de gestion de division (Lead / superviseur) ───
+function DivisionPanel({ members, divroles, onSave, editor, lockedDivision }) {
+  const card = { background:"#fff", border:`1px solid ${C.line}`, borderRadius:8, padding:20, marginBottom:18 };
+  const h = { fontFamily:"'Oswald',sans-serif", fontSize:16, textTransform:"uppercase", letterSpacing:"0.06em", color:C.navy, margin:"0 0 14px" };
+  const divs = LEAD_DIVISIONS.map(d => d[0]);
+  const [sel, setSel] = useState(lockedDivision || divs[0]);
+  const div = lockedDivision || sel;
+  const roles = (divroles && divroles[div]) || [];
+  const [roleNom, setRoleNom] = useState("");
+  const [roleCol, setRoleCol] = useState(ROLE_COLORS[0]);
+  const [addMat, setAddMat] = useState("");
+
+  const inDiv = members.filter(m => (m.division || "") === div)
+    .sort((a,b) => GRADES.indexOf(a.grade) - GRADES.indexOf(b.grade));
+  const outDiv = members.filter(m => (m.division || "") !== div)
+    .sort((a,b) => (a.matricule||"").localeCompare(b.matricule||""));
+  const lead = members.find(m => (m.leadOf || "") === div);
+
+  const upd = (mapFn, action, newDivroles) =>
+    onSave(members.map(mapFn), newDivroles || divroles, action);
+  const addMember = () => {
+    if (!addMat) return;
+    upd(m => m.matricule === addMat ? { ...m, division: div } : m, `Division ${div} : ajout de ${addMat}`);
+    setAddMat("");
+  };
+  const removeMember = (mat) =>
+    upd(m => m.matricule === mat
+      ? { ...m, division:"", leadOf: m.leadOf === div ? "" : m.leadOf, customRoles: [] } : m,
+      `Division ${div} : retrait de ${mat}`);
+  const setLead = (mat) =>
+    upd(m => {
+      if (m.matricule === mat) return { ...m, leadOf: div, division: m.division || div };
+      if (m.leadOf === div) return { ...m, leadOf: "" };
+      return m;
+    }, `Division ${div} : Lead → ${mat || "aucun"}`);
+  const toggleRole = (mat, roleId) =>
+    upd(m => {
+      if (m.matricule !== mat) return m;
+      const cur = m.customRoles || [];
+      return { ...m, customRoles: cur.includes(roleId) ? cur.filter(r => r !== roleId) : [...cur, roleId] };
+    }, `Division ${div} : rôle modifié pour ${mat}`);
+  const createRole = () => {
+    if (!roleNom.trim()) return;
+    const id = "r-" + Date.now().toString(36);
+    const nd = { ...divroles, [div]: [...roles, { id, nom: roleNom.trim(), couleur: roleCol }] };
+    onSave(members, nd, `Division ${div} : rôle « ${roleNom.trim()} » créé`);
+    setRoleNom("");
+  };
+  const deleteRole = (roleId) => {
+    const nd = { ...divroles, [div]: roles.filter(r => r.id !== roleId) };
+    onSave(members.map(m => (m.customRoles||[]).includes(roleId)
+      ? { ...m, customRoles: m.customRoles.filter(r => r !== roleId) } : m),
+      nd, `Division ${div} : rôle supprimé`);
+  };
+
+  const roleChip = (r, onClick, active) => (
+    <span key={r.id} onClick={onClick}
+      style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20,
+        fontSize:11, fontWeight:600, cursor:onClick?"pointer":"default", marginRight:6, marginBottom:6,
+        background: active ? r.couleur : "#fff", color: active ? "#fff" : C.ink, border:`1px solid ${r.couleur}` }}>
+      <span style={{ width:8, height:8, borderRadius:"50%", background: active ? "#fff" : r.couleur }}></span>
+      {r.nom}
+    </span>
+  );
+
+  return (
+    <div style={{ maxWidth:1100, margin:"0 auto" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:18, flexWrap:"wrap" }}>
+        <img src={RAW_BASE + (DIV_EMBLEM[div]||"")} alt="" onError={e=>{e.target.style.display="none";}}
+          style={{ width:56, height:56, objectFit:"contain", background:"#fff", borderRadius:8, border:`1px solid ${C.line}`, padding:4 }} />
+        <div>
+          <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.18em", color:C.gold, fontFamily:"'Oswald',sans-serif" }}>Gestion de division</div>
+          <div style={{ fontFamily:"'Oswald',sans-serif", fontSize:26, fontWeight:700, color:C.navy, textTransform:"uppercase", lineHeight:1 }}>{div}</div>
+          <div style={{ fontSize:13, color:C.grey }}>{DIV_LABEL[div]}</div>
+        </div>
+        {editor && (
+          <select value={div} onChange={e=>setSel(e.target.value)}
+            style={{ marginLeft:"auto", padding:"8px 12px", borderRadius:6, border:`1px solid ${C.line}`, fontSize:13, fontWeight:600, color:C.navy }}>
+            {divs.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        )}
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:12, marginBottom:18 }}>
+        {[["Agents", inDiv.length], ["Rôles définis", roles.length],
+          ["Lead", lead ? lead.matricule : "—"], ["Présents", inDiv.filter(m=>m.statut==="Présent").length]].map(([k,v]) => (
+          <div key={k} style={{ background:C.navy, color:"#fff", borderRadius:8, padding:"14px 16px" }}>
+            <div style={{ fontFamily:"'Oswald',sans-serif", fontSize:24, fontWeight:700, color:C.gold }}>{v}</div>
+            <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:"0.08em", opacity:.85 }}>{k}</div>
+          </div>
+        ))}
+      </div>
+
+      {editor && (
+        <div style={card}>
+          <h3 style={h}>Attribution du Lead</h3>
+          <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+            <select value={lead ? lead.matricule : ""} onChange={e=>setLead(e.target.value)}
+              style={{ padding:"9px 12px", borderRadius:6, border:`1px solid ${C.line}`, fontSize:13, minWidth:220 }}>
+              <option value="">— Aucun Lead —</option>
+              {members.slice().sort((a,b)=>(a.matricule||"").localeCompare(b.matricule||""))
+                .map(m => <option key={m.matricule} value={m.matricule}>{m.matricule} — {m.prenom||""} {m.nom||""} ({m.grade})</option>)}
+            </select>
+            <span style={{ fontSize:12, color:C.grey }}>Le Lead accède à ce panneau pour {div} via sa connexion agent.</span>
+          </div>
+        </div>
+      )}
+
+      <div style={card}>
+        <h3 style={h}>Rôles de la division</h3>
+        <div style={{ marginBottom:12 }}>
+          {roles.length === 0
+            ? <span style={{ fontSize:13, color:C.grey }}>Aucun rôle pour l'instant.</span>
+            : roles.map(r => (
+              <span key={r.id} style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"4px 10px",
+                borderRadius:20, fontSize:12, fontWeight:600, marginRight:8, marginBottom:8, background:r.couleur, color:"#fff" }}>
+                {r.nom}<span onClick={()=>deleteRole(r.id)} title="Supprimer" style={{ cursor:"pointer", opacity:.85, fontWeight:700 }}>×</span>
+              </span>
+            ))}
+        </div>
+        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+          <input value={roleNom} onChange={e=>setRoleNom(e.target.value)} placeholder="Nom du rôle (ex. Instructeur)"
+            style={{ padding:"9px 12px", borderRadius:6, border:`1px solid ${C.line}`, fontSize:13, flex:"1 1 200px" }} />
+          <div style={{ display:"flex", gap:5 }}>
+            {ROLE_COLORS.map(col => (
+              <span key={col} onClick={()=>setRoleCol(col)}
+                style={{ width:22, height:22, borderRadius:"50%", background:col, cursor:"pointer",
+                  border: roleCol===col ? "3px solid "+C.ink : "2px solid #fff", boxShadow:"0 0 0 1px "+C.line }}></span>
+            ))}
+          </div>
+          <button onClick={createRole}
+            style={{ padding:"9px 16px", borderRadius:6, border:"none", background:C.navy, color:"#fff", fontWeight:600, fontSize:13, cursor:"pointer" }}>Créer le rôle</button>
+        </div>
+      </div>
+
+      <div style={card}>
+        <h3 style={h}>Effectif de la division</h3>
+        {inDiv.length === 0
+          ? <div style={{ fontSize:13, color:C.grey }}>Aucun agent dans cette division pour l'instant.</div>
+          : (
+          <div style={{ overflowX:"auto" }}>
+            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+              <thead><tr style={{ textAlign:"left", color:C.grey, borderBottom:`2px solid ${C.line}` }}>
+                <th style={{ padding:"8px 6px" }}>Matricule</th><th style={{ padding:"8px 6px" }}>Agent</th>
+                <th style={{ padding:"8px 6px" }}>Grade</th><th style={{ padding:"8px 6px" }}>Statut</th>
+                <th style={{ padding:"8px 6px" }}>Rôles</th><th style={{ padding:"8px 6px" }}></th>
+              </tr></thead>
+              <tbody>
+                {inDiv.map(m => (
+                  <tr key={m.matricule} style={{ borderBottom:`1px solid ${C.line}` }}>
+                    <td style={{ padding:"8px 6px", fontWeight:700, color:C.navy, whiteSpace:"nowrap" }}>
+                      {m.matricule}{m.leadOf===div && <span style={{ marginLeft:6, fontSize:10, color:C.gold,
+                        border:`1px solid ${C.gold}`, borderRadius:4, padding:"1px 5px", textTransform:"uppercase" }}>Lead</span>}</td>
+                    <td style={{ padding:"8px 6px" }}>{((m.prenom||"")+" "+(m.nom||"")).trim() || "—"}</td>
+                    <td style={{ padding:"8px 6px" }}>{m.grade}</td>
+                    <td style={{ padding:"8px 6px" }}><span style={{ color: STATUT_COLOR[m.statut]||C.grey, fontWeight:600 }}>{m.statut}</span></td>
+                    <td style={{ padding:"8px 6px", maxWidth:300 }}>
+                      {roles.length === 0 ? <span style={{ fontSize:11, color:C.grey }}>—</span>
+                        : roles.map(r => roleChip(r, ()=>toggleRole(m.matricule, r.id), (m.customRoles||[]).includes(r.id)))}
+                    </td>
+                    <td style={{ padding:"8px 6px", textAlign:"right" }}>
+                      <button onClick={()=>removeMember(m.matricule)}
+                        style={{ padding:"5px 10px", borderRadius:6, border:`1px solid ${C.line}`, background:"#fff", color:C.red, fontSize:12, fontWeight:600, cursor:"pointer" }}>Retirer</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div style={card}>
+        <h3 style={h}>Ajouter un agent à la division</h3>
+        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+          <select value={addMat} onChange={e=>setAddMat(e.target.value)}
+            style={{ padding:"9px 12px", borderRadius:6, border:`1px solid ${C.line}`, fontSize:13, flex:"1 1 240px" }}>
+            <option value="">— Choisir un agent —</option>
+            {outDiv.map(m => <option key={m.matricule} value={m.matricule}>{m.matricule} — {m.prenom||""} {m.nom||""} ({m.grade}){m.division ? " · "+m.division : ""}</option>)}
+          </select>
+          <button onClick={addMember} disabled={!addMat}
+            style={{ padding:"9px 16px", borderRadius:6, border:"none", background: addMat?C.navy:"#9aa6b2", color:"#fff", fontWeight:600, fontSize:13, cursor: addMat?"pointer":"default" }}>Ajouter</button>
+        </div>
+        <div style={{ fontSize:12, color:C.grey, marginTop:8 }}>Un agent déjà dans une autre division y sera déplacé.</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Application ───
 function App() {
   const [members, setMembers] = useState(null);
@@ -1162,6 +1390,7 @@ function App() {
 
   // Autorités protégées
   const [autorites, setAutorites] = useState([]);
+  const [divroles, setDivroles] = useState({});
   const [autoriteError, setAutoriteError] = useState("");
   const [showAutoInfo, setShowAutoInfo] = useState(false);
   const [filtreMat, setFiltreMat] = useState("");
@@ -1183,8 +1412,13 @@ function App() {
 
   const editor = session !== null;
   const agentLogged = agentSession !== null;
+  // Contexte Lead : un agent dont le matricule a un leadOf accède au panneau de sa division
+  const myAgentMember = (agentLogged && members) ? members.find(m => m.matricule === agentSession.matricule) : null;
+  const myLeadDiv = (myAgentMember && myAgentMember.leadOf) ? myAgentMember.leadOf : "";
+  const isLeadAgent = !!myLeadDiv && !editor;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
-  const PAGES_AGENT = ["pointeuse", "rapports", "documents", "autorites", "checklists", "progression"];
+  const PAGES_AGENT = ["pointeuse", "rapports", "documents", "autorites", "checklists", "progression",
+    ...(isLeadAgent ? ["division"] : [])];
   const pageEffective = (agentLogged && !editor)
     ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
     : page;
@@ -1207,6 +1441,7 @@ function App() {
         setPointages(data.pointages || []);
         setRapports(data.rapports || []);
         setAutorites(data.autorites || []);
+        setDivroles(data.divroles || {});
       } catch (e) {
         setLoadError("Connexion au registre impossible : " + e.message +
           " — vérifie API_URL et le déploiement Apps Script.");
@@ -1478,6 +1713,28 @@ function App() {
 
   const restoreFrom = (entry) =>
     persist(entry.snapshot, `↩ Retour arrière : état restauré avant « ${entry.action} »`);
+
+  // Sauvegarde de la gestion de division — accessible au superviseur ET au Lead (agent)
+  const persistDivision = async (newMembers, newDivroles, action) => {
+    const token = editor ? session.token : (agentLogged ? agentSession.token : null);
+    if (!token) return;
+    if (editor && action && members) {
+      const entry = {
+        id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+        date: new Date().toLocaleString("fr-FR"), action, auteur: session.login, snapshot: members,
+      };
+      setLogs([entry, ...logs].slice(0, MAX_LOGS));
+    }
+    setMembers(newMembers);
+    setDivroles(newDivroles || divroles);
+    setSaveState("saving");
+    try {
+      await apiSaveDivision(token, newMembers, newDivroles || divroles);
+      setSaveState("ok");
+    } catch (e) {
+      console.error(e); setSaveState("error");
+    }
+  };
 
   if (loadError) {
     return <div style={{ minHeight:"100vh", display:"flex", alignItems:"center",
@@ -1771,8 +2028,8 @@ function App() {
             {(editor || agentLogged) && (
               <nav style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                 {(editor
-                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["pointeuse","Pointeuse"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],["journal","Journal"]]
-                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"]]
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["division","Divisions"],["pointeuse","Pointeuse"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],...(isLeadAgent ? [["division","Gestion division"]] : [])]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
@@ -2486,6 +2743,12 @@ function App() {
         {pageEffective === "checklists" && <ChecklistsMission />}
 
         {pageEffective === "progression" && <ProgressionGrade />}
+
+        {pageEffective === "division" && (editor || isLeadAgent) && (
+          <DivisionPanel members={members} divroles={divroles}
+            onSave={persistDivision} editor={editor}
+            lockedDivision={editor ? null : myLeadDiv} />
+        )}
 
         {pageEffective === "autorites" && (() => {
           const ordre = { "Rouge": 0, "Orange": 1, "Jaune": 2, "Vert": 3 };
