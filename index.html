@@ -1719,22 +1719,34 @@ function App() {
   const restoreFrom = (entry) =>
     persist(entry.snapshot, `↩ Retour arrière : état restauré avant « ${entry.action} »`);
 
-  // Sauvegarde de la gestion de division — accessible au superviseur ET au Lead (agent)
+  // Sauvegarde de la gestion de division.
+  // Superviseur → action « save » (DÉJÀ déployée) : l'attribution du Lead et les divisions
+  //   persistent sans redéploiement. Le catalogue de rôles (divroles, colonne 6) est tenté
+  //   en complément (best-effort) et ne persistera qu'après redéploiement du Code.gs.
+  // Lead (agent) → action « save_division » (nécessite le Code.gs redéployé).
   const persistDivision = async (newMembers, newDivroles, action) => {
-    const token = editor ? session.token : (agentLogged ? agentSession.token : null);
+    const token = editor ? (session && session.token) : (agentLogged ? agentSession.token : null);
     if (!token) return;
+    let newLogs = logs;
     if (editor && action && members) {
       const entry = {
         id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
         date: new Date().toLocaleString("fr-FR"), action, auteur: session.login, snapshot: members,
       };
-      setLogs([entry, ...logs].slice(0, MAX_LOGS));
+      newLogs = [entry, ...logs].slice(0, MAX_LOGS);
+      setLogs(newLogs);
     }
     setMembers(newMembers);
     setDivroles(newDivroles || divroles);
     setSaveState("saving");
     try {
-      await apiSaveDivision(token, newMembers, newDivroles || divroles);
+      if (editor) {
+        await apiSave(token, newMembers, newLogs);                                   // membres → « save » (déployée)
+        try { await apiSaveDivision(token, newMembers, newDivroles || divroles); }   // divroles → « save_division » (best-effort)
+        catch (e2) { console.warn("divroles non persistés (Code.gs à redéployer) :", e2.message); }
+      } else {
+        await apiSaveDivision(token, newMembers, newDivroles || divroles);           // Lead agent → « save_division »
+      }
       setSaveState("ok");
     } catch (e) {
       console.error(e); setSaveState("error");
