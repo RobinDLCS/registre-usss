@@ -668,74 +668,110 @@ function dimancheISO(lundiISO) {
 }
 
 // ─── API Apps Script ───
+// Le déploiement doit répondre du JSON. Quand ce n'est pas le cas (page de connexion
+// Google, déploiement supprimé, script en erreur), on renvoie un diagnostic exploitable
+// au lieu du « Unexpected token '<' » de JSON.parse.
+function diagnostiqueReponse_(res, raw) {
+  const bas = (raw || "").slice(0, 4000).toLowerCase();
+  if (bas.indexOf("accounts.google.com") !== -1 || bas.indexOf("servicelogin") !== -1) {
+    return "le déploiement Apps Script renvoie une page de connexion Google au lieu des données. "
+      + "Dans Apps Script → Déployer → Gérer les déploiements → ✏️ : mettre « Qui a accès » sur "
+      + "« Tout le monde » et « Exécuter en tant que » sur « Moi », puis redéployer.";
+  }
+  if (res.status === 404 || bas.indexOf("unable to open the file") !== -1
+      || bas.indexOf("impossible d'ouvrir le fichier") !== -1) {
+    return "l'URL de déploiement ne répond plus (HTTP " + res.status + "). "
+      + "Recopier dans API_URL l'URL /exec du déploiement actif "
+      + "(Déployer → Gérer les déploiements).";
+  }
+  if (bas.indexOf("script function not found") !== -1) {
+    return "le script déployé n'expose pas doGet/doPost. Déployer la version à jour de Code.gs "
+      + "(Déployer → Gérer les déploiements → ✏️ → Version : Nouvelle version).";
+  }
+  return "le serveur a renvoyé une page HTML au lieu de JSON (HTTP " + res.status + "). "
+    + "Vérifier que API_URL est bien l'URL /exec du déploiement actif, que « Qui a accès » vaut "
+    + "« Tout le monde », et que la dernière version de Code.gs est déployée.";
+}
+
+async function readJson_(res) {
+  const raw = await res.text();
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    const err = new Error(diagnostiqueReponse_(res, raw));
+    err.diagnosed = true;
+    throw err;
+  }
+}
+
 async function apiLoad() {
   const res = await fetch(API_URL);
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiLogin(login, password) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "login", login, password }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiSave(session, members, logs) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save", session, members, logs }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiLoginAgent(matricule, password) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "login_agent", matricule, password }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiAddPointage(session, pointage) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "add_pointage", session, pointage }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiSaveAutorites(session, autorites) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_autorites", session, autorites }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiSaveDivision(session, members, divroles) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_division", session, members, divroles }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiDeletePointage(session, pointageId) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "delete_pointage", session, pointageId }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiSaveRapport(session, rapport) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_rapport", session, rapport }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiSubmitRapport(session, rapportId) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "submit_rapport", session, rapportId }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiDeleteRapport(session, rapportId) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "delete_rapport", session, rapportId }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 
@@ -1448,8 +1484,8 @@ function App() {
         setAutorites(data.autorites || []);
         setDivroles(data.divroles || {});
       } catch (e) {
-        setLoadError("Connexion au registre impossible : " + e.message +
-          " — vérifie API_URL et le déploiement Apps Script.");
+        setLoadError("Connexion au registre impossible : " + e.message
+          + (e.diagnosed ? "" : " — vérifie API_URL et le déploiement Apps Script."));
       }
     })();
   }, []);
@@ -1756,8 +1792,19 @@ function App() {
   if (loadError) {
     return <div style={{ minHeight:"100vh", display:"flex", alignItems:"center",
       justifyContent:"center", background:C.paper, padding:24 }}>
-      <div style={{ maxWidth:480, background:"#FBEDED", border:"1px solid #E5C5C5",
-        color:C.red, borderRadius:6, padding:20, fontSize:14 }}>{loadError}</div>
+      <div style={{ maxWidth:520, background:"#FBEDED", border:"1px solid #E5C5C5",
+        color:C.red, borderRadius:6, padding:20, fontSize:14, lineHeight:1.5 }}>
+        <div style={{ whiteSpace:"pre-line" }}>{loadError}</div>
+        <div style={{ marginTop:14, display:"flex", gap:10, flexWrap:"wrap" }}>
+          <button onClick={() => window.location.reload()}
+            style={{ padding:"7px 14px", borderRadius:6, border:"1px solid " + C.line,
+              background:C.navy, color:"#fff", fontSize:13, cursor:"pointer" }}>Réessayer</button>
+          <a href={API_URL} target="_blank" rel="noopener noreferrer"
+            style={{ padding:"7px 14px", borderRadius:6, border:"1px solid #E5C5C5",
+              background:"#fff", color:C.navy, fontSize:13, textDecoration:"none" }}>
+            Tester l'URL de l'API</a>
+        </div>
+      </div>
     </div>;
   }
 
