@@ -676,6 +676,11 @@ function decaleSemaine(lundiISO, nbSemaines) {
   d.setDate(d.getDate() + 7 * nbSemaines);
   return d.toISOString().slice(0, 10);
 }
+function ajouteJours(isoDate, n) {
+  const d = new Date(isoDate + "T12:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
 function dimancheISO(lundiISO) {
   const d = new Date(lundiISO + "T12:00:00");
   d.setDate(d.getDate() + 6);
@@ -764,6 +769,20 @@ async function apiAddPointage(session, pointage) {
     body: JSON.stringify({ action: "add_pointage", session, pointage }) });
   const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
+}
+async function apiSavePlanning(session, planning) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "save_planning", session, planning }) });
+  const data = await readJson_(res);
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+async function apiPlanningInscription(session, creneauId, retrait, matricule) {
+  const res = await fetch(API_URL, { method: "POST",
+    body: JSON.stringify({ action: "planning_inscription", session, creneauId, retrait, matricule }) });
+  const data = await readJson_(res);
+  if (data.error) throw new Error(data.error);
+  return data;
 }
 async function apiSaveAutorites(session, autorites) {
   const res = await fetch(API_URL, { method: "POST",
@@ -1448,6 +1467,184 @@ function DivisionPanel({ members, divroles, onSave, editor, lockedDivision }) {
   );
 }
 
+// ─── Planning des agents ───
+// Un créneau : { id, date, heureDebut, heureFin, poste, matricule, note }
+// matricule vide = créneau ouvert, qu'un agent peut prendre lui-même.
+const POSTES_PLANNING = ["Protection rapprochée", "Convoi", "Patrouille",
+  "Permanence HQ", "Formation", "Opération"];
+const JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+function PlanningAgents({ planning, members, editor, agentMat, onChange, onInscription, erreur, etat }) {
+  const [lundi, setLundi] = useState(lundiDeLaSemaine(new Date().toISOString().slice(0, 10)));
+  const [busyId, setBusyId] = useState("");
+
+  const jours = [];
+  for (let i = 0; i < 7; i++) jours.push(ajouteJours(lundi, i));
+  const dimanche = jours[6];
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+
+  const semaine = planning.filter(c => c.date >= lundi && c.date <= dimanche);
+  const libres = semaine.filter(c => !c.matricule).length;
+  const miens = agentMat
+    ? semaine.filter(c => normaliseMat(c.matricule) === normaliseMat(agentMat)).length : 0;
+  const minutesSemaine = semaine.reduce((t, c) => t + dureeMinutes(c.heureDebut, c.heureFin), 0);
+
+  const membresTries = [...members].sort((a, b) =>
+    (GRADES.indexOf(a.grade) - GRADES.indexOf(b.grade))
+    || (a.matricule || "").localeCompare(b.matricule || ""));
+  const nomAgent = (mat) => {
+    const m = members.find(x => normaliseMat(x.matricule) === normaliseMat(mat));
+    return m ? `${m.prenom || ""} ${m.nom || ""}`.trim() : "";
+  };
+
+  const maj = (id, champ, valeur) =>
+    onChange(planning.map(c => c.id === id ? { ...c, [champ]: valeur } : c));
+  const ajouter = (date) => onChange([...planning, {
+    id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+    date, heureDebut: "20:00", heureFin: "23:00",
+    poste: POSTES_PLANNING[0], matricule: "", note: "",
+  }]);
+  const supprimer = (id) => onChange(planning.filter(c => c.id !== id));
+
+  const inscrire = async (id, retrait) => {
+    setBusyId(id);
+    await onInscription(id, retrait);
+    setBusyId("");
+  };
+
+  const card = { background:"#fff", border:`1px solid ${C.line}`, borderRadius:8, padding:16 };
+  const btnNav = { padding:"6px 12px", borderRadius:6, border:`1px solid ${C.line}`,
+    background:"#fff", color:C.navy, fontSize:12, fontWeight:600, cursor:"pointer" };
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+        flexWrap:"wrap", gap:12 }}>
+        <div>
+          <h2 style={{ fontSize:13, fontWeight:700, textTransform:"uppercase",
+            letterSpacing:"0.08em", color:C.navy }}>Planning des agents</h2>
+          <div style={{ fontSize:11, color:C.grey, marginTop:2 }}>
+            Semaine du {formatDateFR(lundi)} au {formatDateFR(dimanche)}
+            {editor ? " · modifiable" : agentMat ? " · tu peux prendre les créneaux libres" : ""}
+          </div>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+          {etat === "saving" && <span style={{ fontSize:11, color:C.grey }}>Enregistrement…</span>}
+          {etat === "ok" && <span style={{ fontSize:11, color:C.green }}>Enregistré</span>}
+          <button onClick={() => setLundi(decaleSemaine(lundi, -1))} style={btnNav}>‹ Précédente</button>
+          <button onClick={() => setLundi(lundiDeLaSemaine(aujourdhui))} style={btnNav}>Cette semaine</button>
+          <button onClick={() => setLundi(decaleSemaine(lundi, 1))} style={btnNav}>Suivante ›</button>
+        </div>
+      </div>
+
+      {erreur ? <div style={{ background:"#FBEDED", border:"1px solid #E5C5C5", color:C.red,
+        borderRadius:6, padding:"10px 14px", fontSize:13 }}>{erreur}</div> : null}
+
+      <div style={{ display:"grid", gap:12,
+        gridTemplateColumns:"repeat(auto-fit, minmax(150px, 1fr))" }}>
+        <StatCard label="Créneaux" value={semaine.length} color={C.navy} />
+        <StatCard label="Non pourvus" value={libres} color={libres ? C.red : C.green} />
+        <StatCard label="Volume" value={formatDuree(minutesSemaine)} color={C.blue} />
+        {agentMat ? <StatCard label="Mes créneaux" value={miens} color={C.gold} /> : null}
+      </div>
+
+      {jours.map((date, i) => {
+        const duJour = semaine.filter(c => c.date === date)
+          .sort((a, b) => (a.heureDebut || "").localeCompare(b.heureDebut || ""));
+        const estAujourdhui = date === aujourdhui;
+        return (
+          <div key={date} style={{ ...card,
+            borderLeft: estAujourdhui ? `3px solid ${C.blue}` : `1px solid ${C.line}` }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
+              gap:12, marginBottom: duJour.length ? 10 : 0 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:C.navy }}>
+                {JOURS_SEMAINE[i]} {formatDateFR(date)}
+                {estAujourdhui ? <span style={{ marginLeft:8, fontSize:10, fontWeight:600,
+                  color:C.blue, textTransform:"uppercase", letterSpacing:"0.08em" }}>Aujourd'hui</span> : null}
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <span style={{ fontSize:11, color:C.grey }}>
+                  {duJour.length ? duJour.length + (duJour.length > 1 ? " créneaux" : " créneau") : "Aucun créneau"}
+                </span>
+                {editor ? <button onClick={() => ajouter(date)}
+                  style={{ padding:"4px 10px", borderRadius:6, border:"none", background:C.navy,
+                    color:"#fff", fontSize:12, fontWeight:600, cursor:"pointer" }}>+ Créneau</button> : null}
+              </div>
+            </div>
+
+            {duJour.map(c => {
+              const aMoi = agentMat && normaliseMat(c.matricule) === normaliseMat(agentMat);
+              const fond = aMoi ? "#E9F0F7" : (!c.matricule ? "#FFF8E6" : "#fff");
+              return (
+                <div key={c.id} style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap",
+                  padding:"8px 10px", marginTop:6, borderRadius:6, background:fond,
+                  border:`1px solid ${aMoi ? "#C7DAEA" : (!c.matricule ? "#EBDDB4" : C.line)}` }}>
+                  {editor ? (
+                    <>
+                      <input type="time" value={c.heureDebut || ""}
+                        onChange={e => maj(c.id, "heureDebut", e.target.value)}
+                        style={{ ...inputStyle, width:98, minWidth:98 }} />
+                      <span style={{ color:C.grey, fontSize:12 }}>→</span>
+                      <input type="time" value={c.heureFin || ""}
+                        onChange={e => maj(c.id, "heureFin", e.target.value)}
+                        style={{ ...inputStyle, width:98, minWidth:98 }} />
+                      <select value={c.poste || ""} onChange={e => maj(c.id, "poste", e.target.value)}
+                        style={{ ...inputStyle, width:"auto", minWidth:150 }}>
+                        {POSTES_PLANNING.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                      <select value={c.matricule || ""} onChange={e => maj(c.id, "matricule", e.target.value)}
+                        style={{ ...inputStyle, width:"auto", minWidth:190 }}>
+                        <option value="">— Non pourvu —</option>
+                        {membresTries.map(m => <option key={m.matricule} value={m.matricule}>
+                          {m.matricule} — {m.prenom || ""} {m.nom || ""}</option>)}
+                      </select>
+                      <input type="text" value={c.note || ""} placeholder="Note (optionnel)"
+                        onChange={e => maj(c.id, "note", e.target.value)}
+                        style={{ ...inputStyle, flex:1, minWidth:120 }} />
+                      <button onClick={() => supprimer(c.id)} title="Supprimer le créneau"
+                        style={{ padding:"4px 9px", borderRadius:6, border:`1px solid ${C.line}`,
+                          background:"#fff", color:C.red, fontSize:12, fontWeight:600,
+                          cursor:"pointer" }}>×</button>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color:C.navy,
+                        minWidth:104 }}>{c.heureDebut} → {c.heureFin}</span>
+                      <span style={{ fontSize:13, color:C.ink, minWidth:150 }}>{c.poste}</span>
+                      <span style={{ fontSize:12, color:C.grey, flex:1, minWidth:140 }}>
+                        {c.matricule
+                          ? <span style={{ color:C.ink }}>{c.matricule}
+                              {nomAgent(c.matricule) ? " — " + nomAgent(c.matricule) : ""}</span>
+                          : <em>Créneau libre</em>}
+                        {c.note ? " · " + c.note : ""}
+                      </span>
+                      {agentMat && (aMoi || !c.matricule) ? (
+                        <button onClick={() => inscrire(c.id, aMoi)} disabled={busyId === c.id}
+                          style={{ padding:"4px 10px", borderRadius:6, border:"none",
+                            background: busyId === c.id ? "#9aa6b2" : (aMoi ? C.red : C.navy),
+                            color:"#fff", fontSize:12, fontWeight:600,
+                            cursor: busyId === c.id ? "default" : "pointer" }}>
+                          {busyId === c.id ? "…" : (aMoi ? "Me retirer" : "Je prends")}
+                        </button>
+                      ) : null}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+
+      <div style={{ fontSize:11, color:C.grey }}>
+        {editor
+          ? "Les modifications sont enregistrées automatiquement et visibles par tous les agents."
+          : "Planning tenu par la supervision. Les créneaux en jaune sont libres."}
+      </div>
+    </div>
+  );
+}
+
 // ─── Application ───
 function App() {
   const [members, setMembers] = useState(null);
@@ -1485,6 +1682,12 @@ function App() {
   const [pointageError, setPointageError] = useState("");
   const [pointageBusy, setPointageBusy] = useState(false);
 
+  // Planning des agents
+  const [planning, setPlanning] = useState([]);
+  const [planningError, setPlanningError] = useState("");
+  const [planningState, setPlanningState] = useState("");   // "" | saving | ok
+  const planningTimer = useRef(null);
+
   // Autorités protégées
   const [autorites, setAutorites] = useState([]);
   const [divroles, setDivroles] = useState({});
@@ -1514,7 +1717,7 @@ function App() {
   const myLeadDiv = (myAgentMember && myAgentMember.leadOf) ? myAgentMember.leadOf : "";
   const isLeadAgent = !!myLeadDiv && !editor;
   // Un agent simple peut naviguer entre Pointeuse et Rapports ; toute autre page est redirigée.
-  const PAGES_AGENT = ["pointeuse", "rapports", "documents", "autorites", "checklists", "progression",
+  const PAGES_AGENT = ["pointeuse", "planning", "rapports", "documents", "autorites", "checklists", "progression",
     ...(isLeadAgent ? ["division"] : [])];
   const pageEffective = (agentLogged && !editor)
     ? (PAGES_AGENT.includes(page) ? page : "pointeuse")
@@ -1539,6 +1742,7 @@ function App() {
         setRapports(data.rapports || []);
         setAutorites(data.autorites || []);
         setDivroles(data.divroles || {});
+        setPlanning(data.planning || []);
       } catch (e) {
         setLoadError("Connexion au registre impossible : " + e.message
           + (e.diagnosed ? "" : " — vérifie API_URL et le déploiement Apps Script."));
@@ -2051,6 +2255,42 @@ function App() {
     setFormError("");
   };
 
+  // ── Planning des agents ───
+  // La saisie est locale et immédiate ; l'envoi au serveur est différé de 800 ms pour
+  // ne pas poster une requête par frappe (le verrou d'écriture est global).
+  const persistPlanning = async (list) => {
+    if (!session) return;                    // seul un superviseur écrit le planning entier
+    setPlanningState("saving");
+    setPlanningError("");
+    try {
+      await apiSavePlanning(session.token, list);
+      setPlanningState("ok");
+    } catch (e) {
+      setPlanningState("");
+      setPlanningError("Sauvegarde du planning impossible : " + e.message);
+      if (String(e.message).includes("Session")) doLogout();
+    }
+  };
+  const majPlanning = (list) => {
+    setPlanning(list);
+    setPlanningState("saving");
+    if (planningTimer.current) clearTimeout(planningTimer.current);
+    planningTimer.current = setTimeout(() => persistPlanning(list), 800);
+  };
+  // Un agent ne réécrit pas le planning : le serveur ne touche que le créneau visé
+  // et renvoie la liste à jour, ce qui synchronise aussi les créneaux pris entre-temps.
+  const inscriptionPlanning = async (creneauId, retrait) => {
+    setPlanningError("");
+    const token = agentSession ? agentSession.token : (session ? session.token : "");
+    try {
+      const data = await apiPlanningInscription(token, creneauId, retrait,
+        agentSession ? agentSession.matricule : "");
+      if (data.planning) setPlanning(data.planning);
+    } catch (e) {
+      setPlanningError(e.message);
+    }
+  };
+
   // ── Gestion des autorités protégées (éditeur) ───
   const persistAutorites = async (list) => {
     setAutorites(list);
@@ -2154,8 +2394,8 @@ function App() {
             {(editor || agentLogged) && (
               <nav style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
                 {(editor
-                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["division","Divisions"],["pointeuse","Pointeuse"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],["journal","Journal"]]
-                  : [["pointeuse","Pointeuse"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],...(isLeadAgent ? [["division","Gestion division"]] : [])]
+                  ? [["accueil","Accueil"],["effectifs","Effectifs"],["division","Divisions"],["pointeuse","Pointeuse"],["planning","Planning"],["recap","Récap"],["autorites","Autorités"],["rapports","Rapports"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],["journal","Journal"]]
+                  : [["pointeuse","Pointeuse"],["planning","Planning"],["rapports","Rapports"],["autorites","Autorités"],["documents","Documents TD"],["checklists","Checklists"],["progression","Progression"],...(isLeadAgent ? [["division","Gestion division"]] : [])]
                 ).map(([id,label]) => (
                   <button key={id} onClick={() => setPage(id)}
                     style={{ padding:"7px 14px", borderRadius:6, fontSize:12, fontWeight:600,
@@ -2863,6 +3103,18 @@ function App() {
             </div>
           );
         })()}
+
+        {pageEffective === "planning" && (
+          <PlanningAgents
+            planning={planning}
+            members={members}
+            editor={editor}
+            agentMat={agentLogged ? agentSession.matricule : ""}
+            onChange={majPlanning}
+            onInscription={inscriptionPlanning}
+            erreur={planningError}
+            etat={planningState} />
+        )}
 
         {pageEffective === "documents" && <DocsTD />}
 

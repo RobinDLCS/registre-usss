@@ -158,7 +158,7 @@ function handleGet_(e) {
   // L'onglet UTILISATEURS n'est volontairement pas touché ici : sa création est une
   // écriture, inutile en lecture, et il est créé au premier login de toute façon.
   var last = Math.max(sh.getLastRow(), 1);
-  var nbCols = Math.min(sh.getMaxColumns(), 6);
+  var nbCols = Math.min(sh.getMaxColumns(), 7);
   var grille = sh.getRange(1, 1, last, nbCols).getValues();
   return out_({
     members:   parseColonne_(grille, 0, null),
@@ -166,8 +166,14 @@ function handleGet_(e) {
     pointages: parseColonne_(grille, 2, []),
     rapports:  parseColonne_(grille, 3, []),
     autorites: parseColonne_(grille, 4, []),
-    divroles:  parseColonne_(grille, 5, {})
+    divroles:  parseColonne_(grille, 5, {}),
+    planning:  parseColonne_(grille, 6, [])
   });
+}
+
+function loadPlanning_(sh) {
+  var s = readChunks_(sh, 7);
+  try { return s ? JSON.parse(s) : []; } catch (err) { return []; }
 }
 
 function genereNumeroRapport_(rapports) {
@@ -256,6 +262,57 @@ function handlePost_(e) {
       if (body.members) writeChunks_(shV, 1, JSON.stringify(body.members));
       if (body.divroles) writeChunks_(shV, 6, JSON.stringify(body.divroles));
       return out_({ ok: true });
+    });
+  }
+
+  // ─── Planning des agents (colonne 7) ───
+  // Écriture complète du planning : superviseur uniquement.
+  if (body.action === "save_planning") {
+    var whoP = cache.get("sess_" + body.session);
+    if (!whoP) return out_({ error: "Session expirée — reconnecte-toi" });
+    return withLock_(function() {
+      var shP = getDataSheet_();
+      var planning = body.planning || [];
+      if (planning.length > 1000) planning = planning.slice(0, 1000); // garde-fou
+      writeChunks_(shP, 7, JSON.stringify(planning));
+      return out_({ ok: true, planning: planning });
+    });
+  }
+
+  // Prise ou retrait d'un créneau. Un agent ne touche QUE le champ matricule d'un
+  // créneau libre ou du sien : il ne peut pas réécrire le planning entier.
+  if (body.action === "planning_inscription") {
+    var agentMatP = cache.get("agt_" + body.session);
+    var editorWhoP = cache.get("sess_" + body.session);
+    if (!agentMatP && !editorWhoP) return out_({ error: "Session expirée — reconnecte-toi" });
+    if (!body.creneauId) return out_({ error: "Créneau manquant" });
+    return withLock_(function() {
+      var shI = getDataSheet_();
+      var liste = loadPlanning_(shI);
+      var cible = null;
+      for (var k = 0; k < liste.length; k++) {
+        if (liste[k].id === body.creneauId) { cible = liste[k]; break; }
+      }
+      if (!cible) return out_({ error: "Créneau introuvable" });
+
+      // Le superviseur affecte qui il veut ; l'agent n'agit que pour lui-même.
+      var mat = agentMatP ? agentMatP : normaliseMatricule_(body.matricule || "");
+      var occupant = normaliseMatricule_(cible.matricule || "");
+
+      if (body.retrait) {
+        if (agentMatP && occupant !== mat) {
+          return out_({ error: "Ce créneau n'est pas le tien" });
+        }
+        cible.matricule = "";
+      } else {
+        if (!mat) return out_({ error: "Matricule manquant" });
+        if (occupant && occupant !== mat && agentMatP) {
+          return out_({ error: "Créneau déjà pris par " + occupant });
+        }
+        cible.matricule = mat;
+      }
+      writeChunks_(shI, 7, JSON.stringify(liste));
+      return out_({ ok: true, planning: liste });
     });
   }
 
