@@ -12,11 +12,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
+<script>
+// Le registre est servi par Apps Script, qui met 1 à 2 s à répondre (démarrage à froid).
+// Sans ce préchargement, la requête ne part qu'une fois Babel téléchargé (~2,7 Mo) ET
+// le JSX compilé : les deux attentes s'additionnent. Ici elles se superposent.
+window.USSS_API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec";
+window.USSS_PRELOAD = fetch(window.USSS_API_URL)
+  .then(function (r) {
+    return r.text().then(function (t) { return { status: r.status, text: t }; });
+  })
+  .catch(function () { return null; });  // échec → l'app refera un fetch normal
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- html2canvas et jsPDF ne servent qu'à l'export d'un rapport : chargés à la demande -->
+
 <style>
 :root{
   --ink:#06121c; --navy:#00263a; --navy2:#0d3550; --blue:#1e6fb0; --blue-dark:#00263a;
@@ -499,7 +512,9 @@ const { useState, useEffect, useRef } = React;
 // ════════════════════════════════════════════
 //  ⚠ CONFIGURATION
 // ════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbxoBiFvpc3tRx25foJvZ_dR4UsQJJjcourKbM4rmbhLT2r5iyIfSeX3zsoXGIoFYASV/exec";
+// ⚠ L'URL de déploiement se change dans le bloc de préchargement en tête de fichier
+// (window.USSS_API_URL), un seul endroit pour les deux usages.
+const API_URL = window.USSS_API_URL;
 
 const LOGO_USSS = "https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/mainlogo.jpg";
 const LOGO_DOC  = "https://raw.githubusercontent.com/RobinDLCS/registre-usss/refs/heads/main/USSSdocofficiels.png";
@@ -668,75 +683,152 @@ function dimancheISO(lundiISO) {
 }
 
 // ─── API Apps Script ───
+// Le déploiement doit répondre du JSON. Quand ce n'est pas le cas (page de connexion
+// Google, déploiement supprimé, script en erreur), on renvoie un diagnostic exploitable
+// au lieu du « Unexpected token '<' » de JSON.parse.
+function diagnostiqueReponse_(status, raw) {
+  const bas = (raw || "").slice(0, 4000).toLowerCase();
+  if (bas.indexOf("accounts.google.com") !== -1 || bas.indexOf("servicelogin") !== -1) {
+    return "le déploiement Apps Script renvoie une page de connexion Google au lieu des données. "
+      + "Dans Apps Script → Déployer → Gérer les déploiements → ✏️ : mettre « Qui a accès » sur "
+      + "« Tout le monde » et « Exécuter en tant que » sur « Moi », puis redéployer.";
+  }
+  if (status === 404 || bas.indexOf("unable to open the file") !== -1
+      || bas.indexOf("impossible d'ouvrir le fichier") !== -1) {
+    return "l'URL de déploiement ne répond plus (HTTP " + status + "). "
+      + "Recopier dans API_URL l'URL /exec du déploiement actif "
+      + "(Déployer → Gérer les déploiements).";
+  }
+  if (bas.indexOf("script function not found") !== -1) {
+    return "le script déployé n'expose pas doGet/doPost. Déployer la version à jour de Code.gs "
+      + "(Déployer → Gérer les déploiements → ✏️ → Version : Nouvelle version).";
+  }
+  return "le serveur a renvoyé une page HTML au lieu de JSON (HTTP " + status + "). "
+    + "Vérifier que API_URL est bien l'URL /exec du déploiement actif, que « Qui a accès » vaut "
+    + "« Tout le monde », et que la dernière version de Code.gs est déployée.";
+}
+
+function parseJson_(status, raw) {
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    const err = new Error(diagnostiqueReponse_(status, raw));
+    err.diagnosed = true;
+    throw err;
+  }
+}
+
+async function readJson_(res) {
+  return parseJson_(res.status, await res.text());
+}
+
+// Le premier chargement récupère la réponse lancée dès l'en-tête du document
+// (window.USSS_PRELOAD) ; les rechargements suivants refont un vrai fetch.
+let preloadConsomme = false;
 async function apiLoad() {
-  const res = await fetch(API_URL);
-  const data = await res.json();
+  let data;
+  if (!preloadConsomme && window.USSS_PRELOAD) {
+    preloadConsomme = true;
+    const pre = await window.USSS_PRELOAD;
+    data = pre ? parseJson_(pre.status, pre.text) : null;
+  }
+  if (!data) {
+    const res = await fetch(API_URL);
+    data = await readJson_(res);
+  }
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiLogin(login, password) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "login", login, password }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiSave(session, members, logs) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save", session, members, logs }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiLoginAgent(matricule, password) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "login_agent", matricule, password }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiAddPointage(session, pointage) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "add_pointage", session, pointage }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiSaveAutorites(session, autorites) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_autorites", session, autorites }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiSaveDivision(session, members, divroles) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_division", session, members, divroles }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiDeletePointage(session, pointageId) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "delete_pointage", session, pointageId }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
 }
 async function apiSaveRapport(session, rapport) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "save_rapport", session, rapport }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiSubmitRapport(session, rapportId) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "submit_rapport", session, rapportId }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
   return data;
 }
 async function apiDeleteRapport(session, rapportId) {
   const res = await fetch(API_URL, { method: "POST",
     body: JSON.stringify({ action: "delete_rapport", session, rapportId }) });
-  const data = await res.json();
+  const data = await readJson_(res);
   if (data.error) throw new Error(data.error);
+}
+
+// ─── Chargement à la demande des libs d'export ───
+// html2canvas (~200 Ko) et jsPDF (~360 Ko) ne servent qu'à exporter un rapport :
+// les charger au démarrage pénalise toutes les visites pour une action rare.
+const scriptsCharges = {};
+function chargerScript_(src) {
+  if (scriptsCharges[src]) return scriptsCharges[src];
+  scriptsCharges[src] = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    s.onload = resolve;
+    s.onerror = () => {
+      delete scriptsCharges[src];           // permet une nouvelle tentative
+      reject(new Error("téléchargement impossible (" + src + ")"));
+    };
+    document.head.appendChild(s);
+  });
+  return scriptsCharges[src];
+}
+
+async function chargerOutilsExport_(format) {
+  await chargerScript_("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+  if (format !== "png") {
+    await chargerScript_("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  }
 }
 
 // ─── Petits composants ───
@@ -1448,8 +1540,8 @@ function App() {
         setAutorites(data.autorites || []);
         setDivroles(data.divroles || {});
       } catch (e) {
-        setLoadError("Connexion au registre impossible : " + e.message +
-          " — vérifie API_URL et le déploiement Apps Script.");
+        setLoadError("Connexion au registre impossible : " + e.message
+          + (e.diagnosed ? "" : " — vérifie API_URL et le déploiement Apps Script."));
       }
     })();
   }, []);
@@ -1634,7 +1726,13 @@ function App() {
   // ─── Export PNG/PDF ───
   const exportRapport = async (format) => {
     const el = document.getElementById("rapport-printable");
-    if (!el || !window.html2canvas) return;
+    if (!el) return;
+    try {
+      await chargerOutilsExport_(format);
+    } catch (e) {
+      alert("Export impossible : " + e.message);
+      return;
+    }
     try {
       // Garantir que Montserrat et le logo sont chargés avant capture
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
@@ -1756,8 +1854,19 @@ function App() {
   if (loadError) {
     return <div style={{ minHeight:"100vh", display:"flex", alignItems:"center",
       justifyContent:"center", background:C.paper, padding:24 }}>
-      <div style={{ maxWidth:480, background:"#FBEDED", border:"1px solid #E5C5C5",
-        color:C.red, borderRadius:6, padding:20, fontSize:14 }}>{loadError}</div>
+      <div style={{ maxWidth:520, background:"#FBEDED", border:"1px solid #E5C5C5",
+        color:C.red, borderRadius:6, padding:20, fontSize:14, lineHeight:1.5 }}>
+        <div style={{ whiteSpace:"pre-line" }}>{loadError}</div>
+        <div style={{ marginTop:14, display:"flex", gap:10, flexWrap:"wrap" }}>
+          <button onClick={() => window.location.reload()}
+            style={{ padding:"7px 14px", borderRadius:6, border:"1px solid " + C.line,
+              background:C.navy, color:"#fff", fontSize:13, cursor:"pointer" }}>Réessayer</button>
+          <a href={API_URL} target="_blank" rel="noopener noreferrer"
+            style={{ padding:"7px 14px", borderRadius:6, border:"1px solid #E5C5C5",
+              background:"#fff", color:C.navy, fontSize:13, textDecoration:"none" }}>
+            Tester l'URL de l'API</a>
+        </div>
+      </div>
     </div>;
   }
 
