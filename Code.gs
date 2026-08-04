@@ -80,10 +80,17 @@ function normaliseMatricule_(s) {
 
 // Cellules limitées à 50 000 caractères : JSON découpé en colonne
 function writeChunks_(sh, col, str) {
-  sh.getRange(1, col, sh.getMaxRows(), 1).clearContent();
+  // Ne nettoyer que les lignes réellement occupées : effacer getMaxRows() lignes
+  // (1000 par défaut) à chaque écriture allonge inutilement la tenue du verrou.
+  var occupees = Math.max(sh.getLastRow(), 1);
+  sh.getRange(1, col, occupees, 1).clearContent();
   var size = 45000, chunks = [];
   for (var i = 0; i < str.length; i += size) chunks.push([str.substring(i, i + size)]);
-  if (chunks.length > sh.getMaxRows()) sh.insertRows(1, chunks.length - sh.getMaxRows());
+  // insertRows(1, n) insérerait AVANT la ligne 1 et décalerait toutes les autres
+  // colonnes : il faut ajouter les lignes à la fin.
+  if (chunks.length > sh.getMaxRows()) {
+    sh.insertRowsAfter(sh.getMaxRows(), chunks.length - sh.getMaxRows());
+  }
   if (chunks.length) sh.getRange(1, col, chunks.length, 1).setValues(chunks);
 }
 
@@ -114,6 +121,25 @@ function doGet(e) {
 
 function messageErreur_(err) {
   return (err && err.message) ? err.message : String(err);
+}
+
+// Un seul verrou global protège toutes les écritures. Les blobs sont volumineux :
+// 10 s ne suffisent pas quand deux enregistrements s'enchaînent. On attend plus
+// longtemps, et surtout on relâche TOUJOURS le verrou, même en cas d'exception.
+var LOCK_TIMEOUT_MS = 30000;
+
+function withLock_(fn) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(LOCK_TIMEOUT_MS);
+  } catch (err) {
+    return out_({ error: "Le registre est occupé par une autre sauvegarde — réessaie dans quelques secondes" });
+  }
+  try {
+    return fn();
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function handleGet_(e) {
@@ -188,27 +214,23 @@ function handlePost_(e) {
   if (body.action === "save") {
     var who = cache.get("sess_" + body.session);
     if (!who) return out_({ error: "Session expirée — reconnecte-toi" });
-    var lock = LockService.getScriptLock();
-    lock.waitLock(10000);
-    try {
+    return withLock_(function() {
       var sh = getDataSheet_();
       writeChunks_(sh, 1, JSON.stringify(body.members));
       writeChunks_(sh, 2, JSON.stringify(body.logs));
-    } finally { lock.releaseLock(); }
-    return out_({ ok: true, user: who });
+      return out_({ ok: true, user: who });
+    });
   }
 
   // Sauvegarde des autorités protégées (éditeur uniquement)
   if (body.action === "save_autorites") {
     var whoA = cache.get("sess_" + body.session);
     if (!whoA) return out_({ error: "Session expirée — reconnecte-toi" });
-    var lockA = LockService.getScriptLock();
-    lockA.waitLock(10000);
-    try {
+    return withLock_(function() {
       var shA = getDataSheet_();
       writeChunks_(shA, 5, JSON.stringify(body.autorites || []));
-    } finally { lockA.releaseLock(); }
-    return out_({ ok: true });
+      return out_({ ok: true });
+    });
   }
 
   // Sauvegarde de la gestion des divisions (Lead agent OU éditeur)
@@ -216,14 +238,12 @@ function handlePost_(e) {
     var agentMatV = cache.get("agt_" + body.session);
     var editorWhoV = cache.get("sess_" + body.session);
     if (!agentMatV && !editorWhoV) return out_({ error: "Session expirée — reconnecte-toi" });
-    var lockV = LockService.getScriptLock();
-    lockV.waitLock(10000);
-    try {
+    return withLock_(function() {
       var shV = getDataSheet_();
       if (body.members) writeChunks_(shV, 1, JSON.stringify(body.members));
       if (body.divroles) writeChunks_(shV, 6, JSON.stringify(body.divroles));
-    } finally { lockV.releaseLock(); }
-    return out_({ ok: true });
+      return out_({ ok: true });
+    });
   }
 
   // Ajout d'un pointage (agent pour lui-même, éditeur pour n'importe qui)
@@ -237,9 +257,7 @@ function handlePost_(e) {
     if (agentMat && p.matricule !== agentMat)
       return out_({ error: "Tu ne peux pointer que pour ton propre matricule" });
 
-    var lock1 = LockService.getScriptLock();
-    lock1.waitLock(10000);
-    try {
+    return withLock_(function() {
       var sh1 = getDataSheet_();
       var s1 = readChunks_(sh1, 3);
       var arr = [];
@@ -247,8 +265,8 @@ function handlePost_(e) {
       arr.unshift(p);
       if (arr.length > 500) arr = arr.slice(0, 500); // garde-fou
       writeChunks_(sh1, 3, JSON.stringify(arr));
-    } finally { lock1.releaseLock(); }
-    return out_({ ok: true });
+      return out_({ ok: true });
+    });
   }
 
   // Suppression d'un pointage
@@ -257,9 +275,7 @@ function handlePost_(e) {
     var editorWho2 = cache.get("sess_" + body.session);
     if (!agentMat2 && !editorWho2) return out_({ error: "Session expirée" });
 
-    var lock2 = LockService.getScriptLock();
-    lock2.waitLock(10000);
-    try {
+    return withLock_(function() {
       var sh2 = getDataSheet_();
       var s2b = readChunks_(sh2, 3);
       var arr2 = [];
@@ -271,8 +287,8 @@ function handlePost_(e) {
         return false;
       });
       writeChunks_(sh2, 3, JSON.stringify(filtered));
-    } finally { lock2.releaseLock(); }
-    return out_({ ok: true });
+      return out_({ ok: true });
+    });
   }
 
   // ─── Rapports ───
@@ -292,9 +308,7 @@ function handlePost_(e) {
     }
     r.etat = r.etat || "brouillon";
 
-    var lockR = LockService.getScriptLock();
-    lockR.waitLock(10000);
-    try {
+    return withLock_(function() {
       var shR = getDataSheet_();
       var rapports = loadRapports_(shR);
       // Si rapport existant : refuser modification si déjà soumis (sauf éditeur)
@@ -315,8 +329,8 @@ function handlePost_(e) {
         if (rapports.length > 500) rapports = rapports.slice(0, 500);
       }
       writeChunks_(shR, 4, JSON.stringify(rapports));
-    } finally { lockR.releaseLock(); }
-    return out_({ ok: true });
+      return out_({ ok: true });
+    });
   }
 
   // Soumission d'un rapport (verrouille + génère le numéro)
@@ -326,9 +340,7 @@ function handlePost_(e) {
     if (!agentMatS && !editorWhoS) return out_({ error: "Session expirée — reconnecte-toi" });
     if (!body.rapportId) return out_({ error: "Identifiant manquant" });
 
-    var lockS = LockService.getScriptLock();
-    lockS.waitLock(10000);
-    try {
+    return withLock_(function() {
       var shS = getDataSheet_();
       var rapportsS = loadRapports_(shS);
       var idxS = -1;
@@ -348,7 +360,7 @@ function handlePost_(e) {
       rapportsS[idxS] = target;
       writeChunks_(shS, 4, JSON.stringify(rapportsS));
       return out_({ ok: true, numero: target.numero, dateSoumission: target.dateSoumission });
-    } finally { lockS.releaseLock(); }
+    });
   }
 
   // Suppression d'un rapport
@@ -359,9 +371,7 @@ function handlePost_(e) {
     var editorWhoD = cache.get("sess_" + body.session);
     if (!agentMatD && !editorWhoD) return out_({ error: "Session expirée" });
 
-    var lockD = LockService.getScriptLock();
-    lockD.waitLock(10000);
-    try {
+    return withLock_(function() {
       var shD = getDataSheet_();
       var rapportsD = loadRapports_(shD);
       var filtered = rapportsD.filter(function(r) {
@@ -371,8 +381,8 @@ function handlePost_(e) {
         return true; // sinon on garde
       });
       writeChunks_(shD, 4, JSON.stringify(filtered));
-    } finally { lockD.releaseLock(); }
-    return out_({ ok: true });
+      return out_({ ok: true });
+    });
   }
 
   return out_({ error: "Action inconnue" });
