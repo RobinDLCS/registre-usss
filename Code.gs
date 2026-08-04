@@ -142,19 +142,32 @@ function withLock_(fn) {
   }
 }
 
+// Reconstitue le JSON d'une colonne à partir de la grille déjà lue.
+function parseColonne_(grille, idx, defaut) {
+  if (!grille.length || idx >= grille[0].length) return defaut;
+  var s = "";
+  for (var i = 0; i < grille.length; i++) s += grille[i][idx];
+  if (!s) return defaut;
+  try { return JSON.parse(s); } catch (err) { return defaut; }
+}
+
 function handleGet_(e) {
   var sh = getDataSheet_();
-  // Création paresseuse de l'onglet UTILISATEURS : c'est une écriture, elle échoue si
-  // le déploiement s'exécute au nom du visiteur. La lecture ne doit pas en dépendre.
-  try { getUsersSheet_(); } catch (err) {}
-  var members = null, logs = [], pointages = [], rapports = [], autorites = [], divroles = {};
-  try { var s = readChunks_(sh, 1); if (s) members = JSON.parse(s); } catch (err) {}
-  try { var s2 = readChunks_(sh, 2); if (s2) logs = JSON.parse(s2); } catch (err) {}
-  try { var s3 = readChunks_(sh, 3); if (s3) pointages = JSON.parse(s3); } catch (err) {}
-  try { var s4 = readChunks_(sh, 4); if (s4) rapports = JSON.parse(s4); } catch (err) {}
-  try { var s5 = readChunks_(sh, 5); if (s5) autorites = JSON.parse(s5); } catch (err) {}
-  try { var s6 = readChunks_(sh, 6); if (s6) divroles = JSON.parse(s6); } catch (err) {}
-  return out_({ members: members, logs: logs, pointages: pointages, rapports: rapports, autorites: autorites, divroles: divroles });
+  // Une SEULE lecture de la plage complète. Six appels readChunks_ = six allers-retours
+  // vers Sheets, c'était l'essentiel du temps de chargement.
+  // L'onglet UTILISATEURS n'est volontairement pas touché ici : sa création est une
+  // écriture, inutile en lecture, et il est créé au premier login de toute façon.
+  var last = Math.max(sh.getLastRow(), 1);
+  var nbCols = Math.min(sh.getMaxColumns(), 6);
+  var grille = sh.getRange(1, 1, last, nbCols).getValues();
+  return out_({
+    members:   parseColonne_(grille, 0, null),
+    logs:      parseColonne_(grille, 1, []),
+    pointages: parseColonne_(grille, 2, []),
+    rapports:  parseColonne_(grille, 3, []),
+    autorites: parseColonne_(grille, 4, []),
+    divroles:  parseColonne_(grille, 5, {})
+  });
 }
 
 function genereNumeroRapport_(rapports) {
