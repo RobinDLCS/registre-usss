@@ -102,9 +102,25 @@ function out_(obj) {
 
 // ── GET : lecture libre ──
 //   col 1 = registre, col 2 = journal, col 3 = pointages, col 4 = rapports
+// Toute exception non rattrapée ferait renvoyer une page HTML d'erreur par Google,
+// que le front ne peut pas parser → on garantit une réponse JSON dans tous les cas.
 function doGet(e) {
+  try {
+    return handleGet_(e);
+  } catch (err) {
+    return out_({ error: "Erreur serveur (doGet) : " + messageErreur_(err) });
+  }
+}
+
+function messageErreur_(err) {
+  return (err && err.message) ? err.message : String(err);
+}
+
+function handleGet_(e) {
   var sh = getDataSheet_();
-  getUsersSheet_();
+  // Création paresseuse de l'onglet UTILISATEURS : c'est une écriture, elle échoue si
+  // le déploiement s'exécute au nom du visiteur. La lecture ne doit pas en dépendre.
+  try { getUsersSheet_(); } catch (err) {}
   var members = null, logs = [], pointages = [], rapports = [], autorites = [], divroles = {};
   try { var s = readChunks_(sh, 1); if (s) members = JSON.parse(s); } catch (err) {}
   try { var s2 = readChunks_(sh, 2); if (s2) logs = JSON.parse(s2); } catch (err) {}
@@ -135,6 +151,14 @@ function loadRapports_(sh) {
 
 // ── POST : login & écritures ──
 function doPost(e) {
+  try {
+    return handlePost_(e);
+  } catch (err) {
+    return out_({ error: "Erreur serveur (doPost) : " + messageErreur_(err) });
+  }
+}
+
+function handlePost_(e) {
   var body;
   try { body = JSON.parse(e.postData.contents); }
   catch (err) { return out_({ error: "JSON invalide" }); }
